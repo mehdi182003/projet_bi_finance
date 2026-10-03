@@ -1,0 +1,11 @@
+# Pipeline Crésus — dépendances Python (Python 3.10+)
+pandas>=2.1
+numpy>=1.26
+psycopg[binary]>=3.1
+SQLAlchemy>=2.0
+statsmodels>=0.14
+python-dotenv>=1.0
+requests>=2.31
+kaggle>=1.6
+dbt-core>=1.10,<2.0
+dbt-postgres>=1.9,<2.0

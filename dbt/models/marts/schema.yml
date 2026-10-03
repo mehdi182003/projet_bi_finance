@@ -1,0 +1,134 @@
+version: 2
+
+models:
+  # ----------------------------------------------------------------- dimensions
+  - name: dim_date
+    description: Calendrier en français (une ligne par jour).
+    columns:
+      - name: date_jour
+        tests: [unique, not_null]
+
+  - name: dim_filiale
+    description: Les 6 filiales de ZF Banque, leur devise et leur situation de départ.
+    columns:
+      - name: code_filiale
+        tests: [unique, not_null]
+      - name: code_devise
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_devise'), field: code_devise}
+
+  - name: dim_devise
+    description: Référentiel des devises (régime flottant / fixe / référence).
+    columns:
+      - name: code_devise
+        tests: [unique, not_null]
+
+  - name: dim_type_transaction
+    description: Types d'opérations PaySim et leur sens de trésorerie.
+    columns:
+      - name: code_type
+        tests: [unique, not_null]
+
+  - name: dim_scenario_stress
+    description: Scénarios de stress paramétrés (référence historique pour chacun).
+    columns:
+      - name: code_scenario
+        tests: [unique, not_null]
+
+  # ---------------------------------------------------------------------- faits
+  - name: fct_flux_tresorerie_horaire
+    description: Flux de trésorerie agrégés (heure x filiale x type x jambe x intragroupe x fraude).
+    columns:
+      - name: id_flux
+        tests: [unique, not_null]
+      - name: code_filiale
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_filiale'), field: code_filiale}
+      - name: code_type
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_type_transaction'), field: code_type}
+      - name: date_operation
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_jour}
+      - name: flux_net_eur
+        tests: [not_null]
+
+  - name: fct_position_tresorerie_quotidienne
+    description: Position de trésorerie de clôture par jour et par filiale (semi-additive dans le temps).
+    columns:
+      - name: id_position
+        tests: [unique, not_null]
+      - name: code_filiale
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_filiale'), field: code_filiale}
+      - name: date_position
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_jour}
+      - name: taux_eur_jour
+        description: Un taux manquant ici signifie qu'il manque une cotation BCE sur la période.
+        tests: [not_null]
+      - name: position_cloture_eur
+        tests: [not_null]
+
+  - name: fct_taux_change
+    description: Taux EUR->devise quotidiens, variation et volatilité (annualisée sur 60 cotations).
+    columns:
+      - name: id_taux
+        tests: [unique, not_null]
+      - name: date_cours
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_date'), field: date_jour}
+
+  # ------------------------------------------------------------------- analyses
+  - name: mart_exposition_change
+    description: Exposition au risque de change par devise et VaR paramétrique 95 % (1 j et 10 j).
+    columns:
+      - name: id_exposition
+        tests: [unique, not_null]
+
+  - name: mart_liquidite_placement
+    description: Besoin de liquidité à 30 j (LCR simplifié), liquidité excédentaire, refinancement, coût de couverture.
+    columns:
+      - name: id_liquidite
+        tests: [unique, not_null]
+
+  - name: mart_stress_test
+    description: Résultat des scénarios de stress par filiale à la date d'arrêté.
+    columns:
+      - name: id_stress
+        tests: [unique, not_null]
+      - name: statut_resilience
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['1 - Résilient', '2 - Vigilance', '3 - Critique']
+
+  # ------------------------------------------------------------------ prévision
+  - name: mart_prevision_tresorerie
+    description: Position réalisée + projection (P5 / P50 / P95) issue de la simulation Monte-Carlo.
+    columns:
+      - name: id_prevision
+        tests: [unique, not_null]
+  - name: mart_prevision_change
+    description: Taux historiques + fourchette de prévision et contrôle a posteriori.
+    columns:
+      - name: id_prevision_change
+        tests: [unique, not_null]
+  - name: mart_qualite_prevision
+    description: Précision de chaque modèle candidat (WAPE, MAPE, biais) et champion retenu.
+    columns:
+      - name: id_qualite
+        tests: [unique, not_null]
+  - name: mart_backtest_journalier
+    description: Réel vs prévu, jour par jour, sur la période de backtest.
+    columns:
+      - name: id_backtest
+        tests: [unique, not_null]

@@ -1,0 +1,39 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Données brutes chargées par Python (etl/chargement_raw.py), sans transformation.
+    schema: raw
+    tables:
+      - name: paysim_transactions
+        description: >
+          Logs PaySim (Kaggle ealaxi/paysim1) : 6,36 M de transactions mobiles simulées sur 743 heures.
+          Utilisés comme proxy des flux de la banque de détail ZF Banque.
+        columns:
+          - name: id_ligne
+            tests: [unique, not_null]
+          - name: step
+            tests: [not_null]
+          - name: type
+            tests:
+              - accepted_values:
+                  arguments:
+                    values: [CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER]
+      - name: bce_taux_change
+        description: Cours de référence BCE (unités de devise pour 1 EUR), format long.
+        columns:
+          - name: date_cours
+            tests: [not_null]
+          - name: code_devise
+            tests: [not_null]
+
+  - name: ml
+    description: Sorties du module de prévision Python (etl/prevision.py).
+    schema: ml
+    tables:
+      - name: prevision_tresorerie_quotidienne
+        description: Projection Monte-Carlo de la position de trésorerie par filiale (quantiles P5/P50/P95).
+      - name: prevision_change
+        description: Projection Monte-Carlo des taux de change (quantiles P5/P50/P95).
+      - name: backtest_prevision
+        description: Mesure de la précision du modèle de flux sur les derniers jours observés.

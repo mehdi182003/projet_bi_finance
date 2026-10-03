@@ -1,0 +1,29 @@
+# Données (volumineuses / téléchargées)
+data/raw/*
+data/demo/*
+!data/raw/.gitkeep
+!data/demo/.gitkeep
+*.zip
+*.csv
+!dbt/seeds/*.csv
+!data/sources/*.csv
+
+# Secrets
+.env
+kaggle.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# dbt
+dbt/target/
+dbt/dbt_packages/
+dbt/logs/
+logs/
+.user.yml
+
+# Power BI
+*.pbix.bak

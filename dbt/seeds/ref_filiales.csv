@@ -1,0 +1,11 @@
+code_filiale,nom_filiale,pays,code_pays_iso,region,code_devise,poids_clientele_pct,taux_reserve_liquidite_pct,ordre_affichage
+FR,ZF Banque France,France,FR,France métropolitaine,EUR,30,15,1
+BNL,ZF Banque Benelux,Belgique,BE,Europe du Nord,EUR,8,15,2
+FI,ZF Banque Finlande,Finlande,FI,Europe du Nord,EUR,4,15,3
+SE,ZF Banque Suède,Suède,SE,Europe du Nord,SEK,6,15,4
+DK,ZF Banque Danemark,Danemark,DK,Europe du Nord,DKK,4,15,5
+NO,ZF Banque Norvège,Norvège,NO,Europe du Nord,NOK,4,15,6
+CI,ZF Banque Côte d'Ivoire,Côte d'Ivoire,CI,Afrique de l'Ouest (UEMOA),XOF,10,20,7
+CM,ZF Banque Cameroun,Cameroun,CM,Afrique centrale (CEMAC),XAF,8,20,8
+CA,ZF Banque Canada,Canada,CA,Amérique du Nord,CAD,10,12,9
+US,ZF Bank USA,États-Unis,US,Amérique du Nord,USD,16,12,10

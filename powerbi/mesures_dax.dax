@@ -1,0 +1,232 @@
+// =============================================================================
+//  Projet Crésus - ZF Banque : mesures DAX du cockpit de trésorerie
+//  À créer dans une table vide « _Mesures » (Accueil > Entrer des données > OK).
+//  Les tables du schéma marts sont supposées renommées sans le préfixe « marts ».
+// =============================================================================
+
+// ---------------------------------------------------------------- 1. FLUX
+Encaissements (EUR) = SUM ( fct_flux_tresorerie_horaire[encaissements_eur] )
+
+Décaissements (EUR) = SUM ( fct_flux_tresorerie_horaire[decaissements_eur] )
+
+Solde net (EUR) = SUM ( fct_flux_tresorerie_horaire[flux_net_eur] )
+
+Solde net quotidien moyen (EUR) =
+AVERAGEX ( VALUES ( dim_date[date_jour] ), [Solde net (EUR)] )
+
+Nb opérations = SUM ( fct_flux_tresorerie_horaire[nb_mouvements] )
+
+Flux intragroupe sortants (EUR) =
+CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_intragroupe] = TRUE () )
+
+// Part des sorties qui pourraient être compensées en interne (netting / cash pooling)
+Taux de netting potentiel % =
+DIVIDE ( [Flux intragroupe sortants (EUR)], [Décaissements (EUR)] )
+
+Décaissements frauduleux (EUR) =
+CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_fraude] = TRUE () )
+
+Taux de fraude % = DIVIDE ( [Décaissements frauduleux (EUR)], [Décaissements (EUR)] )
+
+// ------------------------------------------------- 2. POSITION (semi-additive)
+// Une position est un STOCK : on ne l'additionne pas dans le temps,
+// on prend la valeur du dernier jour de la période filtrée.
+Date d'arrêté =
+CALCULATE ( MAX ( fct_position_tresorerie_quotidienne[date_position] ) )
+
+Position de trésorerie (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE (
+        SUM ( fct_position_tresorerie_quotidienne[position_cloture_eur] ),
+        dim_date[date_jour] = DerniereDate
+    )
+
+Position début de période (EUR) =
+VAR PremiereDate = CALCULATE ( MIN ( fct_position_tresorerie_quotidienne[date_position] ) )
+RETURN
+    CALCULATE (
+        SUMX (
+            fct_position_tresorerie_quotidienne,
+            fct_position_tresorerie_quotidienne[position_ouverture_devise]
+                / fct_position_tresorerie_quotidienne[taux_eur_jour]
+        ),
+        dim_date[date_jour] = PremiereDate
+    )
+
+Variation de position % =
+DIVIDE ( [Position de trésorerie (EUR)] - [Position début de période (EUR)], [Position début de période (EUR)] )
+
+Encours de dépôts (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE (
+        SUM ( fct_position_tresorerie_quotidienne[encours_depots_eur] ),
+        dim_date[date_jour] = DerniereDate
+    )
+
+Effet de change cumulé (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE (
+        SUM ( fct_position_tresorerie_quotidienne[effet_change_eur] ),
+        dim_date[date_jour] = DerniereDate
+    )
+
+// --------------------------------------- 3. LIQUIDITÉ, PLACEMENT, REFINANCEMENT
+Besoin de liquidité 30 j (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[besoin_liquidite_30j_eur] ), dim_date[date_jour] = DerniereDate )
+
+Ratio de couverture liquidité % =
+DIVIDE ( [Position de trésorerie (EUR)], [Besoin de liquidité 30 j (EUR)] )
+
+Liquidité excédentaire (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[liquidite_excedentaire_eur] ), dim_date[date_jour] = DerniereDate )
+
+Gain annuel de placement (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[gain_placement_annuel_eur] ), dim_date[date_jour] = DerniereDate )
+
+Besoin de refinancement (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[besoin_refinancement_eur] ), dim_date[date_jour] = DerniereDate )
+
+Coût annuel de refinancement (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[cout_refinancement_annuel_eur] ), dim_date[date_jour] = DerniereDate )
+
+Coût annuel de couverture de change (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[cout_couverture_change_annuel_eur] ), dim_date[date_jour] = DerniereDate )
+
+// Indicateur de synthèse « centre de profit » : gains de placement - coûts
+Résultat net de trésorerie annuel (EUR) =
+[Gain annuel de placement (EUR)] - [Coût annuel de refinancement (EUR)] - [Coût annuel de couverture de change (EUR)]
+
+// ------------------------------------------------------- 4. RISQUE DE CHANGE
+Exposition au change (EUR) =
+VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+RETURN
+    CALCULATE ( SUM ( mart_exposition_change[exposition_eur] ), dim_date[date_jour] = DerniereDate )
+
+Part de la position en devises % =
+DIVIDE ( [Exposition au change (EUR)], [Position de trésorerie (EUR)] )
+
+VaR change 95 % 10 j (EUR) =
+VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+RETURN
+    CALCULATE ( SUM ( mart_exposition_change[var_95_10j_eur] ), dim_date[date_jour] = DerniereDate )
+
+Taux EUR -> devise = AVERAGE ( fct_taux_change[taux_eur] )
+
+Volatilité annualisée % = AVERAGE ( fct_taux_change[volatilite_annualisee_pct] ) / 100
+
+// --------------------------------------------------------------- 5. PRÉVISION
+Position prévue P50 (EUR) = SUM ( mart_prevision_tresorerie[position_p50_eur] )
+Position prévue P05 (EUR) = SUM ( mart_prevision_tresorerie[position_p05_eur] )
+Position prévue P95 (EUR) = SUM ( mart_prevision_tresorerie[position_p95_eur] )
+// NB : au niveau groupe, la somme des P05 des filiales est une borne PRUDENTE
+// (elle suppose que toutes les filiales subissent leur mauvais scénario en même temps).
+
+Probabilité de passer sous le besoin de liquidité % =
+MAXX (
+    VALUES ( dim_filiale[code_filiale] ),
+    CALCULATE ( MAX ( mart_prevision_tresorerie[proba_sous_besoin_liquidite] ) )
+)
+
+WAPE du modèle champion % =
+CALCULATE ( AVERAGE ( mart_qualite_prevision[wape_pct] ), mart_qualite_prevision[est_champion] = TRUE () ) / 100
+
+Taux de change prévu P50 = AVERAGE ( mart_prevision_change[taux_p50] )
+Taux de change prévu P05 = AVERAGE ( mart_prevision_change[taux_p05] )
+Taux de change prévu P95 = AVERAGE ( mart_prevision_change[taux_p95] )
+Taux de change réalisé = AVERAGE ( mart_prevision_change[taux_realise] )
+
+// ------------------------------------------- 6. SIMULATEUR DE STRESS (What-if)
+// Créer d'abord 4 paramètres : Modélisation > Nouveau paramètre > Plage numérique
+//   « Choc retraits % »        : 0 à 30, pas 1,    défaut 0
+//   « Choc change % »          : -50 à 20, pas 1,  défaut 0
+//   « Multiplicateur sorties » : 1 à 3, pas 0,1,   défaut 1
+//   « Choc taux (pb) »         : 0 à 300, pas 25,  défaut 0
+// Power BI crée automatiquement les mesures [Valeur Choc retraits %], etc.
+// Puis une table de sélection de la devise choquée (Modélisation > Nouvelle table) :
+//
+// Devises choquées =
+// DATATABLE ( "Cible", STRING, { { "Toutes devises hors EUR" }, { "USD" }, { "CAD" }, { "Couronnes nordiques" }, { "Franc CFA" } } )
+
+Facteur choc change =
+VAR Devise = SELECTEDVALUE ( dim_filiale[code_devise] )
+VAR Cible = SELECTEDVALUE ( 'Devises choquées'[Cible], "Toutes devises hors EUR" )
+VAR Facteur = 1 + [Valeur Choc change %] / 100
+RETURN
+    SWITCH (
+        TRUE (),
+        Devise = "EUR", 1,
+        Cible = "Toutes devises hors EUR", Facteur,
+        Cible = "Franc CFA" && Devise IN { "XOF", "XAF" }, Facteur,
+        Cible = "Couronnes nordiques" && Devise IN { "SEK", "NOK", "DKK" }, Facteur,
+        Devise = Cible, Facteur,
+        1
+    )
+
+Position stressée (EUR) =
+SUMX (
+    VALUES ( dim_filiale[code_filiale] ),
+    ( [Position de trésorerie (EUR)] - [Encours de dépôts (EUR)] * [Valeur Choc retraits %] / 100 )
+        * [Facteur choc change]
+)
+
+Flux net quotidien stressé (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+VAR Fenetre = DATESINPERIOD ( dim_date[date_jour], DerniereDate, -7, DAY )
+RETURN
+    SUMX (
+        VALUES ( dim_filiale[code_filiale] ),
+        VAR Enc = CALCULATE ( AVERAGE ( fct_position_tresorerie_quotidienne[encaissements_eur] ), Fenetre )
+        VAR Dec = CALCULATE ( AVERAGE ( fct_position_tresorerie_quotidienne[decaissements_eur] ), Fenetre )
+        RETURN ( Enc - Dec * [Valeur Multiplicateur sorties] ) * [Facteur choc change]
+    )
+
+Horizon de survie (jours) =
+VAR Pos = [Position stressée (EUR)]
+VAR Net = [Flux net quotidien stressé (EUR)]
+RETURN
+    SWITCH ( TRUE (), Pos <= 0, 0, Net >= 0, BLANK (), DIVIDE ( Pos, -Net ) )
+
+Besoin de refinancement stressé (EUR) =
+MAX ( 0, - [Flux net quotidien stressé (EUR)] * 30 - [Position stressée (EUR)] )
+
+// 0,5 = marge de refinancement (même valeur que la variable dbt marge_refinancement_pct)
+Coût du refinancement stressé (EUR/an) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    SUMX (
+        VALUES ( dim_filiale[code_filiale] ),
+        VAR Taux =
+            CALCULATE ( MAX ( mart_liquidite_placement[taux_directeur_local_pct] ), dim_date[date_jour] = DerniereDate )
+        RETURN [Besoin de refinancement stressé (EUR)] * ( Taux + 0.5 + [Valeur Choc taux (pb)] / 100 ) / 100
+    )
+
+Statut de résilience =
+VAR Pos = [Position stressée (EUR)]
+VAR H = [Horizon de survie (jours)]
+RETURN
+    SWITCH (
+        TRUE (),
+        Pos <= 0, "Critique",
+        ISBLANK ( H ) || H >= 30, "Résilient",
+        H >= 7, "Vigilance",
+        "Critique"
+    )
+
+// Pour la mise en forme conditionnelle (Format > Couleur > Valeur du champ)
+Couleur statut =
+SWITCH ( [Statut de résilience], "Résilient", "#1B7F3B", "Vigilance", "#C77700", "#B42318" )

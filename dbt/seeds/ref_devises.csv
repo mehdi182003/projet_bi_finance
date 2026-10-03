@@ -1,0 +1,11 @@
+code_devise,libelle_devise,regime_change,parite_fixe_par_eur,banque_centrale,zone_monetaire,remarque
+EUR,Euro,reference,1,BCE,Zone euro,Devise de consolidation du groupe
+USD,Dollar américain,flottant,,Federal Reserve,États-Unis,Cours de référence BCE (Webstat)
+CAD,Dollar canadien,flottant,,Banque du Canada,Canada,Cours de référence BCE (Webstat)
+SEK,Couronne suédoise,flottant,,Riksbank,Suède,Cours de référence BCE (Webstat)
+NOK,Couronne norvégienne,flottant,,Norges Bank,Norvège,Cours de référence BCE (Webstat)
+DKK,Couronne danoise,flottant,,Danmarks Nationalbank,Danemark,Ancrée à l'euro (MCE II : 7.46038 +/- 2.25 %) ; volatilité quasi nulle
+XOF,Franc CFA (BCEAO),fixe,655.957,BCEAO,UEMOA,Parité fixe garantie par le Trésor français ; non coté par la BCE
+XAF,Franc CFA (BEAC),fixe,655.957,BEAC,CEMAC,Parité fixe garantie par le Trésor français ; non coté par la BCE
+JPY,Yen japonais,flottant,,Banque du Japon,Japon,Devise de surveillance (pas de filiale)
+RUB,Rouble russe,flottant,,Banque de Russie,Russie,Cotation BCE suspendue depuis le 01/03/2022 (rupture de série)

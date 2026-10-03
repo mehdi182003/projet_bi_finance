@@ -1,0 +1,73 @@
+name: cresus
+version: "1.0.0"
+config-version: 2
+profile: cresus
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Date réelle à laquelle on « rejoue » le step 1 de PaySim (1 step = 1 heure).
+  # Les 743 steps couvrent alors ~31 jours. Changer ici pour rejouer une autre période.
+  date_debut_paysim: "2025-09-01"
+  # Valeur d'une unité monétaire PaySim en EUR (calibrage : transaction moyenne ~1 800 EUR).
+  valeur_unite_paysim_eur: 0.01
+  # Part des virements (TRANSFER) dont le bénéficiaire est dans la même filiale que l'émetteur.
+  part_virements_domestiques_pct: 85
+  # Profondeur d'historique de change conservée (calcul de volatilité).
+  annees_historique_change: 3
+  # Report maximal (jours) d'un taux non publié (week-end, jour férié). Au-delà : rupture de série.
+  jours_report_max_taux: 7
+  # Hypothèse LCR simplifiée (Bâle III) : taux de fuite des dépôts à 30 jours.
+  taux_fuite_depots_lcr_pct: 10
+  # Fenêtre (jours) pour la moyenne des flux utilisée dans les projections.
+  fenetre_moyenne_flux_jours: 7
+  # Marge de refinancement au-dessus du taux directeur (points de pourcentage).
+  marge_refinancement_pct: 0.50
+  # Quantile de la loi normale pour la VaR à 95 %.
+  quantile_var_95: 1.645
+
+models:
+  cresus:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: view
+    marts:
+      +schema: marts
+      +materialized: table
+
+seeds:
+  cresus:
+    +schema: referentiel
+    ref_filiales:
+      +column_types:
+        poids_clientele_pct: numeric
+        taux_reserve_liquidite_pct: numeric
+        ordre_affichage: integer
+    ref_devises:
+      +column_types:
+        parite_fixe_par_eur: numeric
+    ref_taux_directeurs:
+      +column_types:
+        taux_directeur_pct: numeric
+        date_effet: date
+    ref_scenarios_stress:
+      +column_types:
+        choc_retraits_pct: numeric
+        choc_change_usd_pct: numeric
+        choc_change_cad_pct: numeric
+        choc_change_cfa_pct: numeric
+        choc_change_nordiques_pct: numeric
+        choc_taux_bp: numeric
+        multiplicateur_sorties: numeric
+    ref_types_transaction:
+      +column_types:
+        sens_jambe_emetteur: integer
+        genere_jambe_beneficiaire: boolean
