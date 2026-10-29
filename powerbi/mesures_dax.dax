@@ -19,14 +19,27 @@ Nb opérations = SUM ( fct_flux_tresorerie_horaire[nb_mouvements] )
 Flux intragroupe sortants (EUR) =
 CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_intragroupe] = TRUE () )
 
-// Part des sorties qui pourraient être compensées en interne (netting / cash pooling)
+// ATTENTION : valeur fixée par l'hypothèse « 85 % de virements domestiques » (var dbt).
+// C'est un paramètre de simulation, pas un KPI mesuré : ne pas l'afficher sur le cockpit.
 Taux de netting potentiel % =
 DIVIDE ( [Flux intragroupe sortants (EUR)], [Décaissements (EUR)] )
 
 Décaissements frauduleux (EUR) =
 CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_fraude] = TRUE () )
 
+// Fraude : à placer sur la page Qualité / Risques, PAS dans le temps (fraude injectée à rythme constant
+// par PaySim : son « taux » quotidien est un artefact). Voir aussi mart_qualite_donnees.
 Taux de fraude % = DIVIDE ( [Décaissements frauduleux (EUR)], [Décaissements (EUR)] )
+
+Taux de détection actuel % =
+DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_signalees] ), SUM ( mart_qualite_donnees[nb_fraudes] ) )
+
+Rappel de la règle « vide le compte » % =
+DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_detectees_regle] ), SUM ( mart_qualite_donnees[nb_fraudes] ) )
+
+// Concentration : 0,4 % des décaissements (>= 10 k EUR) pèsent ~10 % des montants
+Part des gros décaissements % =
+DIVIDE ( SUM ( fct_position_tresorerie_quotidienne[decaissements_gros_tickets_eur] ), [Décaissements (EUR)] )
 
 // ------------------------------------------------- 2. POSITION (semi-additive)
 // Une position est un STOCK : on ne l'additionne pas dans le temps,
@@ -79,8 +92,30 @@ VAR DerniereDate = [Date d'arrêté]
 RETURN
     CALCULATE ( SUM ( mart_liquidite_placement[besoin_liquidite_30j_eur] ), dim_date[date_jour] = DerniereDate )
 
+// LCR simplifié Bâle III : position / (10 % des dépôts). Seuil réglementaire 100 %, pilotage 110 %.
 Ratio de couverture liquidité % =
 DIVIDE ( [Position de trésorerie (EUR)], [Besoin de liquidité 30 j (EUR)] )
+
+// Vitesse à laquelle la réserve se consomme (moyenne glissante 7 j)
+Consommation quotidienne de la position % =
+VAR DerniereDate = [Date d'arrêté]
+VAR FluxMoyen = CALCULATE ( SUM ( mart_liquidite_placement[flux_net_moyen_eur] ), dim_date[date_jour] = DerniereDate )
+RETURN DIVIDE ( -FluxMoyen, [Position de trésorerie (EUR)] )
+
+// KPI d'anticipation : dans combien de jours la filiale passe sous 100 % (0 = déjà en dessous).
+// Au niveau groupe on affiche la filiale la plus exposée (minimum).
+Jours avant passage sous 100 % =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    MINX (
+        VALUES ( dim_filiale[code_filiale] ),
+        CALCULATE ( MIN ( mart_liquidite_placement[jours_avant_seuil_100pct] ), dim_date[date_jour] = DerniereDate )
+    )
+
+Économie annuelle grâce à l'anticipation (EUR) =
+VAR DerniereDate = [Date d'arrêté]
+RETURN
+    CALCULATE ( SUM ( mart_liquidite_placement[economie_anticipation_annuelle_eur] ), dim_date[date_jour] = DerniereDate )
 
 Liquidité excédentaire (EUR) =
 VAR DerniereDate = [Date d'arrêté]
@@ -125,6 +160,16 @@ VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
 RETURN
     CALCULATE ( SUM ( mart_exposition_change[var_95_10j_eur] ), dim_date[date_jour] = DerniereDate )
 
+// Décision de couverture : coût annuel (différentiel de taux) / volatilité annuelle, par devise
+// À afficher PAR DEVISE uniquement (une moyenne de ratios entre devises n'a pas de sens)
+Rapport coût / risque de la couverture =
+VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+RETURN CALCULATE ( AVERAGE ( mart_exposition_change[rapport_cout_risque] ), dim_date[date_jour] = DerniereDate )
+
+Recommandation de couverture =
+VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+RETURN CALCULATE ( SELECTEDVALUE ( mart_exposition_change[recommandation_couverture] ), dim_date[date_jour] = DerniereDate )
+
 Taux EUR -> devise = AVERAGE ( fct_taux_change[taux_eur] )
 
 Volatilité annualisée % = AVERAGE ( fct_taux_change[volatilite_annualisee_pct] ) / 100
@@ -142,8 +187,16 @@ MAXX (
     CALCULATE ( MAX ( mart_prevision_tresorerie[proba_sous_besoin_liquidite] ) )
 )
 
+// WAPE pondéré (Σ|réel − prévu| / Σ réel) plutôt qu'une moyenne de WAPE par série (moyenne de moyennes).
+// Montants en devise locale : à lire par filiale (au total groupe, l'écart mesuré vs pondération EUR est < 0,1 pt).
 WAPE du modèle champion % =
-CALCULATE ( AVERAGE ( mart_qualite_prevision[wape_pct] ), mart_qualite_prevision[est_champion] = TRUE () ) / 100
+CALCULATE (
+    DIVIDE (
+        SUMX ( mart_backtest_journalier, ABS ( mart_backtest_journalier[reel_devise] - mart_backtest_journalier[prevu_devise] ) ),
+        SUM ( mart_backtest_journalier[reel_devise] )
+    ),
+    mart_backtest_journalier[est_champion] = TRUE ()
+)
 
 Taux de change prévu P50 = AVERAGE ( mart_prevision_change[taux_p50] )
 Taux de change prévu P05 = AVERAGE ( mart_prevision_change[taux_p05] )

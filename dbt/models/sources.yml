@@ -9,6 +9,7 @@ sources:
         description: >
           Logs PaySim (Kaggle ealaxi/paysim1) : 6,36 M de transactions mobiles simulées sur 743 heures.
           Utilisés comme proxy des flux de la banque de détail ZF Banque.
+          Jeu de données historique figé (2017) : pas de contrôle de fraîcheur.
         columns:
           - name: id_ligne
             tests: [unique, not_null]
@@ -21,6 +22,11 @@ sources:
                     values: [CASH_IN, CASH_OUT, DEBIT, PAYMENT, TRANSFER]
       - name: bce_taux_change
         description: Cours de référence BCE (unités de devise pour 1 EUR), format long.
+        # Fraîcheur : la BCE publie chaque jour ouvré. Un export Webstat de plus de 10 jours doit
+        # être rafraîchi avant une restitution (dbt source freshness).
+        loaded_at_field: "cast(date_cours as timestamp)"
+        freshness:
+          warn_after: {count: 10, period: day}
         columns:
           - name: date_cours
             tests: [not_null]

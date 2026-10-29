@@ -36,10 +36,11 @@
 |---|---|---|
 | Placement de la liquidité dormante | La prévision réduit le coussin de précaution nécessaire ; l'excédent est placé | *Gain annuel de placement* |
 | Moindre coût de refinancement | On anticipe les besoins au lieu d'emprunter en urgence (plus cher) | *Coût annuel de refinancement* |
-| Couverture de change optimisée | On couvre l'exposition nette et le juste montant (VaR), au bon moment | *Coût annuel de couverture*, *VaR 95 % 10 j* |
-| Netting intragroupe | On compense les flux entre filiales avant de passer par le marché | *Taux de netting potentiel %* |
+| Couverture de change optimisée | On couvre en priorité les devises au rapport coût / risque faible (CAD, SEK), pas la DKK ancrée à l'euro ; le CFA se pilote par stress test | *Rapport coût / risque*, *Recommandation de couverture*, *VaR 95 % 10 j* |
+| Anticipation du refinancement | On sait **quand** chaque filiale passera sous 100 % (6 à 8 jours pour l'Europe) et on emprunte de façon programmée plutôt qu'en urgence | *Jours avant passage sous 100 %*, *Économie annuelle grâce à l'anticipation* |
+| Netting intragroupe | On compense les flux entre filiales avant de passer par le marché (valeur à mesurer sur données réelles : dans le POC, elle découle d'une hypothèse) | — |
 | Résilience et conformité | Stress tests fondés sur des données réelles, horizon de survie connu | *Horizon de survie*, statut |
-| Fraude | Détection des sorties anormales (PaySim marque les fraudes) | *Taux de fraude %* |
+| Fraude | Le dispositif actuel (`isFlaggedFraud`) ne détecte que 0,2 % des fraudes ; une règle simple en détecte 97,6 % sur PaySim (signature propre au simulateur) | *Taux de détection actuel %* |
 
 Les montants du POC dépendent des hypothèses (valeur d'une unité PaySim, taux de réserve) : il faut **présenter les ordres de grandeur et les mécanismes**, pas les montants comme des prévisions réelles de ZF Banque.
 

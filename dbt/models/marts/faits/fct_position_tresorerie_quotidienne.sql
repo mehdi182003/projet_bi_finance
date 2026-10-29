@@ -16,6 +16,7 @@ with flux_jour as (
         sum(flux_net_eur)                                                 as flux_net_eur,
         sum(case when est_intragroupe then flux_net_eur else 0 end)      as flux_net_intragroupe_eur,
         sum(case when est_fraude then decaissements_eur else 0 end)      as decaissements_frauduleux_eur,
+        sum(case when est_gros_ticket then decaissements_eur else 0 end) as decaissements_gros_tickets_eur,
         sum(nb_mouvements)                                                as nb_mouvements
     from {{ ref('fct_flux_tresorerie_horaire') }}
     group by date_operation, code_filiale
@@ -44,6 +45,7 @@ cumul as (
         coalesce(fj.flux_net_eur, 0)                    as flux_net_eur,
         coalesce(fj.flux_net_intragroupe_eur, 0)        as flux_net_intragroupe_eur,
         coalesce(fj.decaissements_frauduleux_eur, 0)    as decaissements_frauduleux_eur,
+        coalesce(fj.decaissements_gros_tickets_eur, 0)  as decaissements_gros_tickets_eur,
         coalesce(fj.nb_mouvements, 0)                   as nb_mouvements,
         e.taux_reference,
         e.reserve_liquidite_initiale_devise,
@@ -71,6 +73,7 @@ select
     c.flux_net_eur,
     c.flux_net_intragroupe_eur,
     c.decaissements_frauduleux_eur,
+    c.decaissements_gros_tickets_eur,
     c.reserve_liquidite_initiale_devise + c.flux_net_cumule_devise - c.flux_net_devise  as position_ouverture_devise,
     c.reserve_liquidite_initiale_devise + c.flux_net_cumule_devise                      as position_cloture_devise,
     c.encours_depots_initial_devise + c.flux_net_cumule_devise                          as encours_depots_devise,

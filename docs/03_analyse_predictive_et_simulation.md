@@ -21,7 +21,8 @@
 | Holt-Winters sur log(1 + montant) | Biais de −70 à −99 % | Biais de retransformation : exp(moyenne des log) < moyenne, surtout quand il y a beaucoup d'heures à 0 |
 | Holt-Winters additif | WAPE d'environ 1 500 % | La saisonnalité apprise pendant la forte activité ne diminue pas quand le volume chute (après la 400ᵉ heure de PaySim) |
 | Holt-Winters **multiplicatif** | WAPE médian d'environ 10 % | Le profil horaire est proportionnel au niveau d'activité |
-| Naïf saisonnier | WAPE de 2 à 12 % | Robuste aux ruptures de régime |
+| Naïf saisonnier | WAPE de 3,5 à 7,7 % sur la fenêtre stable du vrai PaySim (champion sur 19 séries sur 20) | Robuste ; les flux journaliers sont stables |
+| Backtest sur les jours 28-30 (avant correction) | WAPE de 74 % (naïf), 902 559 % (Holt-Winters) | Le test portait sur des jours « morts » : fenêtre d'analyse restreinte aux jours 6-17 + garde-fou de divergence |
 
 ## 2. Simulation Monte-Carlo de la position
 Une prévision ponctuelle ne suffit pas : le trésorier doit connaître le **risque**. Pour chaque filiale :
@@ -36,7 +37,7 @@ C'est une *simulation historique*, la même logique que la VaR historique utilis
 Les cours de change sont proches d'une **marche aléatoire** : aucun modèle ne bat durablement la prévision « demain = aujourd'hui » (Meese & Rogoff, 1983). On ne cherche donc pas à prédire le cours exact, mais une **fourchette** :
 - mouvement brownien géométrique, volatilité estimée sur les 250 dernières cotations ;
 - 2 000 trajectoires sur 30 jours → quantiles P5 / P50 / P95 ;
-- **contrôle a posteriori** : comme l'export Webstat va jusqu'en septembre 2026, on compare la fourchette prévue au 01/10/2025 aux cours réellement observés en octobre 2025. Résultat : 100 % des jours dans la fourchette à 90 % pour USD, CAD, SEK, NOK et DKK, et 82 % pour le JPY (plus volatil sur la période).
+- **contrôle a posteriori** : comme l'export Webstat va jusqu'en septembre 2026, on compare la fourchette prévue au 12/09/2025 (date d'arrêté) aux cours réellement observés ensuite. Résultat : 100 % des 20 jours de cotation dans la fourchette à 90 %, pour les 6 devises. C'est plus que les 90 % attendus : l'intervalle est **prudent** (plutôt large), et les jours successifs sont autocorrélés. Un premier essai depuis le 01/10/2025 donnait 82 % pour le JPY : la fourchette est utile, pas infaillible.
 - Le RUB est exclu automatiquement (dernière cotation le 01/03/2022).
 - La DKK, ancrée à l'euro (MCE II), a une fourchette très étroite (±0,1 %) : couvrir une position en couronnes danoises n'a presque aucun intérêt.
 
@@ -55,6 +56,7 @@ Sortie : position stressée, horizon de survie (jours), besoin et coût de refin
 Le simulateur Power BI rejoue le même calcul avec des curseurs libres (paramètres What-if).
 
 ## 5. Limites
-- 31 jours d'historique : pas de saisonnalité hebdomadaire ou mensuelle exploitable.
+- 12 jours d'historique stable : pas de saisonnalité hebdomadaire ou mensuelle exploitable.
+- À la maille journalière, la prévision ne fait pas mieux qu'une moyenne simple (flux stables) : sa valeur est dans l'anticipation de la date de franchissement du seuil et dans la mesure de l'incertitude (voir docs/06 § 5).
 - Encaissements et décaissements sont simulés à partir des mêmes journées tirées : la corrélation est respectée, mais pas d'éventuelles tendances futures.
 - Pistes d'industrialisation : Prophet ou SARIMAX avec calendrier (jours fériés par pays, paie, fins de mois), modèles hiérarchiques (filiale → groupe), réentraînement quotidien et suivi de la dérive (WAPE glissant).

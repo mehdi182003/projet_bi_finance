@@ -107,14 +107,28 @@ def par_jour(valeurs: np.ndarray) -> np.ndarray:
     return valeurs.reshape(-1, SAISON).sum(axis=1)
 
 
+def est_divergent(entrainement: np.ndarray, prevu_horaire: np.ndarray) -> bool:
+    """Garde-fou : une prévision horaire au-delà de 3x le pic observé est jugée divergente."""
+    return not np.all(np.isfinite(prevu_horaire)) or prevu_horaire.max() > 3 * max(entrainement.max(), 1.0)
+
+
 def backtester(y: np.ndarray, jours_test: int) -> tuple[pd.DataFrame, str]:
-    """Évalue chaque modèle sur les derniers jours ; renvoie le détail et le champion."""
+    """Évalue chaque modèle sur les derniers jours ; renvoie le détail et le champion.
+
+    Un modèle divergent est écarté (prévu = NaN, donc WAPE NULL dans dbt) au lieu
+    d'afficher une erreur absurde ; le naïf saisonnier reste toujours disponible.
+    """
     h = jours_test * SAISON
     entrainement, reel = y[:-h], par_jour(y[-h:])
     lignes, scores = [], {}
     for nom, modele in MODELES.items():
-        prevu = par_jour(modele(entrainement, h))
-        scores[nom] = wape(reel, prevu)
+        prevu_horaire = modele(entrainement, h)
+        if est_divergent(entrainement, prevu_horaire):
+            log.warning("    modèle %s divergent sur cette série : écarté", nom)
+            prevu, scores[nom] = np.full(jours_test, np.nan), np.inf
+        else:
+            prevu = par_jour(prevu_horaire)
+            scores[nom] = wape(reel, prevu)
         lignes.append(pd.DataFrame({"modele": nom, "jour_test": range(1, jours_test + 1), "reel": reel, "prevu": prevu}))
     return pd.concat(lignes, ignore_index=True), min(scores, key=scores.get)
 

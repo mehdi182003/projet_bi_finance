@@ -9,7 +9,7 @@ ZF Banque est un groupe de banques de détail : une dizaine de filiales, plus de
 |---|---|---|---|---|
 | O1 | Anticiper les entrées/sorties de cash par devise et par filiale | Quelle sera ma position à J+7 et avec quelle incertitude ? | Solde net quotidien, position P5/P50/P95, probabilité de passer sous le besoin | `fct_position_tresorerie_quotidienne`, `mart_prevision_tresorerie` |
 | O2 | Stratégie de couverture selon des scénarios de change | Quelle perte possible sur mes devises ? Que coûte la couverture ? | Exposition, VaR 95 % 10 j, fourchette de change, coût de couverture | `mart_exposition_change`, `mart_prevision_change`, `mart_liquidite_placement` |
-| O3 | Optimiser refinancement et placement | Où dort de la liquidité ? Où faut-il se refinancer ? | Ratio de couverture, liquidité excédentaire, gain de placement, coût de refinancement | `mart_liquidite_placement` |
+| O3 | Optimiser refinancement et placement | Où dort de la liquidité ? Où faut-il se refinancer, et quand ? | Ratio de liquidité, jours avant passage sous 100 %, liquidité excédentaire, gain de placement, coût de refinancement | `mart_liquidite_placement` |
 | O4 | Scénarios de stress à partir de données réelles | Combien de temps chaque filiale tient-elle en cas de crise ? | Position stressée, horizon de survie, statut | `mart_stress_test` + simulateur Power BI |
 
 Enjeux transverses : **hétérogénéité** des données (10 filiales, 8 devises, 3 régimes de change) et **intégration de données externes** (cours BCE, taux directeurs).
@@ -21,7 +21,7 @@ Enjeux transverses : **hétérogénéité** des données (10 filiales, 8 devises
 | Filiales | 10 : France, Benelux, Finlande, Suède, Danemark, Norvège, Côte d'Ivoire, Cameroun, Canada, États-Unis |
 | Devises de filiales | EUR, SEK, DKK, NOK, XOF, XAF, CAD, USD |
 | Devises de surveillance | JPY, RUB (citées par le sujet) |
-| Période rejouée | 743 heures à partir du 01/09/2025 (variable dbt `date_debut_paysim`) |
+| Période analysée | Jours 6 à 17 de PaySim (régime d'activité stable), rejoués du 01/09 au 12/09/2025 (variables dbt) |
 | Horizon de prévision | 7 jours pour les flux, 30 jours pour le change |
 | Hors périmètre | Crédits, titres, dérivés ; données nominatives (RGPD) |
 

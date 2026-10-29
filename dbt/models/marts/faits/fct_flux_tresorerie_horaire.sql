@@ -3,7 +3,7 @@
 -- => import Power BI rapide, sans perte d'information utile au pilotage.
 
 select
-    md5(concat_ws('|', horodatage, code_filiale, code_type, role_jambe, est_intragroupe, est_fraude)) as id_flux,
+    md5(concat_ws('|', horodatage, code_filiale, code_type, role_jambe, est_intragroupe, est_fraude, est_gros_ticket)) as id_flux,
     horodatage,
     date_operation,
     extract(hour from horodatage)::int                                       as heure,
@@ -13,6 +13,7 @@ select
     role_jambe,
     est_intragroupe,
     est_fraude,
+    est_gros_ticket,
     count(*)                                                                  as nb_mouvements,
     sum(case when sens > 0 then montant_devise else 0 end)                    as encaissements_devise,
     sum(case when sens < 0 then montant_devise else 0 end)                    as decaissements_devise,
@@ -21,4 +22,4 @@ select
     sum(case when sens < 0 then montant_eur else 0 end)                       as decaissements_eur,
     sum(sens * montant_eur)                                                   as flux_net_eur
 from {{ ref('int_mouvements_tresorerie') }}
-group by horodatage, date_operation, code_filiale, code_devise, code_type, role_jambe, est_intragroupe, est_fraude
+group by horodatage, date_operation, code_filiale, code_devise, code_type, role_jambe, est_intragroupe, est_fraude, est_gros_ticket

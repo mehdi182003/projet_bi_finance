@@ -10,7 +10,7 @@
    - Si une erreur SSL apparaît : *Fichier → Options → Sécurité des sources de données → Modifier les autorisations* → décocher « Chiffrer les connexions ».
    - Si le connecteur réclame Npgsql (anciennes versions de Power BI) : installer Npgsql 4.0.x en cochant « Npgsql GAC Installation ».
 3. Cocher les tables du schéma **marts** :
-   `dim_date, dim_filiale, dim_devise, dim_type_transaction, dim_scenario_stress, fct_flux_tresorerie_horaire, fct_position_tresorerie_quotidienne, fct_taux_change, mart_exposition_change, mart_liquidite_placement, mart_stress_test, mart_prevision_tresorerie, mart_prevision_change, mart_qualite_prevision, mart_backtest_journalier`.
+   `dim_date, dim_filiale, dim_devise, dim_type_transaction, dim_scenario_stress, fct_flux_tresorerie_horaire, fct_position_tresorerie_quotidienne, fct_taux_change, mart_exposition_change, mart_liquidite_placement, mart_stress_test, mart_prevision_tresorerie, mart_prevision_change, mart_qualite_prevision, mart_backtest_journalier, mart_qualite_donnees` (cette dernière n'a pas de relation : c'est une table autonome par jour de simulation).
 4. Dans Power Query, renommer les tables pour enlever le préfixe `marts ` (sinon adapter les noms dans les mesures DAX).
 
 ## 2. Modèle (vue Modèle)
@@ -42,7 +42,8 @@ Ensuite :
 
 ### Page 1 — Cockpit Direction Financière
 - Segments : période (`dim_date`), région, filiale.
-- Cartes : *Position de trésorerie*, *Variation de position %*, *Ratio de couverture liquidité %*, *Liquidité excédentaire*, *Gain annuel de placement*, *Coût annuel de refinancement*, *VaR change 95 % 10 j*, *Résultat net de trésorerie annuel*.
+- Cartes : *Position de trésorerie*, *Consommation quotidienne de la position %*, *Ratio de couverture liquidité %*, **Jours avant passage sous 100 %** (KPI phare, rouge si < 7), *Gain annuel de placement*, *Coût annuel de refinancement*, *VaR change 95 % 10 j*, *Résultat net de trésorerie annuel*.
+- Ne **pas** mettre sur cette page : *Taux de netting* (simple reflet d'une hypothèse) et *Taux de fraude* (artefact), voir docs/06.
 - Courbe : position (`fct_position…[position_cloture_eur]`) par date, légende = filiale.
 - Carte géographique : `dim_filiale[pays]`, taille = *Position de trésorerie*.
 - Tableau par filiale : position, ratio de couverture (mise en forme conditionnelle : vert ≥ 100 %, rouge < 100 %), excédent, refinancement.
@@ -51,7 +52,7 @@ Ensuite :
 - Histogramme groupé : *Encaissements* / *Décaissements* par `date_jour`.
 - Matrice (carte de chaleur) : lignes = `fct_flux…[heure]`, colonnes = `dim_date[libelle_jour]`, valeur = *Solde net*, couleur divergente → profil intrajournalier.
 - Barres : *Décaissements* par `dim_type_transaction[libelle_type]`.
-- Cartes : *Taux de netting potentiel %* (flux intragroupe compensables), *Taux de fraude %*.
+- Carte : *Part des gros décaissements %* (0,4 % des décaissements, à partir de 10 k€, pèsent environ 10 % des montants).
 
 ### Page 3 — Prévisions (analyse prédictive)
 - Graphique en courbes : axe = `mart_prevision_tresorerie[date_jour]`, valeur = *Position prévue P50*, légende = `type_valeur` (Réalisé / Prévision). Volet **Analyse → Barres d'erreur** : limite haute = *P95*, limite basse = *P05* → **cône d'incertitude**.
@@ -62,6 +63,7 @@ Ensuite :
 ### Page 4 — Change & couverture
 - Courbe `mart_prevision_change` : *Taux de change prévu P50* + barres d'erreur P05/P95, avec *Taux de change réalisé* en superposition (contrôle a posteriori), segment = devise.
 - Barres : *Exposition au change* par devise ; cartes *VaR 95 % 10 j*, *Coût annuel de couverture*, *Effet de change cumulé*.
+- Tableau de décision : devise, exposition, volatilité, *Rapport coût / risque de la couverture*, *Recommandation de couverture*.
 - Tableau `fct_taux_change` : volatilité annualisée par devise ; mettre en évidence le RUB (`est_rupture_serie`).
 
 ### Page 5 — Simulateur de stress (What-if)
@@ -69,6 +71,11 @@ Ensuite :
 - Cartes dynamiques : *Position stressée*, *Horizon de survie (jours)*, *Besoin de refinancement stressé*, *Coût du refinancement stressé*.
 - Tableau par filiale avec *Statut de résilience* coloré via *Couleur statut* (Format → Couleur d'arrière-plan → Valeur du champ).
 - Matrice des scénarios précalculés : lignes = `dim_scenario_stress[libelle_scenario]`, colonnes = filiale, valeur = `mart_stress_test[horizon_survie_jours]`, couleur selon `statut_resilience`. Info-bulle : `reference_historique`.
+
+### Page 6 — Qualité des données
+- Histogramme `mart_qualite_donnees[nb_transactions]` par `jour_simulation`, couleur = `statut` (Retenu / Exclu) : montre **pourquoi** on n'analyse que les jours 6 à 17.
+- Courbe `nb_fraudes` sur le même axe : la fraude reste constante quand le volume s'effondre, preuve d'un artefact du simulateur.
+- Cartes : *Taux de détection actuel %* (0,2 %) vs *Rappel de la règle « vide le compte » %* (97,6 %).
 
 ## 5. Conseils pour la soutenance
 - Démonstration en direct : régler *Choc retraits* sur 20 % (scénario SVB) et montrer quelles filiales passent en « Critique ».

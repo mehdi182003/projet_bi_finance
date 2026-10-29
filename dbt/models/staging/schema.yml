@@ -2,7 +2,7 @@ version: 2
 
 models:
   - name: stg_paysim__transactions
-    description: Transactions PaySim nettoyées, horodatées sur la période rejouée (var date_debut_paysim).
+    description: Transactions PaySim nettoyées et horodatées ; toutes les lignes, avec le drapeau est_periode_analyse (RG-QUA-02).
     columns:
       - name: id_transaction
         tests: [unique, not_null]

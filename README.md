@@ -9,7 +9,7 @@ Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout
 |---|---|---|
 | Extraction + chargement | **Python** (pandas, psycopg) | Récupère PaySim (Kaggle) et les taux BCE (Banque de France Webstat), les charge dans PostgreSQL |
 | Entrepôt de données | **PostgreSQL 16** | Stocke les couches `raw` → `staging` → `intermediate` → `marts` (+ `ml`) |
-| Transformation + qualité | **dbt** | Règles de gestion en SQL, modèle en étoile, 71 tests automatiques, documentation et lignage |
+| Transformation + qualité | **dbt** | Règles de gestion en SQL, modèle en étoile, 78 tests automatiques, documentation et lignage |
 | Analyse prédictive | **Python** (statsmodels, numpy) | Prévision des flux (champion/challenger) + simulation Monte-Carlo, fourchettes de change |
 | Restitution | **Power BI** | Cockpit, prévisions, risque de change, simulateur de stress test (What-if) |
 
@@ -96,9 +96,11 @@ Le sujet fixe 4 objectifs au projet Crésus. Nous les avons reformulés en quest
 - **Données externes** : les **cours de référence BCE** exportés de **Banque de France Webstat** (30 devises, 1999 → 23/09/2026). On en garde 7 : USD, CAD (Amérique du Nord), SEK, DKK, NOK (Europe du Nord), JPY et RUB (devises citées par le sujet, en surveillance).
 - **Référentiels** que nous avons construits (fichiers CSV dans `dbt/seeds/`) : filiales, devises, taux directeurs des banques centrales (sources officielles indiquées ligne par ligne), scénarios de stress (chacun adossé à une crise historique).
 
-Deux constats « qualité de données » faits dès cette étape, et exploités ensuite :
-1. **Le rouble n'est plus coté par la BCE depuis le 01/03/2022** : rupture de série détectée automatiquement par un test dbt (avertissement non bloquant), la devise est exclue des prévisions.
-2. **Les francs CFA (XOF pour la Côte d'Ivoire, XAF pour le Cameroun) ne sont pas cotés** : ils ont une parité fixe de 655,957 pour 1 €. Leur risque n'est pas la volatilité mais la **dévaluation** (cas réel : -50 % en janvier 1994), qu'on traite par un scénario de stress.
+Constats « qualité de données » faits dès cette étape (profil complet : [docs/06](docs/06_profil_donnees_et_choix_kpi.md)), et exploités ensuite :
+1. **PaySim n'a une activité normale que les jours 1-2 et 6-17.** Les autres jours, le volume chute de 94 à 99 % alors que la fraude reste constante : c'est un artefact du simulateur. On retient donc une **fenêtre d'analyse de 12 jours continus et stables (jours 6 à 17)**, qui concentre 77 % des opérations (règle RG-QUA-02, variables `step_debut_analyse` / `step_fin_analyse`).
+2. **Les soldes PaySim sont peu fiables** (le montant dépasse le solde dans 88 % des retraits). L'encours de dépôts reconstitué est donc un ordre de grandeur, contrôlé par un test de vraisemblance.
+3. **Le rouble n'est plus coté par la BCE depuis le 01/03/2022** : rupture de série détectée automatiquement par un test dbt (avertissement non bloquant), la devise est exclue des prévisions.
+4. **Les francs CFA (XOF pour la Côte d'Ivoire, XAF pour le Cameroun) ne sont pas cotés** : ils ont une parité fixe de 655,957 pour 1 €. Leur risque n'est pas la volatilité mais la **dévaluation** (cas réel : -50 % en janvier 1994), qu'on traite par un scénario de stress.
 
 ### Étape 3 — Modélisation des filiales : distribuer toutes les transactions
 Le sujet décrit **une dizaine de filiales** en France, Europe du Nord, Afrique et Amérique du Nord. Le référentiel `ref_filiales.csv` en définit 10 :
@@ -118,46 +120,54 @@ Les virements (`TRANSFER`) restent dans la même filiale dans 85 % des cas ; sin
 
 ### Étape 4 — Ingénierie des données (ELT avec Python, PostgreSQL et dbt)
 1. **Extract / Load (Python)** : `COPY` PostgreSQL en flux : 6,4 M de lignes chargées en ~20 s.
-2. **Staging (dbt, vues)** : renommage en français, typage, conversion du `step` PaySim (1 h) en date réelle (période rejouée : 01/09/2025 → 01/10/2025, paramétrable).
+2. **Staging (dbt, vues)** : renommage en français, typage, conversion du `step` PaySim (1 h) en date réelle ; la fenêtre d'analyse (jours 6 à 17) est rejouée du 01/09 au 12/09/2025 (paramétrable).
 3. **Intermediate (dbt)** : les règles métier :
    - grille de change quotidienne (week-ends = dernier cours connu, au plus 7 jours ; parités CFA ; EUR = 1) ;
    - affectation aux filiales, sens de trésorerie (+ dépôt / − retrait, paiement, débit), neutralisation des virements internes à une filiale ;
    - valorisation en devise locale puis en EUR au **cours BCE du jour** ;
    - position de départ : encours de dépôts (soldes d'ouverture des clients) × taux de réserve de la filiale.
 4. **Marts (dbt, tables)** : modèle en étoile prêt pour Power BI (§ 4 ci-dessous).
-5. **Qualité** : 71 tests (unicité, non-nullité, intégrité référentielle, bornes, conservation des volumes, équilibre intragroupe, disponibilité des taux, rupture de série).
+5. **Qualité** : 78 tests (unicité, non-nullité, intégrité référentielle, bornes, conservation des volumes, équilibre intragroupe, disponibilité des taux, rupture de série, régime d'activité, vraisemblance de l'encours) + contrôle de fraîcheur des cours BCE + table `mart_qualite_donnees`.
 
 → Détail des règles de gestion et du dictionnaire : [docs/02_specifications_moe.md](docs/02_specifications_moe.md)
 
-### Étape 5 — Définition et calcul des KPI
-| KPI | Définition | Usage |
+### Étape 5 — Choix des KPI à partir des données
+Les KPI n'ont pas été posés a priori : chacun a été **testé statistiquement sur les vraies données**. On n'a gardé que ceux qui varient, sont mesurés (pas seulement supposés), résistent aux artefacts de PaySim et éclairent une décision. Détail et chiffres : [docs/06_profil_donnees_et_choix_kpi.md](docs/06_profil_donnees_et_choix_kpi.md).
+
+| KPI retenu | Définition | Décision éclairée |
 |---|---|---|
-| Solde net quotidien par devise | Encaissements − décaissements | Suivi opérationnel |
-| Position de trésorerie | Réserve initiale + cumul des flux nets, réévaluée au cours du jour | Pilotage de la liquidité |
-| Effet de change | Position au cours du jour − position au cours du 1er jour | Impact du change sur le résultat |
-| Exposition au change + **VaR 95 % 10 j** | 1,645 × volatilité × exposition × √10 | Dimensionner la couverture |
-| Ratio de couverture de liquidité (LCR simplifié) | Position / (10 % des dépôts + sorties nettes à 30 j) | Conformité Bâle III |
-| Liquidité excédentaire → **gain de placement** | max(position − besoin, 0) × taux directeur local | Transformer la trésorerie en centre de profit |
-| Besoin de refinancement → **coût** | max(besoin − position, 0) × (taux + marge) | Arbitrage refinancement |
-| Coût de couverture de change | Exposition × (taux local − taux BCE) | Arbitrer couvrir / ne pas couvrir |
-| Horizon de survie sous stress | Position stressée / sortie nette quotidienne stressée | Stress tests |
+| Solde net quotidien | Encaissements − décaissements | Suivi opérationnel |
+| Position de trésorerie + **consommation quotidienne** | Réserve + cumul des flux nets ; − flux net moyen / position | Vitesse d'usure de la réserve |
+| **Ratio de liquidité** (Bâle III simplifié) | Position / (10 % des dépôts) ; seuil 100 %, pilotage 110 % | Conformité |
+| **Jours avant passage sous 100 %** | (Position − besoin) / sortie nette moyenne | **Quand** se refinancer |
+| Prévision J+7 (P5 / P50 / P95) + probabilité de passer sous le seuil | Simulation Monte-Carlo | Anticipation |
+| Exposition au change + **VaR 95 % 10 j** | 1,645 × volatilité × exposition × √10 | Risque de change |
+| **Rapport coût / risque de la couverture** + recommandation | (Taux local − taux BCE) / volatilité | Quelles devises couvrir |
+| Excédent → **gain de placement** ; déficit → **coût de refinancement** | Par rapport à la cible de pilotage (110 %) | Placer ou emprunter |
+| Horizon de survie sous stress | Position stressée / sortie nette stressée | Stress tests |
+| Part des gros décaissements | Décaissements ≥ 10 k€ / total | Pré-notification des gros retraits |
+
+KPI **écartés après analyse** : ancien ratio de liquidité (figé sous 100 %, double comptage) ; taux de netting (simple reflet d'une hypothèse) ; taux de fraude dans le temps (artefact du simulateur) ; pic de liquidité intrajournalier (toujours égal au solde du jour).
 
 ### Étape 6 — Analyse prédictive et simulation
-- **Flux** : deux modèles sont mis en concurrence pour chaque filiale (*naïf saisonnier* vs *Holt-Winters à saisonnalité journalière multiplicative*). Chacun est **backtesté** sur les 3 derniers jours, et le plus précis (WAPE) devient le **champion**. Sur 6,4 M de transactions, l'erreur du champion est d'environ 2 à 12 %.
+- **Flux** : deux modèles sont mis en concurrence pour chaque filiale (*naïf saisonnier* vs *Holt-Winters à saisonnalité journalière multiplicative*). Chacun est **backtesté** sur les 3 derniers jours, et le plus précis (WAPE) devient le **champion**. Sur la fenêtre stable du vrai PaySim, l'erreur du champion est de 3,5 à 7,7 % (WAPE), avec un biais de +2,5 %. Un garde-fou écarte Holt-Winters quand il diverge (4 séries sur 20).
 - **Simulation Monte-Carlo** : 500 trajectoires futures construites en rejouant des journées réellement observées, mises à l'échelle du niveau prévu → cône P5 / P50 / P95 de la position à J+7 et **probabilité de passer sous le besoin de liquidité**.
-- **Change** : fourchette à 30 jours par mouvement brownien géométrique calibré sur la volatilité réelle. Vérification a posteriori sur les vrais cours d'octobre 2025 : le cours réalisé est resté dans la fourchette à 90 % pour USD, CAD, SEK, NOK et DKK, et 82 % des jours pour le JPY.
+- **Change** : fourchette à 30 jours par mouvement brownien géométrique calibré sur la volatilité réelle. Vérification a posteriori sur les vrais cours BCE (13/09 → 12/10/2025) : le cours réalisé est resté dans la fourchette à 90 % tous les jours, pour les 6 devises : un intervalle prudent, plutôt large.
 - **Stress tests** : 7 scénarios précalculés (Northern Rock, SVB, dévaluation du CFA de 1994…) + simulateur dynamique dans Power BI.
 
-Ce que nous avons appris en route (à raconter en soutenance) : notre premier modèle (Holt-Winters sur le logarithme des montants) **sous-estimait les flux de 70 à 99 %** ; la version additive divergeait (+1 500 %) quand l'activité de PaySim chute après la 400ᵉ heure. C'est le backtest qui l'a révélé, d'où le choix d'une démarche champion/challenger : **on ne met jamais un modèle en production sans l'avoir comparé à une référence naïve.**
+Ce que nous avons appris en route (à raconter en soutenance) : notre premier modèle (Holt-Winters sur le logarithme des montants) **sous-estimait les flux de 70 à 99 %** ; la version additive divergeait (+1 500 %) quand l'activité de PaySim chute après la 400ᵉ heure. C'est le backtest qui l'a révélé, d'où le choix d'une démarche champion/challenger : **on ne met jamais un modèle en production sans l'avoir comparé à une référence naïve.** Sur les vraies données, le backtest a aussi révélé qu'il portait sur des jours « morts » (erreur de 74 %), ce qui a conduit à restreindre la fenêtre d'analyse.
 
 → Détail : [docs/03_analyse_predictive_et_simulation.md](docs/03_analyse_predictive_et_simulation.md)
 
 ### Étape 7 — Restitution Power BI
-Cinq pages : Cockpit DAF · Flux · Prévisions · Change & couverture · Simulateur de stress. Les mesures DAX sont prêtes à coller ([powerbi/mesures_dax.dax](powerbi/mesures_dax.dax)), ainsi qu'un thème ([powerbi/theme_cresus.json](powerbi/theme_cresus.json)).
+Six pages : Cockpit DAF · Flux · Prévisions · Change & couverture · Simulateur de stress · Qualité des données. Les mesures DAX sont prêtes à coller ([powerbi/mesures_dax.dax](powerbi/mesures_dax.dax)), ainsi qu'un thème ([powerbi/theme_cresus.json](powerbi/theme_cresus.json)).
 → Guide de construction pas à pas : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md)
 
 ### Étape 8 — Synthèse, SWOT et recommandations
 → [docs/05_synthese_swot_recommandations.md](docs/05_synthese_swot_recommandations.md)
+
+### Étape 9 — Revue critique avec des skills (profilage, revue dbt, statistiques)
+→ [docs/06_profil_donnees_et_choix_kpi.md](docs/06_profil_donnees_et_choix_kpi.md)
 
 ---
 
@@ -205,7 +215,8 @@ erDiagram
 
 ## 6. Hypothèses et limites (à assumer en soutenance)
 - PaySim est un **proxy** : volumes et comportements d'un opérateur de paiement mobile, pas d'une vraie banque. La valeur d'une unité PaySim (0,01 €), la répartition entre filiales et les taux de réserve sont des **hypothèses paramétrables**, pas des données de ZF Banque.
-- 743 heures d'historique (31 jours) : suffisant pour un profil journalier, insuffisant pour des saisonnalités hebdomadaires ou mensuelles (fins de mois, paie). En production, il faudrait au moins 2 ans d'historique.
+- 12 jours d'historique exploitable (fenêtre stable de PaySim) : suffisant pour un profil horaire, insuffisant pour des saisonnalités hebdomadaires ou mensuelles (fins de mois, paie). En production, il faudrait au moins 2 ans d'historique.
+- PaySim n'a pas de flux interbancaires entrants (salaires, virements reçus) : le solde net est négatif tous les jours et la réserve se consomme d'environ 2 % par jour. Les **niveaux** de ratio dépendent des hypothèses ; les **pentes** viennent des données.
 - Le LCR est simplifié (un seul taux de fuite de 10 %, pas de pondération des actifs liquides HQLA).
 - Les taux directeurs 2025 marqués `a_verifier = true` dans `ref_taux_directeurs.csv` sont à confirmer sur les sites des banques centrales avant la soutenance.
 - La prévision de position du groupe = somme des quantiles des filiales : c'est une borne **prudente** (corrélation parfaite supposée).

@@ -1,9 +1,10 @@
--- Contrôle de complétude : chaque transaction non nulle et non neutralisée se retrouve
+-- Contrôle de complétude : chaque transaction de la fenêtre d'analyse, non nulle et non neutralisée, se retrouve
 -- dans le fait agrégé (aucune perte de ligne pendant les jointures filiale / taux).
 with attendu as (
     select count(*) as nb
     from {{ ref('stg_paysim__transactions') }}
     where montant_paysim > 0
+      and est_periode_analyse
 ),
 obtenu as (
     select count(*) as nb
@@ -20,7 +21,7 @@ neutralises as (
     left join {{ ref('int_filiales_affectation') }} fb
       on {{ seau_hachage("t.id_beneficiaire || '|filiale'", 10000) }} >= fb.borne_min
      and {{ seau_hachage("t.id_beneficiaire || '|filiale'", 10000) }} <  fb.borne_max
-    where t.code_type = 'TRANSFER' and t.montant_paysim > 0
+    where t.code_type = 'TRANSFER' and t.montant_paysim > 0 and t.est_periode_analyse
       and ({{ seau_hachage('t.id_beneficiaire', 100) }} < {{ var('part_virements_domestiques_pct') }}
            or fb.code_filiale = f.code_filiale)
 )

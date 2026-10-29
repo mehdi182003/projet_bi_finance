@@ -13,11 +13,13 @@
 --   RG-SEN-02 : un virement génère 2 jambes (débit émetteur, crédit bénéficiaire).
 --   RG-SEN-03 : un virement entre 2 clients de la même filiale est neutre => exclu.
 --   RG-QUA-01 : les transactions de montant nul sont exclues.
+--   RG-QUA-02 : seules les transactions de la fenêtre d'analyse (régime d'activité stable) sont retenues.
 
 with transactions as (
     select *
     from {{ ref('stg_paysim__transactions') }}
     where montant_paysim > 0
+      and est_periode_analyse
 ),
 
 filiales as (
@@ -91,7 +93,8 @@ jambe_emetteur as (
         ty.sens_jambe_emetteur                              as sens,
         v.montant_devise_emetteur                           as montant_devise,
         v.montant_eur,
-        v.code_filiale_beneficiaire is not null             as est_intragroupe
+        v.code_filiale_beneficiaire is not null             as est_intragroupe,
+        v.montant_eur >= {{ var('seuil_gros_ticket_eur') }} as est_gros_ticket
     from valorisees v
     join types ty on ty.code_type = v.code_type
 ),
@@ -109,7 +112,8 @@ jambe_beneficiaire as (
         1                                                   as sens,
         v.montant_eur * tb.taux_eur                         as montant_devise,
         v.montant_eur,
-        true                                                as est_intragroupe
+        true                                                as est_intragroupe,
+        v.montant_eur >= {{ var('seuil_gros_ticket_eur') }} as est_gros_ticket
     from valorisees v
     join types ty     on ty.code_type = v.code_type and ty.genere_jambe_beneficiaire
     join filiales fb  on fb.code_filiale = v.code_filiale_beneficiaire

@@ -89,16 +89,34 @@ models:
 
   # ------------------------------------------------------------------- analyses
   - name: mart_exposition_change
-    description: Exposition au risque de change par devise et VaR paramétrique 95 % (1 j et 10 j).
+    description: >
+      Exposition au risque de change par devise, VaR paramétrique 95 % (1 j et 10 j),
+      coût de couverture, rapport coût / risque et recommandation de couverture.
     columns:
       - name: id_exposition
         tests: [unique, not_null]
+      - name: recommandation_couverture
+        tests: [not_null]
 
   - name: mart_liquidite_placement
-    description: Besoin de liquidité à 30 j (LCR simplifié), liquidité excédentaire, refinancement, coût de couverture.
+    description: >
+      Ratio de liquidité Bâle III simplifié, consommation quotidienne, jours avant passage sous 100 %,
+      liquidité excédentaire / besoin de refinancement (par rapport au seuil de pilotage), coûts et gains.
     columns:
       - name: id_liquidite
         tests: [unique, not_null]
+      - name: ratio_couverture_liquidite_pct
+        tests: [not_null]
+      - name: jours_avant_seuil_100pct
+        description: 0 si le ratio est déjà sous 100 % ; NULL si la position ne baisse pas.
+
+  - name: mart_qualite_donnees
+    description: Profil quotidien de PaySim (volume, fraude, cohérence des soldes) et jours retenus / exclus.
+    columns:
+      - name: jour_simulation
+        tests: [unique, not_null]
+      - name: statut
+        tests: [not_null]
 
   - name: mart_stress_test
     description: Résultat des scénarios de stress par filiale à la date d'arrêté.

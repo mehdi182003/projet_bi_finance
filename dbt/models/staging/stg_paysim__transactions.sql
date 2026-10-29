@@ -1,6 +1,7 @@
 -- Nettoyage technique des logs PaySim : renommage en français, typage,
 -- conversion du step (heure de simulation) en date/heure réelle.
--- Aucune règle métier ici (elles sont dans la couche intermediate).
+-- Toutes les lignes sont conservées ; le drapeau est_periode_analyse (RG-QUA-02)
+-- est appliqué dans la couche intermediate.
 
 with source as (
     select * from {{ source('raw', 'paysim_transactions') }}
@@ -9,6 +10,8 @@ with source as (
 select
     id_ligne                                   as id_transaction,
     step                                       as step_heure,
+    (step - 1) / 24 + 1                        as jour_simulation,
+    step between {{ var('step_debut_analyse') }} and {{ var('step_fin_analyse') }} as est_periode_analyse,
     {{ heure_paysim('step') }}                 as horodatage,
     cast({{ heure_paysim('step') }} as date)   as date_operation,
     upper(trim(type))                          as code_type,

@@ -5,6 +5,10 @@
 --   RG-POS-02 : réserve de liquidité initiale = encours x taux de réserve de la filiale
 --               (ref_filiales.taux_reserve_liquidite_pct, hypothèse paramétrable).
 --   Montants convertis en devise locale au taux du premier jour (voir int_mouvements_tresorerie).
+--   LIMITE CONNUE : les soldes PaySim sont peu fiables (le montant dépasse le solde dans 88 % des
+--   retraits et 95 % des virements ; le solde est alors ramené à 0). 99,7 % des clients n'apparaissent
+--   qu'une fois : l'encours est donc la somme des soldes des clients actifs sur la fenêtre. L'ordre de
+--   grandeur est contrôlé par le test alerte_vraisemblance_encours (sorties / dépôts).
 
 with premiere_apparition as (
     select distinct on (id_client_emetteur)
@@ -12,6 +16,7 @@ with premiere_apparition as (
         solde_avant_emetteur
     from {{ ref('stg_paysim__transactions') }}
     where id_client_emetteur like 'C%'
+      and est_periode_analyse
     order by id_client_emetteur, step_heure, id_transaction
 ),
 

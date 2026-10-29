@@ -30,14 +30,18 @@ Le pipeline est **rejouable** : les tables brutes sont vidées puis rechargées,
 | RG-SEN-02 | Un virement intragroupe génère 2 jambes (débit émetteur, crédit bénéficiaire) | `int_mouvements_tresorerie` |
 | RG-SEN-03 | Un virement interne à une filiale est neutre → exclu | idem |
 | RG-QUA-01 | Transactions de montant nul exclues | idem |
+| RG-QUA-02 | Seule la fenêtre d'activité stable (steps 121 à 408 = jours 6 à 17) est retenue | `stg_paysim__transactions` (drapeau), `int_*` (filtre) |
 | RG-POS-01 | Encours initial = somme des soldes d'ouverture des clients à leur 1ʳᵉ apparition | `int_encours_initial` |
 | RG-POS-02 | Réserve initiale = encours × taux de réserve de la filiale | idem |
 | RG-POS-03/04 | Position et encours = valeur initiale + cumul des flux nets | `fct_position_tresorerie_quotidienne` |
 | RG-POS-05 | Position EUR réévaluée chaque jour ; effet de change = écart avec le cours du 1er jour | idem |
 | RG-RIS-01 | Volatilité = écart-type des 60 dernières variations publiées × √252 | `fct_taux_change` |
 | RG-RIS-02/03 | VaR 95 % = 1,645 × vol. quotidienne × exposition ; 10 j = × √10 | `mart_exposition_change` |
-| RG-LIQ-01 | Besoin 30 j = 10 % des dépôts + sorties nettes moyennes (7 j) × 30 | `mart_liquidite_placement` |
-| RG-LIQ-02..04 | Ratio = position / besoin ; excédent → gain au taux directeur ; déficit → coût au taux + 0,5 pt | idem |
+| RG-LIQ-01 (v2) | Besoin 30 j = 10 % des dépôts (Bâle III). La v1 y ajoutait la tendance des flux : double comptage, ratio figé sous 100 % | `mart_liquidite_placement` |
+| RG-LIQ-02..04 | Ratio = position / besoin ; excédent / déficit par rapport à la cible de pilotage de 110 % → gain au taux directeur / coût au taux + 0,5 pt | idem |
+| RG-LIQ-05 | Consommation quotidienne = − flux net moyen 7 j / position | idem |
+| RG-LIQ-06 | Jours avant 100 % = (position − besoin) / sortie nette moyenne | idem |
+| RG-COU-02 | Rapport coût / risque de la couverture = (taux local − taux BCE) / volatilité ; recommandation par devise | `mart_exposition_change` |
 | RG-COU-01 | Coût de couverture ≈ exposition × (taux local − taux BCE) (parité des taux d'intérêt) | idem |
 | RG-STR-01..05 | Chocs de change, de retraits, de sorties et de taux → horizon de survie | `mart_stress_test` |
 | RG-PRV-01 | Projection convertie en EUR au cours d'arrêté (change constant) | `mart_prevision_tresorerie` |
@@ -68,7 +72,7 @@ Flux du jour, `position_ouverture_devise`, `position_cloture_devise`, `position_
 
 Le dictionnaire complet et le graphe de lignage s'obtiennent avec `dbt docs generate && dbt docs serve`.
 
-## 4. Plan de tests (71 tests dbt)
+## 4. Plan de tests (78 tests dbt)
 
 | Famille | Exemples |
 |---|---|
@@ -76,4 +80,4 @@ Le dictionnaire complet et le graphe de lignage s'obtiennent avec `dbt docs gene
 | Intégrité référentielle | faits → `dim_date`, `dim_filiale`, `dim_type_transaction` |
 | Domaines de valeurs | types PaySim, sens ±1, statuts de résilience, bornes du step et des montants |
 | Métier | somme des poids = 100 % ; conservation des volumes (aucune transaction perdue) ; flux intragroupe équilibrés chaque jour ; taux disponibles sur toute la période |
-| Alerte (non bloquante) | rupture de série de change (RUB) |
+| Alertes (non bloquantes) | rupture de série de change (RUB) ; jour atypique dans la fenêtre d'analyse ; vraisemblance de l'encours (décaissements / dépôts entre 0,05 % et 5 % par jour) ; fraîcheur des cours BCE (> 10 jours) |

@@ -27,14 +27,16 @@ ETAPES = ["extract", "load", "dbt", "prevision", "dbt_prev"]
 log = logging.getLogger("cresus")
 
 
-def executer_dbt(*arguments: str) -> None:
+def executer_dbt(*arguments: str, bloquant: bool = True) -> None:
     executable = shutil.which("dbt")
     if not executable:
         raise SystemExit("dbt introuvable : pip install -r requirements.txt")
     commande = [executable, *arguments, "--profiles-dir", str(DOSSIER_DBT), "--project-dir", str(DOSSIER_DBT)]
     log.info("$ dbt %s", " ".join(arguments))
     if subprocess.run(commande, cwd=DOSSIER_DBT).returncode != 0:
-        raise SystemExit(f"Échec de 'dbt {' '.join(arguments)}' (voir le détail ci-dessus)")
+        if bloquant:
+            raise SystemExit(f"Échec de 'dbt {' '.join(arguments)}' (voir le détail ci-dessus)")
+        log.warning("'dbt %s' signale un problème (non bloquant)", " ".join(arguments))
 
 
 def main() -> None:
@@ -73,6 +75,7 @@ def main() -> None:
 
     if "dbt" in args.etapes:
         log.info("=== 3. TRANSFORM (dbt : seeds, modèles, tests) ===")
+        executer_dbt("source", "freshness", bloquant=False)   # alerte si l'export Webstat est ancien
         executer_dbt("build", "--exclude", "tag:prevision")
 
     if "prevision" in args.etapes:

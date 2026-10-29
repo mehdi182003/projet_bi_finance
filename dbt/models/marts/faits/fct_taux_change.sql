@@ -3,7 +3,9 @@
 --               annualisée par racine(252 jours ouvrés).
 
 with taux as (
-    select * from {{ ref('int_taux_change_journalier') }}
+    select date_cours, code_devise, regime_change, id_groupe_publication,
+           est_taux_publie, jours_depuis_publication, taux_eur
+    from {{ ref('int_taux_change_journalier') }}
 ),
 
 publies as (
@@ -29,7 +31,8 @@ volatilite as (
 
 jointe as (
     select
-        t.*,
+        t.date_cours, t.code_devise, t.regime_change, t.id_groupe_publication,
+        t.est_taux_publie, t.jours_depuis_publication, t.taux_eur,
         v.rendement_log,
         v.volatilite_quotidienne as volatilite_publiee
     from taux t
