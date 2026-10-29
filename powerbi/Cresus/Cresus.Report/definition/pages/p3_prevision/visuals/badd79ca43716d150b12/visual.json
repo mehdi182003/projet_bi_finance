@@ -1,0 +1,110 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "badd79ca43716d150b12",
+  "position": {
+    "x": 20,
+    "y": 140,
+    "z": 10000,
+    "width": 740,
+    "height": 560,
+    "tabOrder": 10000
+  },
+  "visual": {
+    "visualType": "lineChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_prevision_tresorerie"
+                    }
+                  },
+                  "Property": "date_jour"
+                }
+              },
+              "queryRef": "mart_prevision_tresorerie.date_jour",
+              "nativeQueryRef": "date_jour",
+              "displayName": "Date"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Position prévue P05 (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Position prévue P05 (EUR)",
+              "nativeQueryRef": "Position prévue P05 (EUR)",
+              "displayName": "P5 (pessimiste)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Position prévue P50 (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Position prévue P50 (EUR)",
+              "nativeQueryRef": "Position prévue P50 (EUR)",
+              "displayName": "P50 (médiane)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Position prévue P95 (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Position prévue P95 (EUR)",
+              "nativeQueryRef": "Position prévue P95 (EUR)",
+              "displayName": "P95 (optimiste)"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Position réalisée puis prévue : P5 / P50 / P95 (EUR)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

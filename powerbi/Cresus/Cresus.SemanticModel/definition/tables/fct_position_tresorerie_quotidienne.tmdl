@@ -1,0 +1,168 @@
+table fct_position_tresorerie_quotidienne
+	lineageTag: 3565b91f359549a5e5d8
+
+	column id_position
+		dataType: string
+		isHidden
+		lineageTag: 7088d40be00865b189d3
+		summarizeBy: none
+		sourceColumn: id_position
+
+	column date_position
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 54c2f266e9c136575c2d
+		summarizeBy: none
+		sourceColumn: date_position
+
+	column code_filiale
+		dataType: string
+		lineageTag: 7afe45e3d1889f7ad56d
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column code_devise
+		dataType: string
+		lineageTag: 046da72b68ba02d7f2e4
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column nb_mouvements
+		dataType: double
+		formatString: #,0
+		lineageTag: 4be1044c127f712ce626
+		summarizeBy: sum
+		sourceColumn: nb_mouvements
+
+	column encaissements_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 6572146674f9e100e50b
+		summarizeBy: sum
+		sourceColumn: encaissements_devise
+
+	column decaissements_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 196fc214fea75ea8f1cd
+		summarizeBy: sum
+		sourceColumn: decaissements_devise
+
+	column flux_net_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 7a43c613f4063c6acf07
+		summarizeBy: sum
+		sourceColumn: flux_net_devise
+
+	column encaissements_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 2924594078d1b1761f21
+		summarizeBy: sum
+		sourceColumn: encaissements_eur
+
+	column decaissements_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: d551f8fedc2deed4fbc0
+		summarizeBy: sum
+		sourceColumn: decaissements_eur
+
+	column flux_net_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 20492fb2aa90ac0601df
+		summarizeBy: sum
+		sourceColumn: flux_net_eur
+
+	column flux_net_intragroupe_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 78d526ce4ca9a52ad148
+		summarizeBy: sum
+		sourceColumn: flux_net_intragroupe_eur
+
+	column decaissements_frauduleux_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 238e085f35ed543c79af
+		summarizeBy: sum
+		sourceColumn: decaissements_frauduleux_eur
+
+	column decaissements_gros_tickets_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: b4c3ed84248700ef6640
+		summarizeBy: sum
+		sourceColumn: decaissements_gros_tickets_eur
+
+	column position_ouverture_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: fc68c9c26a55095093d0
+		summarizeBy: sum
+		sourceColumn: position_ouverture_devise
+
+	column position_cloture_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 8c52b6021485895489ae
+		summarizeBy: sum
+		sourceColumn: position_cloture_devise
+
+	column encours_depots_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 25af5c2ab79591a7cb57
+		summarizeBy: sum
+		sourceColumn: encours_depots_devise
+
+	column taux_eur_jour
+		dataType: double
+		lineageTag: afe96559890de146ae37
+		summarizeBy: none
+		sourceColumn: taux_eur_jour
+
+	column position_cloture_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 909954b82d2b1665422f
+		summarizeBy: sum
+		sourceColumn: position_cloture_eur
+
+	column position_cloture_eur_taux_constant
+		dataType: double
+		lineageTag: d595bb841b520145cd09
+		summarizeBy: none
+		sourceColumn: position_cloture_eur_taux_constant
+
+	column effet_change_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 5f6f12e24b09ac58357b
+		summarizeBy: sum
+		sourceColumn: effet_change_eur
+
+	column encours_depots_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 3d7a81863e4ac7b2a0d7
+		summarizeBy: sum
+		sourceColumn: encours_depots_eur
+
+	column ratio_reserve_sur_depots
+		dataType: double
+		lineageTag: 970cfc27534d824f6956
+		summarizeBy: none
+		sourceColumn: ratio_reserve_sur_depots
+
+	partition fct_position_tresorerie_quotidienne = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="fct_position_tresorerie_quotidienne"]}[Data]
+				in
+				    Donnees
+

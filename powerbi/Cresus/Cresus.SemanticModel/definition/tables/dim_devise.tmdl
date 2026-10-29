@@ -1,0 +1,60 @@
+table dim_devise
+	lineageTag: a4deb7cc3c918d20a6b6
+
+	column code_devise
+		dataType: string
+		lineageTag: 1e8ac085cee61040a5fa
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column libelle_devise
+		dataType: string
+		lineageTag: 1ec0157b84fba73b22b8
+		summarizeBy: none
+		sourceColumn: libelle_devise
+
+	column regime_change
+		dataType: string
+		lineageTag: 33d3400144fd2fa3d775
+		summarizeBy: none
+		sourceColumn: regime_change
+
+	column parite_fixe_par_eur
+		dataType: double
+		lineageTag: 1f03e9e931f5b770d11f
+		summarizeBy: none
+		sourceColumn: parite_fixe_par_eur
+
+	column banque_centrale
+		dataType: string
+		lineageTag: d4e354fbbb3dbc9d4a92
+		summarizeBy: none
+		sourceColumn: banque_centrale
+
+	column zone_monetaire
+		dataType: string
+		lineageTag: 9498eb256a6823902f92
+		summarizeBy: none
+		sourceColumn: zone_monetaire
+
+	column remarque
+		dataType: string
+		lineageTag: 9c2e2d62e69354378c51
+		summarizeBy: none
+		sourceColumn: remarque
+
+	column a_une_filiale
+		dataType: boolean
+		lineageTag: b7f654bf95d2a8a9c299
+		summarizeBy: none
+		sourceColumn: a_une_filiale
+
+	partition dim_devise = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="dim_devise"]}[Data]
+				in
+				    Donnees
+

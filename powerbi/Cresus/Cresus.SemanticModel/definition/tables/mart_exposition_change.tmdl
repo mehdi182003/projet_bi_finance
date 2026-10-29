@@ -1,0 +1,116 @@
+table mart_exposition_change
+	lineageTag: fc9f3d1ae03aa1679828
+
+	column id_exposition
+		dataType: string
+		isHidden
+		lineageTag: 4c18cd14ce9d7d9dc3aa
+		summarizeBy: none
+		sourceColumn: id_exposition
+
+	column date_position
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 521e33510fddee729982
+		summarizeBy: none
+		sourceColumn: date_position
+
+	column code_devise
+		dataType: string
+		lineageTag: d8b0195e184e1030cdd6
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column regime_change
+		dataType: string
+		lineageTag: d462882bb512b5c683f8
+		summarizeBy: none
+		sourceColumn: regime_change
+
+	column position_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 49a707bc9a348507e6e2
+		summarizeBy: sum
+		sourceColumn: position_devise
+
+	column exposition_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: ad6b7765509087f8d092
+		summarizeBy: sum
+		sourceColumn: exposition_eur
+
+	column effet_change_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 5555a0a2bd40b2e6c368
+		summarizeBy: sum
+		sourceColumn: effet_change_eur
+
+	column part_position_groupe_pct
+		dataType: double
+		lineageTag: a76fa6e6e26486d5a3a6
+		summarizeBy: none
+		sourceColumn: part_position_groupe_pct
+
+	column taux_eur
+		dataType: double
+		lineageTag: d856a4dae36318c484a6
+		summarizeBy: none
+		sourceColumn: taux_eur
+
+	column volatilite_annualisee_pct
+		dataType: double
+		lineageTag: c19c71dc6ea0d943cf78
+		summarizeBy: none
+		sourceColumn: volatilite_annualisee_pct
+
+	column var_95_1j_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 8281547f1297966a072f
+		summarizeBy: sum
+		sourceColumn: var_95_1j_eur
+
+	column var_95_10j_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 65226543e84b10b94e0e
+		summarizeBy: sum
+		sourceColumn: var_95_10j_eur
+
+	column cout_couverture_annuel_pct
+		dataType: double
+		lineageTag: 368190a8548632600d2e
+		summarizeBy: none
+		sourceColumn: cout_couverture_annuel_pct
+
+	column cout_couverture_annuel_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: bcf41facf1831d0c003d
+		summarizeBy: sum
+		sourceColumn: cout_couverture_annuel_eur
+
+	column rapport_cout_risque
+		dataType: double
+		lineageTag: 80ff3000caba8639f118
+		summarizeBy: none
+		sourceColumn: rapport_cout_risque
+
+	column recommandation_couverture
+		dataType: string
+		lineageTag: cd3833b0fd226d25506c
+		summarizeBy: none
+		sourceColumn: recommandation_couverture
+
+	partition mart_exposition_change = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_exposition_change"]}[Data]
+				in
+				    Donnees
+

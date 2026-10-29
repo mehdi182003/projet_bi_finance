@@ -1,0 +1,121 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "c95b9344e2dd55c03ed6",
+  "position": {
+    "x": 780,
+    "y": 140,
+    "z": 11000,
+    "width": 480,
+    "height": 330,
+    "tabOrder": 11000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_prevision"
+                    }
+                  },
+                  "Property": "code_filiale"
+                }
+              },
+              "queryRef": "mart_qualite_prevision.code_filiale",
+              "nativeQueryRef": "code_filiale",
+              "displayName": "Filiale"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_prevision"
+                    }
+                  },
+                  "Property": "serie"
+                }
+              },
+              "queryRef": "mart_qualite_prevision.serie",
+              "nativeQueryRef": "serie",
+              "displayName": "Série"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_prevision"
+                    }
+                  },
+                  "Property": "modele"
+                }
+              },
+              "queryRef": "mart_qualite_prevision.modele",
+              "nativeQueryRef": "modele",
+              "displayName": "Modèle"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_prevision"
+                    }
+                  },
+                  "Property": "est_champion"
+                }
+              },
+              "queryRef": "mart_qualite_prevision.est_champion",
+              "nativeQueryRef": "est_champion",
+              "displayName": "Champion"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_prevision"
+                    }
+                  },
+                  "Property": "wape_pct"
+                }
+              },
+              "queryRef": "mart_qualite_prevision.wape_pct",
+              "nativeQueryRef": "wape_pct",
+              "displayName": "WAPE %"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Backtest : précision des modèles'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

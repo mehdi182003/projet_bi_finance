@@ -1,0 +1,68 @@
+table mart_prevision_change
+	lineageTag: bb5ec95bb79b0729127e
+
+	column id_prevision_change
+		dataType: string
+		isHidden
+		lineageTag: 1ae8bbb9923a42507c6d
+		summarizeBy: none
+		sourceColumn: id_prevision_change
+
+	column date_jour
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 346dff27a5843b0f3a27
+		summarizeBy: none
+		sourceColumn: date_jour
+
+	column code_devise
+		dataType: string
+		lineageTag: 358b914ed5b42e02bd67
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column type_valeur
+		dataType: string
+		lineageTag: 18ca3f898d0cc20d1aa0
+		summarizeBy: none
+		sourceColumn: type_valeur
+
+	column taux_p50
+		dataType: double
+		lineageTag: 07fc7d8d6078200cae9c
+		summarizeBy: none
+		sourceColumn: taux_p50
+
+	column taux_p05
+		dataType: double
+		lineageTag: 8c2aaafa217af1613dab
+		summarizeBy: none
+		sourceColumn: taux_p05
+
+	column taux_p95
+		dataType: double
+		lineageTag: d9d4797506eac05696a6
+		summarizeBy: none
+		sourceColumn: taux_p95
+
+	column taux_realise
+		dataType: double
+		lineageTag: dc26ac5852b31d5e3f16
+		summarizeBy: none
+		sourceColumn: taux_realise
+
+	column realise_dans_intervalle_90
+		dataType: boolean
+		lineageTag: 1caadb0550003b89e691
+		summarizeBy: none
+		sourceColumn: realise_dans_intervalle_90
+
+	partition mart_prevision_change = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_prevision_change"]}[Data]
+				in
+				    Donnees
+

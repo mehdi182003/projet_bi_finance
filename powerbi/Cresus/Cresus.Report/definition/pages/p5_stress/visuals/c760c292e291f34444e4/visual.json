@@ -1,0 +1,104 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "c760c292e291f34444e4",
+  "position": {
+    "x": 600,
+    "y": 200,
+    "z": 11000,
+    "width": 660,
+    "height": 500,
+    "tabOrder": 11000
+  },
+  "visual": {
+    "visualType": "pivotTable",
+    "query": {
+      "queryState": {
+        "Rows": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_scenario_stress"
+                    }
+                  },
+                  "Property": "libelle_scenario"
+                }
+              },
+              "queryRef": "dim_scenario_stress.libelle_scenario",
+              "nativeQueryRef": "libelle_scenario",
+              "displayName": "Scénario"
+            }
+          ]
+        },
+        "Columns": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_filiale"
+                    }
+                  },
+                  "Property": "code_filiale"
+                }
+              },
+              "queryRef": "dim_filiale.code_filiale",
+              "nativeQueryRef": "code_filiale",
+              "displayName": "Filiale"
+            }
+          ]
+        },
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "mart_stress_test"
+                        }
+                      },
+                      "Property": "horizon_survie_jours"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(mart_stress_test.horizon_survie_jours)",
+              "nativeQueryRef": "Somme de horizon_survie_jours",
+              "displayName": "Jours"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Scénarios historiques : horizon de survie (jours)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

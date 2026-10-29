@@ -1,0 +1,64 @@
+table mart_backtest_journalier
+	lineageTag: 62f536e10cae72d02077
+
+	column id_backtest
+		dataType: string
+		isHidden
+		lineageTag: f3e6c6f1a2f41671e609
+		summarizeBy: none
+		sourceColumn: id_backtest
+
+	column code_filiale
+		dataType: string
+		lineageTag: 14c1f1e0d703eedd80f5
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column serie
+		dataType: string
+		lineageTag: bf98957b944717637879
+		summarizeBy: none
+		sourceColumn: serie
+
+	column modele
+		dataType: string
+		lineageTag: d7033602fe49160c2314
+		summarizeBy: none
+		sourceColumn: modele
+
+	column est_champion
+		dataType: boolean
+		lineageTag: 762cce2f5f73c3be1cb6
+		summarizeBy: none
+		sourceColumn: est_champion
+
+	column date_jour
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 253dda0659e587900d20
+		summarizeBy: none
+		sourceColumn: date_jour
+
+	column reel_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 4e15b6cb711eb4fc1445
+		summarizeBy: sum
+		sourceColumn: reel_devise
+
+	column prevu_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 8978b638a693980a1d8a
+		summarizeBy: sum
+		sourceColumn: prevu_devise
+
+	partition mart_backtest_journalier = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_backtest_journalier"]}[Data]
+				in
+				    Donnees
+

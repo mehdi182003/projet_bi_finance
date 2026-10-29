@@ -1,0 +1,121 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "d84e74e5fed5f9ce0f58",
+  "position": {
+    "x": 780,
+    "y": 330,
+    "z": 31000,
+    "width": 480,
+    "height": 370,
+    "tabOrder": 31000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_filiale"
+                    }
+                  },
+                  "Property": "nom_filiale"
+                }
+              },
+              "queryRef": "dim_filiale.nom_filiale",
+              "nativeQueryRef": "nom_filiale",
+              "displayName": "Filiale"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Ratio de couverture liquidité %"
+                }
+              },
+              "queryRef": "_Mesures.Ratio de couverture liquidité %",
+              "nativeQueryRef": "Ratio de couverture liquidité %",
+              "displayName": "Ratio"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Jours avant passage sous 100 %"
+                }
+              },
+              "queryRef": "_Mesures.Jours avant passage sous 100 %",
+              "nativeQueryRef": "Jours avant passage sous 100 %",
+              "displayName": "Jours avant 100 %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Liquidité excédentaire (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Liquidité excédentaire (EUR)",
+              "nativeQueryRef": "Liquidité excédentaire (EUR)",
+              "displayName": "Excédent"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Besoin de refinancement (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Besoin de refinancement (EUR)",
+              "nativeQueryRef": "Besoin de refinancement (EUR)",
+              "displayName": "Refinancement"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Liquidité par filiale à la date d''arrêté'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

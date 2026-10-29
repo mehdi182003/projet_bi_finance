@@ -1,0 +1,124 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "962204009a4bbb7674b8",
+  "position": {
+    "x": 780,
+    "y": 480,
+    "z": 12000,
+    "width": 480,
+    "height": 220,
+    "tabOrder": 12000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_backtest_journalier"
+                    }
+                  },
+                  "Property": "date_jour"
+                }
+              },
+              "queryRef": "mart_backtest_journalier.date_jour",
+              "nativeQueryRef": "date_jour",
+              "displayName": "Date"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "mart_backtest_journalier"
+                        }
+                      },
+                      "Property": "reel_devise"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(mart_backtest_journalier.reel_devise)",
+              "nativeQueryRef": "Somme de reel_devise",
+              "displayName": "Réel"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "mart_backtest_journalier"
+                        }
+                      },
+                      "Property": "prevu_devise"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(mart_backtest_journalier.prevu_devise)",
+              "nativeQueryRef": "Somme de prevu_devise",
+              "displayName": "Prévu"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_backtest_journalier"
+                    }
+                  },
+                  "Property": "modele"
+                }
+              },
+              "queryRef": "mart_backtest_journalier.modele",
+              "nativeQueryRef": "modele",
+              "displayName": "Modèle"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Réel vs prévu (choisir une filiale)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

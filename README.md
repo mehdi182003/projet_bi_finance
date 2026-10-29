@@ -71,7 +71,7 @@ Puis :
 ```powershell
 cd dbt ; dbt docs generate --profiles-dir . ; dbt docs serve --profiles-dir .   # lignage + dictionnaire (idéal en soutenance)
 ```
-Et ouvrir Power BI en suivant [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md).
+Et ouvrir `powerbi/Cresus/Cresus.pbip` dans Power BI Desktop (détails : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md)).
 
 ---
 
@@ -160,7 +160,7 @@ Ce que nous avons appris en route (à raconter en soutenance) : notre premier mo
 → Détail : [docs/03_analyse_predictive_et_simulation.md](docs/03_analyse_predictive_et_simulation.md)
 
 ### Étape 7 — Restitution Power BI
-Six pages : Cockpit DAF · Flux · Prévisions · Change & couverture · Simulateur de stress · Qualité des données. Les mesures DAX sont prêtes à coller ([powerbi/mesures_dax.dax](powerbi/mesures_dax.dax)), ainsi qu'un thème ([powerbi/theme_cresus.json](powerbi/theme_cresus.json)).
+Le rapport est **déjà construit** : ouvrir `powerbi/Cresus/Cresus.pbip` avec Power BI Desktop puis *Actualiser*. Six pages : Cockpit DAF · Flux · Prévisions · Change & couverture · Simulateur de stress · Qualité des données. Le modèle (57 mesures DAX, What-if) a été validé par la bibliothèque Microsoft et les fichiers du rapport par les schémas officiels.
 → Guide de construction pas à pas : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md)
 
 ### Étape 8 — Synthèse, SWOT et recommandations
@@ -209,7 +209,8 @@ erDiagram
 │   ├── tests/                  tests métier
 │   └── macros/                 hachage, conversion d'horodatage, tests génériques
 ├── data/sources/               export Webstat (versionné)
-├── powerbi/                    mesures DAX + thème
+├── powerbi/Cresus/             projet Power BI prêt à ouvrir (Cresus.pbip)
+├── powerbi/                    générateur du projet, mesures DAX, thème
 └── docs/                       livrables AMOA / MOE
 ```
 

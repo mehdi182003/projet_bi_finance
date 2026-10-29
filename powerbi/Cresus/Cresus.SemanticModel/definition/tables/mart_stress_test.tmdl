@@ -1,0 +1,140 @@
+table mart_stress_test
+	lineageTag: 29fe92e2d005ad21a555
+
+	column id_stress
+		dataType: string
+		isHidden
+		lineageTag: 48b6eee487a4c748dedc
+		summarizeBy: none
+		sourceColumn: id_stress
+
+	column date_arrete
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: e5089306abfb76e22221
+		summarizeBy: none
+		sourceColumn: date_arrete
+
+	column code_scenario
+		dataType: string
+		lineageTag: 14a304b1b324c9ddb4f5
+		summarizeBy: none
+		sourceColumn: code_scenario
+
+	column libelle_scenario
+		dataType: string
+		lineageTag: cf7078e41f6318bdce67
+		summarizeBy: none
+		sourceColumn: libelle_scenario
+
+	column ordre_affichage
+		dataType: int64
+		lineageTag: 67adb4308b4aa9c6d217
+		summarizeBy: none
+		sourceColumn: ordre_affichage
+
+	column code_filiale
+		dataType: string
+		lineageTag: fc95f9d575ba3ea86296
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column code_devise
+		dataType: string
+		lineageTag: c7ccd6ceaf93c05c242a
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column choc_retraits_pct
+		dataType: double
+		lineageTag: 7066d31a1f87d703308f
+		summarizeBy: none
+		sourceColumn: choc_retraits_pct
+
+	column choc_change_pct
+		dataType: double
+		lineageTag: 9b573fefe95f351e859e
+		summarizeBy: none
+		sourceColumn: choc_change_pct
+
+	column choc_taux_bp
+		dataType: double
+		lineageTag: 77e8415bc6b3999f785e
+		summarizeBy: none
+		sourceColumn: choc_taux_bp
+
+	column multiplicateur_sorties
+		dataType: double
+		lineageTag: 466258182dd17594d290
+		summarizeBy: none
+		sourceColumn: multiplicateur_sorties
+
+	column position_avant_choc_eur
+		dataType: double
+		lineageTag: 5772401805323e405d38
+		summarizeBy: none
+		sourceColumn: position_avant_choc_eur
+
+	column impact_change_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: d22846f8789ea2a66a03
+		summarizeBy: sum
+		sourceColumn: impact_change_eur
+
+	column impact_retraits_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 553477c3aaf7adf2154a
+		summarizeBy: sum
+		sourceColumn: impact_retraits_eur
+
+	column position_stressee_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 7226aacdeebeb90c1adf
+		summarizeBy: sum
+		sourceColumn: position_stressee_eur
+
+	column flux_net_quotidien_stresse_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 811649bbd103c4cda1d6
+		summarizeBy: sum
+		sourceColumn: flux_net_quotidien_stresse_eur
+
+	column horizon_survie_jours
+		dataType: double
+		lineageTag: 82d96aaae3513c3c7bc4
+		summarizeBy: none
+		sourceColumn: horizon_survie_jours
+
+	column besoin_refinancement_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: db2bc185d7f7d45dfecc
+		summarizeBy: sum
+		sourceColumn: besoin_refinancement_eur
+
+	column cout_refinancement_annuel_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 5de9e9e312d18b95a43d
+		summarizeBy: sum
+		sourceColumn: cout_refinancement_annuel_eur
+
+	column statut_resilience
+		dataType: string
+		lineageTag: f3a5b65ea718bd53214d
+		summarizeBy: none
+		sourceColumn: statut_resilience
+
+	partition mart_stress_test = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_stress_test"]}[Data]
+				in
+				    Donnees
+

@@ -1,0 +1,87 @@
+table fct_taux_change
+	lineageTag: d2603d738b45c30ab24c
+
+	column id_taux
+		dataType: string
+		isHidden
+		lineageTag: d5e30acade8948e94c1c
+		summarizeBy: none
+		sourceColumn: id_taux
+
+	column date_cours
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 81e1656c0f7d82d17f75
+		summarizeBy: none
+		sourceColumn: date_cours
+
+	column code_devise
+		dataType: string
+		lineageTag: 66ac09d7a5c4d11d566f
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column regime_change
+		dataType: string
+		lineageTag: 34e872ebaf4053294dc7
+		summarizeBy: none
+		sourceColumn: regime_change
+
+	column taux_eur
+		dataType: double
+		lineageTag: b5237d4b583be70a60f3
+		summarizeBy: none
+		sourceColumn: taux_eur
+
+	column valeur_eur_par_unite
+		dataType: double
+		formatString: #,0
+		lineageTag: 33efacb9c2b17bc4f755
+		summarizeBy: sum
+		sourceColumn: valeur_eur_par_unite
+
+	column est_taux_publie
+		dataType: boolean
+		lineageTag: 5b62a17b365f59aaf0e0
+		summarizeBy: none
+		sourceColumn: est_taux_publie
+
+	column jours_depuis_publication
+		dataType: int64
+		lineageTag: 238dc909967d0f2278ca
+		summarizeBy: none
+		sourceColumn: jours_depuis_publication
+
+	column variation_jour_pct
+		dataType: double
+		lineageTag: 68b31a63269d7e55d2a2
+		summarizeBy: none
+		sourceColumn: variation_jour_pct
+
+	column volatilite_quotidienne
+		dataType: double
+		lineageTag: e8687d14cd2785b2e6bd
+		summarizeBy: none
+		sourceColumn: volatilite_quotidienne
+
+	column volatilite_annualisee_pct
+		dataType: double
+		lineageTag: e4ab6f890e91a83b3dc1
+		summarizeBy: none
+		sourceColumn: volatilite_annualisee_pct
+
+	column est_rupture_serie
+		dataType: boolean
+		lineageTag: 46d9649b27f0f125dafc
+		summarizeBy: none
+		sourceColumn: est_rupture_serie
+
+	partition fct_taux_change = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="fct_taux_change"]}[Data]
+				in
+				    Donnees
+

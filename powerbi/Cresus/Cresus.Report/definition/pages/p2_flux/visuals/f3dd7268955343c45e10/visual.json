@@ -1,0 +1,79 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "f3dd7268955343c45e10",
+  "position": {
+    "x": 20,
+    "y": 430,
+    "z": 11000,
+    "width": 740,
+    "height": 270,
+    "tabOrder": 11000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "fct_flux_tresorerie_horaire"
+                    }
+                  },
+                  "Property": "heure"
+                }
+              },
+              "queryRef": "fct_flux_tresorerie_horaire.heure",
+              "nativeQueryRef": "heure",
+              "displayName": "Heure"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Solde net (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Solde net (EUR)",
+              "nativeQueryRef": "Solde net (EUR)"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Profil horaire du solde net (EUR)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

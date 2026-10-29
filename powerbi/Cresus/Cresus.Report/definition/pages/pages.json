@@ -1,0 +1,12 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/pagesMetadata/1.0.0/schema.json",
+  "pageOrder": [
+    "p1_cockpit",
+    "p2_flux",
+    "p3_prevision",
+    "p4_change",
+    "p5_stress",
+    "p6_qualite"
+  ],
+  "activePageName": "p1_cockpit"
+}

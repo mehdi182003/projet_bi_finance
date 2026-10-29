@@ -1,0 +1,23 @@
+{
+  "name": "Crésus - ZF Banque",
+  "dataColors": ["#1F4E79", "#2E86AB", "#F18F01", "#6A994E", "#A23B72", "#5C677D", "#C73E1D", "#3B8EA5"],
+  "background": "#FFFFFF",
+  "foreground": "#1B1F24",
+  "tableAccent": "#1F4E79",
+  "good": "#1B7F3B",
+  "neutral": "#C77700",
+  "bad": "#B42318",
+  "maximum": "#1F4E79",
+  "center": "#F2F4F7",
+  "minimum": "#B42318",
+  "textClasses": {
+    "title": {"fontFace": "Segoe UI Semibold", "fontSize": 14, "color": "#1B1F24"},
+    "header": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#1B1F24"},
+    "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": "#475467"},
+    "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 26, "color": "#1F4E79"}
+  },
+  "visualStyles": {
+    "*": {"*": {"border": [{"show": false}], "background": [{"show": true, "transparency": 0}]}},
+    "page": {"*": {"background": [{"color": {"solid": {"color": "#F5F7FA"}}, "transparency": 0}]}}
+  }
+}

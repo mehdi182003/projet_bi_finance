@@ -1,0 +1,101 @@
+table mart_qualite_prevision
+	lineageTag: b2050f6613f757b7e260
+
+	column id_qualite
+		dataType: string
+		isHidden
+		lineageTag: a08431d3f5abda94c499
+		summarizeBy: none
+		sourceColumn: id_qualite
+
+	column code_filiale
+		dataType: string
+		lineageTag: aceacca5059cd36d2f58
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column serie
+		dataType: string
+		lineageTag: c744ac7928ec2cca84c4
+		summarizeBy: none
+		sourceColumn: serie
+
+	column modele
+		dataType: string
+		lineageTag: cde81c95863b0f06a2a7
+		summarizeBy: none
+		sourceColumn: modele
+
+	column est_champion
+		dataType: boolean
+		lineageTag: 7fea4081ea4fded46784
+		summarizeBy: none
+		sourceColumn: est_champion
+
+	column est_divergent
+		dataType: boolean
+		lineageTag: f511b87d9733015c3b9b
+		summarizeBy: none
+		sourceColumn: est_divergent
+
+	column nb_jours_testes
+		dataType: int64
+		lineageTag: 8b835922450bd8874edd
+		summarizeBy: none
+		sourceColumn: nb_jours_testes
+
+	column debut_test
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 01259facc4e5dbe95a68
+		summarizeBy: none
+		sourceColumn: debut_test
+
+	column fin_test
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 1f810d472b36479bb3bf
+		summarizeBy: none
+		sourceColumn: fin_test
+
+	column total_reel_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: ded2fe39a0dd139c47b8
+		summarizeBy: sum
+		sourceColumn: total_reel_devise
+
+	column total_prevu_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: a32dcc58210f68199365
+		summarizeBy: sum
+		sourceColumn: total_prevu_devise
+
+	column wape_pct
+		dataType: double
+		lineageTag: 3c22271e6018a6184d45
+		summarizeBy: none
+		sourceColumn: wape_pct
+
+	column mape_pct
+		dataType: double
+		lineageTag: 6b85c5dbe4e3a5e9065f
+		summarizeBy: none
+		sourceColumn: mape_pct
+
+	column biais_pct
+		dataType: double
+		lineageTag: 8d1428a92632d20c461f
+		summarizeBy: none
+		sourceColumn: biais_pct
+
+	partition mart_qualite_prevision = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_qualite_prevision"]}[Data]
+				in
+				    Donnees
+

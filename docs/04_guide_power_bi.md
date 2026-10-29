@@ -1,6 +1,20 @@
-# 04 — Guide de construction du cockpit Power BI
+# 04 — Cockpit Power BI
 
-> Le fichier `.pbix` se construit dans Power BI Desktop (Windows) en suivant ce guide (environ 1 h à 1 h 30). Toutes les mesures sont prêtes dans `powerbi/mesures_dax.dax`.
+## Option A (recommandée) : ouvrir le projet déjà construit
+
+Le rapport complet est fourni au format **projet Power BI (`.pbip`)** dans `powerbi/Cresus/` :
+modèle de données (22 tables, 21 relations, 57 mesures DAX, paramètres What-if) et 6 pages de visuels.
+
+1. Lancer le pipeline (`python pipeline.py`) pour remplir le schéma `marts` de PostgreSQL.
+2. Ouvrir **Power BI Desktop** (version de mi-2025 ou plus récente) → *Fichier → Ouvrir* → `powerbi/Cresus/Cresus.pbip`.
+   - Si Power BI refuse le fichier (version plus ancienne) : *Fichier → Options → Fonctionnalités en préversion* → cocher « Option d'enregistrement de projet Power BI (.pbip) », « Stocker le modèle sémantique au format TMDL » et « Stocker les rapports au format PBIR », puis redémarrer.
+3. *Accueil → Actualiser*. Aux identifiants demandés pour PostgreSQL, choisir l'onglet **Base de données** : `postgres` / `postgres`. En cas d'erreur de chiffrement, décocher « Chiffrer les connexions » (voir § 1).
+4. Si la base n'est pas sur `localhost:5432` / `cresus` : *Transformer les données → Modifier les paramètres* (`ServeurPostgres`, `BasePostgres`).
+5. Pour garder une copie en un seul fichier : *Fichier → Enregistrer sous → .pbix*.
+
+Comment le projet a été produit et vérifié (à mentionner en soutenance) : `powerbi/generer_pbip.py` lit la structure réelle des tables dans PostgreSQL, construit le modèle, puis le fait **valider et convertir au format TMDL par la bibliothèque officielle Microsoft** (Analysis Services TOM, outil `powerbi/outils/TomTool`). Les 59 fichiers du rapport sont validés contre les **schémas JSON publiés par Microsoft**. Un contrôle croisé vérifie enfin que chaque champ des visuels et chaque référence DAX existent dans le modèle. Limite : Power BI Desktop ne tournant que sous Windows, le projet n'a pas pu être ouvert dans Power BI pendant sa génération ; s'il signale un problème à l'ouverture, l'option B permet de reconstruire la page concernée à la main.
+
+Les sections ci-dessous décrivent le contenu du rapport. Elles servent aussi de **guide pour le reconstruire à la main (option B)**.
 
 ## 1. Connexion à PostgreSQL
 1. Lancer le pipeline (`python pipeline.py`) : le schéma `marts` doit être rempli.

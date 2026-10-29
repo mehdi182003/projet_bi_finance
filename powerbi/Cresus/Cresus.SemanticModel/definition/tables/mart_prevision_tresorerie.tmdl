@@ -1,0 +1,99 @@
+table mart_prevision_tresorerie
+	lineageTag: 792ab2d62a993886aef9
+
+	column id_prevision
+		dataType: string
+		isHidden
+		lineageTag: 4cccf0073f6a539432b6
+		summarizeBy: none
+		sourceColumn: id_prevision
+
+	column date_jour
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: afd6823cbe92a6007d02
+		summarizeBy: none
+		sourceColumn: date_jour
+
+	column code_filiale
+		dataType: string
+		lineageTag: 4a979b41983ce852dd3d
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column code_devise
+		dataType: string
+		lineageTag: dd88bfe6fcbc6183d7d0
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column type_valeur
+		dataType: string
+		lineageTag: f73e0c743c5cffeffa69
+		summarizeBy: none
+		sourceColumn: type_valeur
+
+	column position_p50_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 951a9808bbba2a75433f
+		summarizeBy: sum
+		sourceColumn: position_p50_devise
+
+	column position_p05_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 210cd4c0ccc77faf95c3
+		summarizeBy: sum
+		sourceColumn: position_p05_devise
+
+	column position_p95_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 3782297329ad18984b8d
+		summarizeBy: sum
+		sourceColumn: position_p95_devise
+
+	column position_p50_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 335589fc448ef05c65e3
+		summarizeBy: sum
+		sourceColumn: position_p50_eur
+
+	column position_p05_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: b4b6c677184d793025a8
+		summarizeBy: sum
+		sourceColumn: position_p05_eur
+
+	column position_p95_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 57829574a36e47494373
+		summarizeBy: sum
+		sourceColumn: position_p95_eur
+
+	column flux_net_p50_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: ee338621e17701962b9b
+		summarizeBy: sum
+		sourceColumn: flux_net_p50_eur
+
+	column proba_sous_besoin_liquidite
+		dataType: double
+		lineageTag: 9fbd9f5ed02e251f23ac
+		summarizeBy: none
+		sourceColumn: proba_sous_besoin_liquidite
+
+	partition mart_prevision_tresorerie = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_prevision_tresorerie"]}[Data]
+				in
+				    Donnees
+

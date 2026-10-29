@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Cresus"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "76e95fe2-0783-44ea-36c2-000000000000"
+  }
+}

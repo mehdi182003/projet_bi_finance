@@ -1,0 +1,35 @@
+model Model
+	culture: fr-FR
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: fr-FR
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table dim_date
+ref table dim_filiale
+ref table dim_devise
+ref table dim_type_transaction
+ref table dim_scenario_stress
+ref table fct_flux_tresorerie_horaire
+ref table fct_position_tresorerie_quotidienne
+ref table fct_taux_change
+ref table mart_exposition_change
+ref table mart_liquidite_placement
+ref table mart_stress_test
+ref table mart_prevision_tresorerie
+ref table mart_prevision_change
+ref table mart_qualite_prevision
+ref table mart_backtest_journalier
+ref table mart_qualite_donnees
+ref table _Mesures
+ref table 'Choc retraits %'
+ref table 'Choc change %'
+ref table 'Multiplicateur sorties'
+ref table 'Choc taux (pb)'
+ref table 'Devises choquées'
+

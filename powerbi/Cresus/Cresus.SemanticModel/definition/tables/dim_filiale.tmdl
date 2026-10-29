@@ -1,0 +1,100 @@
+table dim_filiale
+	lineageTag: 1856f97f2cbab0044a41
+
+	column code_filiale
+		dataType: string
+		lineageTag: 09a65253537963ffa34c
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column nom_filiale
+		dataType: string
+		lineageTag: cbc1ba550636c4991130
+		summarizeBy: none
+		sourceColumn: nom_filiale
+
+	column pays
+		dataType: string
+		lineageTag: 93590baf7e0de282e0df
+		dataCategory: Country
+		summarizeBy: none
+		sourceColumn: pays
+
+	column code_pays_iso
+		dataType: string
+		lineageTag: 96fc8eb2d0fea824835b
+		summarizeBy: none
+		sourceColumn: code_pays_iso
+
+	column region
+		dataType: string
+		lineageTag: d803248cac28fc0366f0
+		summarizeBy: none
+		sourceColumn: region
+
+	column code_devise
+		dataType: string
+		lineageTag: 160c0e77e588bc34b9e2
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column libelle_devise
+		dataType: string
+		lineageTag: 2cddbedde795c08e73af
+		summarizeBy: none
+		sourceColumn: libelle_devise
+
+	column regime_change
+		dataType: string
+		lineageTag: 40c78378984ed8d4c617
+		summarizeBy: none
+		sourceColumn: regime_change
+
+	column poids_clientele_pct
+		dataType: double
+		lineageTag: ad5ef1df7cbb767ef115
+		summarizeBy: none
+		sourceColumn: poids_clientele_pct
+
+	column taux_reserve_liquidite_pct
+		dataType: double
+		lineageTag: 24aab0f21fb788653849
+		summarizeBy: none
+		sourceColumn: taux_reserve_liquidite_pct
+
+	column ordre_affichage
+		dataType: int64
+		lineageTag: 7f05edb0232e269f327b
+		summarizeBy: none
+		sourceColumn: ordre_affichage
+
+	column nb_clients
+		dataType: int64
+		formatString: #,0
+		lineageTag: f69fd98607b707d09a36
+		summarizeBy: sum
+		sourceColumn: nb_clients
+
+	column encours_depots_initial_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: d11290c9f3d6c99ad024
+		summarizeBy: sum
+		sourceColumn: encours_depots_initial_devise
+
+	column reserve_liquidite_initiale_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 910d8f6f45353f62dcb8
+		summarizeBy: sum
+		sourceColumn: reserve_liquidite_initiale_devise
+
+	partition dim_filiale = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="dim_filiale"]}[Data]
+				in
+				    Donnees
+

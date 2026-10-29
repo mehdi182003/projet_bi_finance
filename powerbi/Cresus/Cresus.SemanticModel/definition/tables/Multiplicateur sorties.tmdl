@@ -1,0 +1,24 @@
+table 'Multiplicateur sorties'
+	lineageTag: 6fcaa3518d4bfd86d8f9
+
+	measure 'Valeur Multiplicateur sorties' = SELECTEDVALUE('Multiplicateur sorties'[Multiplicateur sorties], 1)
+		formatString: 0.0
+		lineageTag: adbf62e388e2ded0d6ce
+
+	column 'Multiplicateur sorties'
+		dataType: double
+		formatString: 0.0
+		lineageTag: 01b1aa1b068e8dd9e51d
+		summarizeBy: none
+		isDataTypeInferred
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+	partition 'Multiplicateur sorties' = calculated
+		mode: import
+		source = GENERATESERIES(1, 3, 0.1)
+

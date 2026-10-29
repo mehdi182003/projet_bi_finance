@@ -1,0 +1,151 @@
+table mart_liquidite_placement
+	lineageTag: ab95f05ad3145fc2ba67
+
+	column id_liquidite
+		dataType: string
+		isHidden
+		lineageTag: 357a425313789f73ee61
+		summarizeBy: none
+		sourceColumn: id_liquidite
+
+	column date_position
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: dd21d625aa879f8563f3
+		summarizeBy: none
+		sourceColumn: date_position
+
+	column code_filiale
+		dataType: string
+		lineageTag: 9c7c112abd8d20a8d1e3
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column code_devise
+		dataType: string
+		lineageTag: 9b65a5c0db771a9b4849
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column regime_change
+		dataType: string
+		lineageTag: 6455a85c564b907896ef
+		summarizeBy: none
+		sourceColumn: regime_change
+
+	column position_cloture_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: b78365e0dcc2095fe338
+		summarizeBy: sum
+		sourceColumn: position_cloture_eur
+
+	column encours_depots_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: ebdd860ce0080b16f66a
+		summarizeBy: sum
+		sourceColumn: encours_depots_eur
+
+	column flux_net_moyen_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 63ccf4b9d02591dd6e7d
+		summarizeBy: sum
+		sourceColumn: flux_net_moyen_eur
+
+	column consommation_quotidienne_pct
+		dataType: double
+		lineageTag: f8431616c41083b7cd6f
+		summarizeBy: none
+		sourceColumn: consommation_quotidienne_pct
+
+	column besoin_liquidite_30j_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 606411d2d8c449e318aa
+		summarizeBy: sum
+		sourceColumn: besoin_liquidite_30j_eur
+
+	column cible_pilotage_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 45842adac5988676f513
+		summarizeBy: sum
+		sourceColumn: cible_pilotage_eur
+
+	column ratio_couverture_liquidite_pct
+		dataType: double
+		lineageTag: d727e5024a0201bd0b53
+		summarizeBy: none
+		sourceColumn: ratio_couverture_liquidite_pct
+
+	column jours_avant_seuil_100pct
+		dataType: double
+		lineageTag: 20d020035ec3f019790e
+		summarizeBy: none
+		sourceColumn: jours_avant_seuil_100pct
+
+	column liquidite_excedentaire_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: a087b3307979bd419641
+		summarizeBy: sum
+		sourceColumn: liquidite_excedentaire_eur
+
+	column besoin_refinancement_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 559f6fa47c1a4a691802
+		summarizeBy: sum
+		sourceColumn: besoin_refinancement_eur
+
+	column taux_directeur_local_pct
+		dataType: double
+		lineageTag: cc5e61aaf290f95d2aa0
+		summarizeBy: none
+		sourceColumn: taux_directeur_local_pct
+
+	column taux_directeur_eur_pct
+		dataType: double
+		lineageTag: 81770aeecdc57f39fbef
+		summarizeBy: none
+		sourceColumn: taux_directeur_eur_pct
+
+	column gain_placement_annuel_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: db575d2aeffb60615aac
+		summarizeBy: sum
+		sourceColumn: gain_placement_annuel_eur
+
+	column cout_refinancement_annuel_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 5ddabb8103898dd29d21
+		summarizeBy: sum
+		sourceColumn: cout_refinancement_annuel_eur
+
+	column economie_anticipation_annuelle_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 32f8b10da8774e4154fc
+		summarizeBy: sum
+		sourceColumn: economie_anticipation_annuelle_eur
+
+	column cout_couverture_change_annuel_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 9fa9541e25ecf5102684
+		summarizeBy: sum
+		sourceColumn: cout_couverture_change_annuel_eur
+
+	partition mart_liquidite_placement = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_liquidite_placement"]}[Data]
+				in
+				    Donnees
+

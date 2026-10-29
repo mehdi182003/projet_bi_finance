@@ -1,0 +1,24 @@
+table 'Choc taux (pb)'
+	lineageTag: d8adb0b8695b06761a3f
+
+	measure 'Valeur Choc taux (pb)' = SELECTEDVALUE('Choc taux (pb)'[Choc taux (pb)], 0)
+		formatString: 0.0
+		lineageTag: 0e9f8267eed1d5e17451
+
+	column 'Choc taux (pb)'
+		dataType: int64
+		formatString: 0
+		lineageTag: 5245344cd3558aa568e3
+		summarizeBy: none
+		isDataTypeInferred
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+	partition 'Choc taux (pb)' = calculated
+		mode: import
+		source = GENERATESERIES(0, 300, 25)
+

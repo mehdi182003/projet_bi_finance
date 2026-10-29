@@ -1,0 +1,49 @@
+table dim_type_transaction
+	lineageTag: 44cac7196db01a511a80
+
+	column code_type
+		dataType: string
+		lineageTag: 480794fb7451cb17fe8e
+		summarizeBy: none
+		sourceColumn: code_type
+
+	column libelle_type
+		dataType: string
+		lineageTag: 543a71c748bcfbb4802b
+		summarizeBy: none
+		sourceColumn: libelle_type
+
+	column categorie_tresorerie
+		dataType: string
+		lineageTag: d719cec5eb71f88f32b4
+		summarizeBy: none
+		sourceColumn: categorie_tresorerie
+
+	column sens_jambe_emetteur
+		dataType: int64
+		formatString: #,0
+		lineageTag: 8a1f1ee549f9fbfa90af
+		summarizeBy: sum
+		sourceColumn: sens_jambe_emetteur
+
+	column genere_jambe_beneficiaire
+		dataType: boolean
+		lineageTag: a82c6c3cda76edffc7ce
+		summarizeBy: none
+		sourceColumn: genere_jambe_beneficiaire
+
+	column description
+		dataType: string
+		lineageTag: 866b6eeb0d4939e6748c
+		summarizeBy: none
+		sourceColumn: description
+
+	partition dim_type_transaction = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="dim_type_transaction"]}[Data]
+				in
+				    Donnees
+

@@ -1,0 +1,130 @@
+table fct_flux_tresorerie_horaire
+	lineageTag: 9fc7878ba3fea7412c17
+
+	column id_flux
+		dataType: string
+		isHidden
+		lineageTag: ce9c2b30859d62d9afaf
+		summarizeBy: none
+		sourceColumn: id_flux
+
+	column horodatage
+		dataType: dateTime
+		formatString: dd/mm/yyyy hh:nn
+		lineageTag: c5221299446b36ad0db9
+		summarizeBy: none
+		sourceColumn: horodatage
+
+	column date_operation
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 5d0f51f8d2ed95973821
+		summarizeBy: none
+		sourceColumn: date_operation
+
+	column heure
+		dataType: int64
+		lineageTag: 19088d0289f061a2ba19
+		summarizeBy: none
+		sourceColumn: heure
+
+	column code_filiale
+		dataType: string
+		lineageTag: 45f2184f4772bf98984a
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column code_devise
+		dataType: string
+		lineageTag: 38cc8773f10a63dde20e
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column code_type
+		dataType: string
+		lineageTag: 31d0aee1e61708cdaf88
+		summarizeBy: none
+		sourceColumn: code_type
+
+	column role_jambe
+		dataType: string
+		lineageTag: 8b1b2f6703c8af45169b
+		summarizeBy: none
+		sourceColumn: role_jambe
+
+	column est_intragroupe
+		dataType: boolean
+		lineageTag: 0a5c6d5839c6598626ca
+		summarizeBy: none
+		sourceColumn: est_intragroupe
+
+	column est_fraude
+		dataType: boolean
+		lineageTag: fb501660aefddc2a0367
+		summarizeBy: none
+		sourceColumn: est_fraude
+
+	column est_gros_ticket
+		dataType: boolean
+		lineageTag: 274f601fd5b5753562dd
+		summarizeBy: none
+		sourceColumn: est_gros_ticket
+
+	column nb_mouvements
+		dataType: int64
+		formatString: #,0
+		lineageTag: dee65b81feb469e16385
+		summarizeBy: sum
+		sourceColumn: nb_mouvements
+
+	column encaissements_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 642c956365b4de1270e4
+		summarizeBy: sum
+		sourceColumn: encaissements_devise
+
+	column decaissements_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 55324f90f86617ce25cc
+		summarizeBy: sum
+		sourceColumn: decaissements_devise
+
+	column flux_net_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 07f85c900b60ea976de0
+		summarizeBy: sum
+		sourceColumn: flux_net_devise
+
+	column encaissements_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 1a7f295e364c78c517f5
+		summarizeBy: sum
+		sourceColumn: encaissements_eur
+
+	column decaissements_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 20d6f273a096a8a0d1fd
+		summarizeBy: sum
+		sourceColumn: decaissements_eur
+
+	column flux_net_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: f535afc0e4699d7179e9
+		summarizeBy: sum
+		sourceColumn: flux_net_eur
+
+	partition fct_flux_tresorerie_horaire = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="fct_flux_tresorerie_horaire"]}[Data]
+				in
+				    Donnees
+

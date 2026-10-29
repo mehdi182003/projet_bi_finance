@@ -1,0 +1,84 @@
+relationship 0e90bf89b8faca0d6fb8
+	fromColumn: fct_flux_tresorerie_horaire.date_operation
+	toColumn: dim_date.date_jour
+
+relationship 39898f96764994412659
+	fromColumn: fct_position_tresorerie_quotidienne.date_position
+	toColumn: dim_date.date_jour
+
+relationship 481deffde4c7f3c7dd11
+	fromColumn: fct_taux_change.date_cours
+	toColumn: dim_date.date_jour
+
+relationship 04e88a4f1b178176571c
+	fromColumn: mart_exposition_change.date_position
+	toColumn: dim_date.date_jour
+
+relationship f85b9d1273870eb0441f
+	fromColumn: mart_liquidite_placement.date_position
+	toColumn: dim_date.date_jour
+
+relationship 39f036a00b8f71e6e295
+	fromColumn: mart_prevision_tresorerie.date_jour
+	toColumn: dim_date.date_jour
+
+relationship 3a3fab271afa522bf4b8
+	fromColumn: mart_prevision_change.date_jour
+	toColumn: dim_date.date_jour
+
+relationship 4d38d196766e840ae666
+	fromColumn: mart_backtest_journalier.date_jour
+	toColumn: dim_date.date_jour
+
+relationship 23304849c0e3d611d3bc
+	fromColumn: fct_flux_tresorerie_horaire.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship 334fd83528ac95340458
+	fromColumn: fct_position_tresorerie_quotidienne.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship 915c8d21fc43d1d51275
+	fromColumn: mart_liquidite_placement.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship acd6230f77325c484790
+	fromColumn: mart_stress_test.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship 75216455d7fe8105f7c9
+	fromColumn: mart_prevision_tresorerie.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship c2a4ed769aec58629c5a
+	fromColumn: mart_qualite_prevision.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship f2a3a9af3101b6d1b880
+	fromColumn: mart_backtest_journalier.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship 31903b92ec8344c9d29c
+	fromColumn: dim_filiale.code_devise
+	toColumn: dim_devise.code_devise
+
+relationship b581af137e359162a153
+	fromColumn: fct_taux_change.code_devise
+	toColumn: dim_devise.code_devise
+
+relationship eae0f6aac1654b4c9cd3
+	fromColumn: mart_exposition_change.code_devise
+	toColumn: dim_devise.code_devise
+
+relationship ee98d7d6c38fe62e28be
+	fromColumn: mart_prevision_change.code_devise
+	toColumn: dim_devise.code_devise
+
+relationship 1df02d9b611eaf51ceb2
+	fromColumn: fct_flux_tresorerie_horaire.code_type
+	toColumn: dim_type_transaction.code_type
+
+relationship 27636d3ff40c926034b0
+	fromColumn: mart_stress_test.code_scenario
+	toColumn: dim_scenario_stress.code_scenario
+

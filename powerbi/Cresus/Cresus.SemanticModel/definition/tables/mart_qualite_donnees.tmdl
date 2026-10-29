@@ -1,0 +1,109 @@
+table mart_qualite_donnees
+	lineageTag: 0edd86d21349c38cce93
+
+	column jour_simulation
+		dataType: int64
+		lineageTag: 98d250c341db68a61f32
+		summarizeBy: none
+		sourceColumn: jour_simulation
+
+	column step_debut
+		dataType: int64
+		lineageTag: 8507abcb5e1771968007
+		summarizeBy: none
+		sourceColumn: step_debut
+
+	column step_fin
+		dataType: int64
+		lineageTag: 1f42452e64e6e7ae3c0d
+		summarizeBy: none
+		sourceColumn: step_fin
+
+	column est_periode_analyse
+		dataType: boolean
+		lineageTag: acee01ce72e228906ed4
+		summarizeBy: none
+		sourceColumn: est_periode_analyse
+
+	column nb_transactions
+		dataType: int64
+		formatString: #,0
+		lineageTag: 0c24bc2780e5e5104d35
+		summarizeBy: sum
+		sourceColumn: nb_transactions
+
+	column montant_eur_approx
+		dataType: double
+		formatString: #,0
+		lineageTag: aedd41453095887d22d6
+		summarizeBy: sum
+		sourceColumn: montant_eur_approx
+
+	column volume_vs_median_pct
+		dataType: double
+		lineageTag: 267cc18bfd3bd967182c
+		summarizeBy: none
+		sourceColumn: volume_vs_median_pct
+
+	column nb_montants_nuls
+		dataType: int64
+		formatString: #,0
+		lineageTag: 644d0f94b9c524603f30
+		summarizeBy: sum
+		sourceColumn: nb_montants_nuls
+
+	column nb_fraudes
+		dataType: int64
+		formatString: #,0
+		lineageTag: 91640db5bd10d4470afd
+		summarizeBy: sum
+		sourceColumn: nb_fraudes
+
+	column taux_fraude_pct
+		dataType: double
+		lineageTag: b5c5fc696c0718d41e4b
+		summarizeBy: none
+		sourceColumn: taux_fraude_pct
+
+	column nb_fraudes_signalees
+		dataType: int64
+		formatString: #,0
+		lineageTag: 9054589009220bb1991a
+		summarizeBy: sum
+		sourceColumn: nb_fraudes_signalees
+
+	column nb_alertes_regle_vide_compte
+		dataType: int64
+		formatString: #,0
+		lineageTag: 8e31220e186279f0f302
+		summarizeBy: sum
+		sourceColumn: nb_alertes_regle_vide_compte
+
+	column nb_fraudes_detectees_regle
+		dataType: int64
+		formatString: #,0
+		lineageTag: 39aa4f7a375d42bdc558
+		summarizeBy: sum
+		sourceColumn: nb_fraudes_detectees_regle
+
+	column pct_montant_superieur_solde
+		dataType: double
+		lineageTag: ae4fd283e3273426fcf7
+		summarizeBy: none
+		sourceColumn: pct_montant_superieur_solde
+
+	column statut
+		dataType: string
+		lineageTag: 82ceb20c52ec79e9cc67
+		summarizeBy: none
+		sourceColumn: statut
+
+	partition mart_qualite_donnees = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_qualite_donnees"]}[Data]
+				in
+				    Donnees
+

@@ -27,3 +27,9 @@ logs/
 
 # Power BI
 *.pbix.bak
+
+# Power BI Desktop (fichiers locaux créés à l'ouverture du .pbip)
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+powerbi/outils/TomTool/bin/
+powerbi/outils/TomTool/obj/

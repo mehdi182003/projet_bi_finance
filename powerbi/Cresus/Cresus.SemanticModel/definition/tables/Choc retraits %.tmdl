@@ -1,0 +1,24 @@
+table 'Choc retraits %'
+	lineageTag: 233bbf333191d1e1e7db
+
+	measure 'Valeur Choc retraits %' = SELECTEDVALUE('Choc retraits %'[Choc retraits %], 0)
+		formatString: 0.0
+		lineageTag: 7e5b42cea14641056db1
+
+	column 'Choc retraits %'
+		dataType: int64
+		formatString: 0
+		lineageTag: fdbb293472c32ca4d7ca
+		summarizeBy: none
+		isDataTypeInferred
+		sourceColumn: [Value]
+
+		extendedProperty ParameterMetadata =
+				{
+				  "version": 0
+				}
+
+	partition 'Choc retraits %' = calculated
+		mode: import
+		source = GENERATESERIES(0, 30, 1)
+

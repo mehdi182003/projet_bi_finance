@@ -1,0 +1,15 @@
+table 'Devises choquées'
+	lineageTag: 8a398825da6e773758e8
+
+	column Cible
+		dataType: string
+		lineageTag: 947a3ab5940033539736
+		summarizeBy: none
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [Cible]
+
+	partition 'Devises choquées' = calculated
+		mode: import
+		source = DATATABLE ( "Cible", STRING, { { "Toutes devises hors EUR" }, { "USD" }, { "CAD" }, { "Couronnes nordiques" }, { "Franc CFA" } } )
+

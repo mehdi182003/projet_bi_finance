@@ -1,0 +1,85 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "8ec1a62db15a16a34d89",
+  "position": {
+    "x": 20,
+    "y": 450,
+    "z": 11000,
+    "width": 820,
+    "height": 250,
+    "tabOrder": 11000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_donnees"
+                    }
+                  },
+                  "Property": "jour_simulation"
+                }
+              },
+              "queryRef": "mart_qualite_donnees.jour_simulation",
+              "nativeQueryRef": "jour_simulation",
+              "displayName": "Jour"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "mart_qualite_donnees"
+                        }
+                      },
+                      "Property": "nb_fraudes"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(mart_qualite_donnees.nb_fraudes)",
+              "nativeQueryRef": "Somme de nb_fraudes",
+              "displayName": "Fraudes"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Fraudes par jour : constantes alors que le volume s''effondre'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

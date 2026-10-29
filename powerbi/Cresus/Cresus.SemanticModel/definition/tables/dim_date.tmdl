@@ -1,0 +1,96 @@
+table dim_date
+	lineageTag: b81f90a493e986683353
+	dataCategory: Time
+
+	column date_jour
+		dataType: dateTime
+		isKey
+		formatString: dd/mm/yyyy
+		lineageTag: 48d4c839d8ae37ca4c8d
+		summarizeBy: none
+		sourceColumn: date_jour
+
+	column id_date
+		dataType: int64
+		isHidden
+		lineageTag: bf196cdd500189dee19b
+		summarizeBy: none
+		sourceColumn: id_date
+
+	column annee
+		dataType: int64
+		lineageTag: f141b178160ef31b61d9
+		summarizeBy: none
+		sourceColumn: annee
+
+	column trimestre
+		dataType: int64
+		lineageTag: 5b7bd75cf856ed92ab04
+		summarizeBy: none
+		sourceColumn: trimestre
+
+	column mois
+		dataType: int64
+		lineageTag: b240a1d63155b888361b
+		summarizeBy: none
+		sourceColumn: mois
+
+	column libelle_mois
+		dataType: string
+		lineageTag: f41b9d6ea1f3efb8219e
+		summarizeBy: none
+		sourceColumn: libelle_mois
+		sortByColumn: mois
+
+	column annee_mois
+		dataType: string
+		lineageTag: 68d97152f099395687ef
+		summarizeBy: none
+		sourceColumn: annee_mois
+
+	column jour_semaine
+		dataType: int64
+		lineageTag: 5b19cdd776559a39fe7a
+		summarizeBy: none
+		sourceColumn: jour_semaine
+
+	column libelle_jour
+		dataType: string
+		lineageTag: e3f5686e2cd169879e98
+		summarizeBy: none
+		sourceColumn: libelle_jour
+		sortByColumn: jour_semaine
+
+	column semaine_iso
+		dataType: int64
+		lineageTag: 5980537d393488678a79
+		summarizeBy: none
+		sourceColumn: semaine_iso
+
+	column est_week_end
+		dataType: boolean
+		lineageTag: 2db26a91a60654b3caa5
+		summarizeBy: none
+		sourceColumn: est_week_end
+
+	column est_periode_analyse
+		dataType: boolean
+		lineageTag: a10af3466f464334bf71
+		summarizeBy: none
+		sourceColumn: est_periode_analyse
+
+	column est_futur_prevision
+		dataType: boolean
+		lineageTag: 167db8a81a81c73e8e76
+		summarizeBy: none
+		sourceColumn: est_futur_prevision
+
+	partition dim_date = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="dim_date"]}[Data]
+				in
+				    Donnees
+

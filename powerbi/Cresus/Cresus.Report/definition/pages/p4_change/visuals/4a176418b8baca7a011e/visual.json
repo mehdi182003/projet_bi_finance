@@ -1,0 +1,121 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "4a176418b8baca7a011e",
+  "position": {
+    "x": 660,
+    "y": 140,
+    "z": 11000,
+    "width": 600,
+    "height": 300,
+    "tabOrder": 11000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "dim_devise"
+                    }
+                  },
+                  "Property": "code_devise"
+                }
+              },
+              "queryRef": "dim_devise.code_devise",
+              "nativeQueryRef": "code_devise",
+              "displayName": "Devise"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Exposition au change (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Exposition au change (EUR)",
+              "nativeQueryRef": "Exposition au change (EUR)",
+              "displayName": "Exposition"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "VaR change 95 % 10 j (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.VaR change 95 % 10 j (EUR)",
+              "nativeQueryRef": "VaR change 95 % 10 j (EUR)",
+              "displayName": "VaR 10 j"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Rapport coût / risque de la couverture"
+                }
+              },
+              "queryRef": "_Mesures.Rapport coût / risque de la couverture",
+              "nativeQueryRef": "Rapport coût / risque de la couverture",
+              "displayName": "Coût / risque"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Recommandation de couverture"
+                }
+              },
+              "queryRef": "_Mesures.Recommandation de couverture",
+              "nativeQueryRef": "Recommandation de couverture",
+              "displayName": "Recommandation"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Décision de couverture par devise'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,406 @@
+table _Mesures
+	lineageTag: 4e34e20c90e9c527fafa
+
+	measure 'Encaissements (EUR)' = SUM ( fct_flux_tresorerie_horaire[encaissements_eur] )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: f82b49a14762889abcfb
+
+	measure 'Décaissements (EUR)' = SUM ( fct_flux_tresorerie_horaire[decaissements_eur] )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: ce22a83aa3b068796c6a
+
+	measure 'Solde net (EUR)' = SUM ( fct_flux_tresorerie_horaire[flux_net_eur] )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: 418a0e59afdd542da0b8
+
+	measure 'Solde net quotidien moyen (EUR)' = AVERAGEX ( VALUES ( dim_date[date_jour] ), [Solde net (EUR)] )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: 8fcaf111e9cce1c7676b
+
+	measure 'Nb opérations' = SUM ( fct_flux_tresorerie_horaire[nb_mouvements] )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: 5b89cf27d9ae7167bf9f
+
+	measure 'Flux intragroupe sortants (EUR)' = CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_intragroupe] = TRUE () )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: 429ee08aa1adb9427dc4
+
+	measure 'Taux de netting potentiel %' = DIVIDE ( [Flux intragroupe sortants (EUR)], [Décaissements (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 1. flux
+		lineageTag: 96c67d070fd6ac1247a5
+
+	measure 'Décaissements frauduleux (EUR)' = CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_fraude] = TRUE () )
+		formatString: #,0
+		displayFolder: 1. flux
+		lineageTag: bea953ca08543e4099b7
+
+	measure 'Taux de fraude %' = DIVIDE ( [Décaissements frauduleux (EUR)], [Décaissements (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 1. flux
+		lineageTag: 2581bb9351d143e139fc
+
+	measure 'Taux de détection actuel %' = DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_signalees] ), SUM ( mart_qualite_donnees[nb_fraudes] ) )
+		formatString: 0.0 %
+		displayFolder: 1. flux
+		lineageTag: c4226cda1237179bef58
+
+	measure 'Rappel de la règle « vide le compte » %' = DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_detectees_regle] ), SUM ( mart_qualite_donnees[nb_fraudes] ) )
+		formatString: 0.0 %
+		displayFolder: 1. flux
+		lineageTag: 294f394fe1a6d974196e
+
+	measure 'Part des gros décaissements %' = DIVIDE ( SUM ( fct_position_tresorerie_quotidienne[decaissements_gros_tickets_eur] ), [Décaissements (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 1. flux
+		lineageTag: 1cc64cb7b0bdcd486249
+
+	measure 'Date d''arrêté' = CALCULATE ( MAX ( fct_position_tresorerie_quotidienne[date_position] ) )
+		formatString: dd/mm/yyyy
+		displayFolder: 2. position (semi-additive)
+		lineageTag: 2f933ab549bc5da964a9
+
+	measure 'Position de trésorerie (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE (
+			        SUM ( fct_position_tresorerie_quotidienne[position_cloture_eur] ),
+			        dim_date[date_jour] = DerniereDate
+			    )
+		formatString: #,0
+		displayFolder: 2. position (semi-additive)
+		lineageTag: 4191be959d8b03972290
+
+	measure 'Position début de période (EUR)' =
+			VAR PremiereDate = CALCULATE ( MIN ( fct_position_tresorerie_quotidienne[date_position] ) )
+			RETURN
+			    CALCULATE (
+			        SUMX (
+			            fct_position_tresorerie_quotidienne,
+			            fct_position_tresorerie_quotidienne[position_ouverture_devise]
+			                / fct_position_tresorerie_quotidienne[taux_eur_jour]
+			        ),
+			        dim_date[date_jour] = PremiereDate
+			    )
+		formatString: #,0
+		displayFolder: 2. position (semi-additive)
+		lineageTag: 18f6b27e8437de0d0851
+
+	measure 'Variation de position %' = DIVIDE ( [Position de trésorerie (EUR)] - [Position début de période (EUR)], [Position début de période (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 2. position (semi-additive)
+		lineageTag: 5f12d8170de4389fce4b
+
+	measure 'Encours de dépôts (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE (
+			        SUM ( fct_position_tresorerie_quotidienne[encours_depots_eur] ),
+			        dim_date[date_jour] = DerniereDate
+			    )
+		formatString: #,0
+		displayFolder: 2. position (semi-additive)
+		lineageTag: 05ec855efbe7b482758b
+
+	measure 'Effet de change cumulé (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE (
+			        SUM ( fct_position_tresorerie_quotidienne[effet_change_eur] ),
+			        dim_date[date_jour] = DerniereDate
+			    )
+		formatString: #,0
+		displayFolder: 2. position (semi-additive)
+		lineageTag: 0b0d904b0262d5a7567e
+
+	measure 'Besoin de liquidité 30 j (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[besoin_liquidite_30j_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 4e05f01446e4812394b7
+
+	measure 'Ratio de couverture liquidité %' = DIVIDE ( [Position de trésorerie (EUR)], [Besoin de liquidité 30 j (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: a42e4eb67e169210316d
+
+	measure 'Consommation quotidienne de la position %' =
+			VAR DerniereDate = [Date d'arrêté]
+			VAR FluxMoyen = CALCULATE ( SUM ( mart_liquidite_placement[flux_net_moyen_eur] ), dim_date[date_jour] = DerniereDate )
+			RETURN DIVIDE ( -FluxMoyen, [Position de trésorerie (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 48ed9e04d72efbb6b854
+
+	measure 'Jours avant passage sous 100 %' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    MINX (
+			        VALUES ( dim_filiale[code_filiale] ),
+			        CALCULATE ( MIN ( mart_liquidite_placement[jours_avant_seuil_100pct] ), dim_date[date_jour] = DerniereDate )
+			    )
+		formatString: 0.0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 3bfd565f7787cc754baf
+
+	measure 'Économie annuelle grâce à l''anticipation (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[economie_anticipation_annuelle_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: f4840ad2a34cb50ea1a1
+
+	measure 'Liquidité excédentaire (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[liquidite_excedentaire_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 594a6d6c3a89ee279422
+
+	measure 'Gain annuel de placement (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[gain_placement_annuel_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: f59e97fec7c83414a7d2
+
+	measure 'Besoin de refinancement (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[besoin_refinancement_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 8c860ded0386c83da0b3
+
+	measure 'Coût annuel de refinancement (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[cout_refinancement_annuel_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 3188fe687c8a5a744c7c
+
+	measure 'Coût annuel de couverture de change (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE ( SUM ( mart_liquidite_placement[cout_couverture_change_annuel_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 2fef17b527a2c8150947
+
+	measure 'Résultat net de trésorerie annuel (EUR)' = [Gain annuel de placement (EUR)] - [Coût annuel de refinancement (EUR)] - [Coût annuel de couverture de change (EUR)]
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 5c88f5f7cfd01a7a3402
+
+	measure 'Exposition au change (EUR)' =
+			VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+			RETURN
+			    CALCULATE ( SUM ( mart_exposition_change[exposition_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 4. risque de change
+		lineageTag: cfe198d9dbae49b48ee3
+
+	measure 'Part de la position en devises %' = DIVIDE ( [Exposition au change (EUR)], [Position de trésorerie (EUR)] )
+		formatString: 0.0 %
+		displayFolder: 4. risque de change
+		lineageTag: 3ef894f317fef5e8d360
+
+	measure 'VaR change 95 % 10 j (EUR)' =
+			VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+			RETURN
+			    CALCULATE ( SUM ( mart_exposition_change[var_95_10j_eur] ), dim_date[date_jour] = DerniereDate )
+		formatString: #,0
+		displayFolder: 4. risque de change
+		lineageTag: 430e0fab97302e9d04d1
+
+	measure 'Rapport coût / risque de la couverture' =
+			VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+			RETURN CALCULATE ( AVERAGE ( mart_exposition_change[rapport_cout_risque] ), dim_date[date_jour] = DerniereDate )
+		formatString: 0.00
+		displayFolder: 4. risque de change
+		lineageTag: fce942d99e2bc1be30b0
+
+	measure 'Recommandation de couverture' =
+			VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
+			RETURN CALCULATE ( SELECTEDVALUE ( mart_exposition_change[recommandation_couverture] ), dim_date[date_jour] = DerniereDate )
+		displayFolder: 4. risque de change
+		lineageTag: efd197eb5e47af1fae32
+
+	measure 'Taux EUR -> devise' = AVERAGE ( fct_taux_change[taux_eur] )
+		formatString: 0.0000
+		displayFolder: 4. risque de change
+		lineageTag: fb00bff6a5e3553a0cc2
+
+	measure 'Volatilité annualisée %' = AVERAGE ( fct_taux_change[volatilite_annualisee_pct] ) / 100
+		formatString: 0.0 %
+		displayFolder: 4. risque de change
+		lineageTag: f62d17df79868a4a74ab
+
+	measure 'Position prévue P50 (EUR)' = SUM ( mart_prevision_tresorerie[position_p50_eur] )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: 5ac90a75ca4e2dcdef46
+
+	measure 'Position prévue P05 (EUR)' = SUM ( mart_prevision_tresorerie[position_p05_eur] )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: 4edd5a11c506c22fedc0
+
+	measure 'Position prévue P95 (EUR)' = SUM ( mart_prevision_tresorerie[position_p95_eur] )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: 98bb784a65d78c212a6b
+
+	measure 'Probabilité de passer sous le besoin de liquidité %' =
+			MAXX (
+			    VALUES ( dim_filiale[code_filiale] ),
+			    CALCULATE ( MAX ( mart_prevision_tresorerie[proba_sous_besoin_liquidite] ) )
+			)
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: b9be5f17566b3e64df9f
+
+	measure 'WAPE du modèle champion %' =
+			CALCULATE (
+			    DIVIDE (
+			        SUMX ( mart_backtest_journalier, ABS ( mart_backtest_journalier[reel_devise] - mart_backtest_journalier[prevu_devise] ) ),
+			        SUM ( mart_backtest_journalier[reel_devise] )
+			    ),
+			    mart_backtest_journalier[est_champion] = TRUE ()
+			)
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: 88ed0c8ad2f55e056ce8
+
+	measure 'Taux de change prévu P50' = AVERAGE ( mart_prevision_change[taux_p50] )
+		formatString: 0.0000
+		displayFolder: 5. prévision
+		lineageTag: b0e4d54ad3f07e64c671
+
+	measure 'Taux de change prévu P05' = AVERAGE ( mart_prevision_change[taux_p05] )
+		formatString: 0.0000
+		displayFolder: 5. prévision
+		lineageTag: cc9aca89b00688c3e7ff
+
+	measure 'Taux de change prévu P95' = AVERAGE ( mart_prevision_change[taux_p95] )
+		formatString: 0.0000
+		displayFolder: 5. prévision
+		lineageTag: a89014190e8fe295f27c
+
+	measure 'Taux de change réalisé' = AVERAGE ( mart_prevision_change[taux_realise] )
+		formatString: 0.0000
+		displayFolder: 5. prévision
+		lineageTag: d6c44db9c917df59e825
+
+	measure 'Facteur choc change' =
+			VAR Devise = SELECTEDVALUE ( dim_filiale[code_devise] )
+			VAR Cible = SELECTEDVALUE ( 'Devises choquées'[Cible], "Toutes devises hors EUR" )
+			VAR Facteur = 1 + [Valeur Choc change %] / 100
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        Devise = "EUR", 1,
+			        Cible = "Toutes devises hors EUR", Facteur,
+			        Cible = "Franc CFA" && Devise IN { "XOF", "XAF" }, Facteur,
+			        Cible = "Couronnes nordiques" && Devise IN { "SEK", "NOK", "DKK" }, Facteur,
+			        Devise = Cible, Facteur,
+			        1
+			    )
+		formatString: 0.00
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: 49e614f261a7984472e1
+
+	measure 'Position stressée (EUR)' =
+			SUMX (
+			    VALUES ( dim_filiale[code_filiale] ),
+			    ( [Position de trésorerie (EUR)] - [Encours de dépôts (EUR)] * [Valeur Choc retraits %] / 100 )
+			        * [Facteur choc change]
+			)
+		formatString: #,0
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: b03f0f16e7604ee64216
+
+	measure 'Flux net quotidien stressé (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			VAR Fenetre = DATESINPERIOD ( dim_date[date_jour], DerniereDate, -7, DAY )
+			RETURN
+			    SUMX (
+			        VALUES ( dim_filiale[code_filiale] ),
+			        VAR Enc = CALCULATE ( AVERAGE ( fct_position_tresorerie_quotidienne[encaissements_eur] ), Fenetre )
+			        VAR Dec = CALCULATE ( AVERAGE ( fct_position_tresorerie_quotidienne[decaissements_eur] ), Fenetre )
+			        RETURN ( Enc - Dec * [Valeur Multiplicateur sorties] ) * [Facteur choc change]
+			    )
+		formatString: #,0
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: e6f837c41dac00b4137b
+
+	measure 'Horizon de survie (jours)' =
+			VAR Pos = [Position stressée (EUR)]
+			VAR Net = [Flux net quotidien stressé (EUR)]
+			RETURN
+			    SWITCH ( TRUE (), Pos <= 0, 0, Net >= 0, BLANK (), DIVIDE ( Pos, -Net ) )
+		formatString: 0.0
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: ce3e26f6d9c0ee74ebc2
+
+	measure 'Besoin de refinancement stressé (EUR)' = MAX ( 0, - [Flux net quotidien stressé (EUR)] * 30 - [Position stressée (EUR)] )
+		formatString: #,0
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: be6eb707d77b40847351
+
+	measure 'Coût du refinancement stressé (EUR/an)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    SUMX (
+			        VALUES ( dim_filiale[code_filiale] ),
+			        VAR Taux =
+			            CALCULATE ( MAX ( mart_liquidite_placement[taux_directeur_local_pct] ), dim_date[date_jour] = DerniereDate )
+			        RETURN [Besoin de refinancement stressé (EUR)] * ( Taux + 0.5 + [Valeur Choc taux (pb)] / 100 ) / 100
+			    )
+		formatString: #,0
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: 2a1c54186764b81400f0
+
+	measure 'Statut de résilience' =
+			VAR Pos = [Position stressée (EUR)]
+			VAR H = [Horizon de survie (jours)]
+			RETURN
+			    SWITCH (
+			        TRUE (),
+			        Pos <= 0, "Critique",
+			        ISBLANK ( H ) || H >= 30, "Résilient",
+			        H >= 7, "Vigilance",
+			        "Critique"
+			    )
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: ba7e94321aa1ae44b0e7
+
+	measure 'Couleur statut' = SWITCH ( [Statut de résilience], "Résilient", "#1B7F3B", "Vigilance", "#C77700", "#B42318" )
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: a880df7709b4b7f1831f
+
+	column Masque
+		dataType: int64
+		isHidden
+		lineageTag: 68072c10cf8ca5cfc641
+		summarizeBy: none
+		isNameInferred
+		isDataTypeInferred
+		sourceColumn: [Masque]
+
+	partition _Mesures = calculated
+		mode: import
+		source = ROW("Masque", 1)
+
