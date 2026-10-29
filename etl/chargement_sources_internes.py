@@ -57,7 +57,11 @@ create table if not exists raw.soldes_comptables (
 """
 
 
-def _lire(chemin: Path, encodage: str, sep: str, titre: bool, total: bool) -> tuple[pd.DataFrame, dict]:
+TAILLE_PAQUET = 500_000   # lignes lues et copiées à la fois (borne la mémoire pour les gros volumes)
+
+
+def _lire(chemin: Path, encodage: str, sep: str, titre: bool, total: bool):
+    """Renvoie (itérateur de paquets de lignes en texte, métadonnées du fichier)."""
     with gzip.open(chemin, "rb") as f:
         texte = f.read().decode(encodage)
     lignes = texte.splitlines()
@@ -68,9 +72,9 @@ def _lire(chemin: Path, encodage: str, sep: str, titre: bool, total: bool) -> tu
         _, nb, montant = lignes[-1].split(sep)[:3]
         meta["nb_lignes_annoncees"], meta["total_annonce"] = int(nb), float(montant)
         lignes = lignes[:-1]
-    df = pd.read_csv(io.StringIO("\n".join(lignes)), sep=sep, dtype=str, keep_default_na=False)
-    df.columns = [c.strip().lower() for c in df.columns]
-    return df, meta
+    paquets = pd.read_csv(io.StringIO("\n".join(lignes)), sep=sep, dtype=str, keep_default_na=False,
+                          chunksize=TAILLE_PAQUET)
+    return paquets, meta
 
 
 def _creer_table(cur, table: str, colonnes: list[str]) -> None:
@@ -79,30 +83,37 @@ def _creer_table(cur, table: str, colonnes: list[str]) -> None:
                 f"_date_chargement timestamp default now())")
 
 
-def charger_exports_bruts() -> dict[str, int]:
+def charger_exports_bruts(dossier: Path | None = None) -> dict[str, int]:
     """Charge les fichiers nouveaux ou modifiés ; renvoie le nombre de lignes chargées par système."""
+    dossier = Path(dossier or DOSSIER_SOURCES_INTERNES)
+    log.info("Dossier des exports bruts : %s", dossier)
     bilan = {}
     with connexion() as cnx, cnx.cursor() as cur:
         cur.execute(DDL_JOURNAL)
         deja = dict(cur.execute("select nom_fichier, empreinte_md5 from raw.journal_chargement").fetchall())
-        for systeme, (dossier, encodage, sep, titre, total) in FORMATS.items():
+        for systeme, (sous_dossier, encodage, sep, titre, total) in FORMATS.items():
             table = f"raw.src_{systeme.lower()}"
-            fichiers = sorted((DOSSIER_SOURCES_INTERNES / dossier).rglob("*.csv.gz"))
+            fichiers = sorted((dossier / sous_dossier).rglob("*.csv.gz"))
             charges = ignores = 0
             for chemin in fichiers:
                 empreinte = hashlib.md5(chemin.read_bytes()).hexdigest()
                 if deja.get(chemin.name) == empreinte:
                     ignores += 1
                     continue
-                df, meta = _lire(chemin, encodage, sep, titre, total)
-                _creer_table(cur, table, list(df.columns))
-                cur.execute(f"delete from {table} where _fichier = %s", (chemin.name,))
-                df["_fichier"], df["_ligne"] = chemin.name, range(1, len(df) + 1)
-                tampon = io.StringIO()
-                df.to_csv(tampon, index=False, header=False)
-                colonnes = ", ".join(f'"{c}"' for c in df.columns)
-                with cur.copy(f"copy {table} ({colonnes}) from stdin with (format csv)") as copie:
-                    copie.write(tampon.getvalue())
+                paquets, meta = _lire(chemin, encodage, sep, titre, total)
+                nb_lignes = 0
+                for i, df in enumerate(paquets):
+                    df.columns = [c.strip().lower() for c in df.columns]
+                    if i == 0:
+                        _creer_table(cur, table, list(df.columns))
+                        cur.execute(f"delete from {table} where _fichier = %s", (chemin.name,))
+                    df["_fichier"], df["_ligne"] = chemin.name, range(nb_lignes + 1, nb_lignes + len(df) + 1)
+                    tampon = io.StringIO()
+                    df.to_csv(tampon, index=False, header=False)
+                    colonnes = ", ".join(f'"{c}"' for c in df.columns)
+                    with cur.copy(f"copy {table} ({colonnes}) from stdin with (format csv)") as copie:
+                        copie.write(tampon.getvalue())
+                    nb_lignes += len(df)
                 cur.execute("""insert into raw.journal_chargement (systeme_source, nom_fichier, empreinte_md5,
                                    nb_lignes_lues, nb_lignes_annoncees, total_annonce, ligne_titre)
                                values (%s, %s, %s, %s, %s, %s, %s)
@@ -110,9 +121,9 @@ def charger_exports_bruts() -> dict[str, int]:
                                    nb_lignes_lues = excluded.nb_lignes_lues, nb_lignes_annoncees = excluded.nb_lignes_annoncees,
                                    total_annonce = excluded.total_annonce, ligne_titre = excluded.ligne_titre,
                                    date_chargement = now()""",
-                            (systeme, chemin.name, empreinte, len(df), meta["nb_lignes_annoncees"],
+                            (systeme, chemin.name, empreinte, nb_lignes, meta["nb_lignes_annoncees"],
                              meta["total_annonce"], meta["ligne_titre"]))
-                charges += len(df)
+                charges += nb_lignes
             bilan[systeme] = charges
             log.info("  %-9s : %d fichiers (%d déjà à jour), %s lignes chargées dans %s", systeme, len(fichiers),
                      ignores, f"{charges:,}".replace(",", " "), table)
@@ -120,7 +131,7 @@ def charger_exports_bruts() -> dict[str, int]:
         cur.execute("truncate raw.soldes_comptables")
         with cur.copy("copy raw.soldes_comptables (code_filiale, date_comptable, total_credits, total_debits, "
                       "nb_operations) from stdin with (format csv, header true)") as copie:
-            copie.write(FICHIER_SOLDES.read_text(encoding="utf-8"))
+            copie.write((dossier / "comptabilite" / FICHIER_SOLDES.name).read_text(encoding="utf-8"))
         cur.execute("truncate raw.ancrages_zf")
         with cur.copy("copy raw.ancrages_zf (code_filiale, date_ancrage, encours_zf_devise, est_point_initial, "
                       "est_interpole, source) from stdin with (format csv, header true)") as copie:

@@ -32,7 +32,7 @@ import holidays
 import numpy as np
 import pandas as pd
 
-from .config import DOSSIER_DBT, DOSSIER_SOURCES, FICHIER_WEBSTAT, GRAINE_ALEATOIRE
+from .config import DOSSIER_DATA, DOSSIER_DBT, DOSSIER_SOURCES, FICHIER_WEBSTAT, GRAINE_ALEATOIRE
 from .extraction_bce import lire_webstat
 from .extraction_paysim import trouver_fichier_paysim
 from .sources_reelles import FICHIER_DEPOTS
@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 
 DEBUT, FIN = pd.Timestamp("2023-01-01"), pd.Timestamp("2025-12-31")
 DATE_INITIALE = pd.Timestamp("2022-12-31")
-POIDS = 100                     # opérations représentées par une ligne
+POIDS = 100                     # opérations représentées par une ligne (--taille-lot ; 100 = jeu versionné)
 TAUX_ROTATION = 0.008           # décaissements bruts d'un jour ouvré / encours de dépôts (PaySim réel : 0,78 %)
 PART_MIN_ENTREES = 0.30         # les encaissements d'une période valent au moins 30 % des décaissements
 VALEUR_UNITE_PAYSIM_EUR = 0.01  # 1 unité PaySim = 0,01 EUR (transaction médiane ~750 EUR)
@@ -186,17 +186,31 @@ def transactions_filiale(f: pd.Series, flux: pd.DataFrame, texture: pd.DataFrame
     return v
 
 
-def generer(fichier_paysim: Path | None = None) -> pd.DataFrame:
-    """Construit la vérité 2023-2025 puis écrit les exports bruts des systèmes sources."""
-    from .systemes_sources import ecrire_exports
+def dossier_par_defaut(taille_lot: int) -> Path:
+    from .systemes_sources import DOSSIER_SOURCES_INTERNES
+    return DOSSIER_SOURCES_INTERNES if taille_lot == 100 else DOSSIER_DATA / "generees" / f"lot_{taille_lot}"
+
+
+def generer(fichier_paysim: Path | None = None, taille_lot: int = 100, dossier: Path | None = None) -> Path:
+    """Construit la vérité 2023-2025, filiale par filiale, et écrit aussitôt ses exports bruts.
+
+    Traiter une filiale à la fois borne la mémoire (utile pour les petites tailles de lot, donc les
+    gros volumes) ; l'ordre des tirages aléatoires est inchangé => résultat identique à graine égale.
+    """
+    from .systemes_sources import GRAINE_DEFAUTS, ecrire_soldes, exporter_filiale, soldes_filiale
+    global POIDS
+    POIDS = taille_lot
+    dossier = dossier or dossier_par_defaut(taille_lot)
     rng = np.random.default_rng(GRAINE_ALEATOIRE)
+    rng_exports = np.random.default_rng(GRAINE_DEFAUTS)
     filiales = pd.read_csv(DOSSIER_DBT / "seeds" / "ref_filiales.csv")
     depots = pd.read_csv(FICHIER_DEPOTS, parse_dates=["date_ancrage"])
     change = lire_webstat(FICHIER_WEBSTAT)
     change["date_cours"] = pd.to_datetime(change.date_cours)
     texture = charger_texture(fichier_paysim)
+    log.info("Taille de lot : %d opérations par ligne ; sortie : %s", POIDS, dossier)
 
-    tous_ancrages, verite = [], []
+    tous_ancrages, soldes = [], []
     for _, f in filiales.iterrows():
         if f.code_devise == "EUR":
             taux = pd.Series(1.0, index=pd.date_range(DATE_INITIALE, FIN))
@@ -210,16 +224,13 @@ def generer(fichier_paysim: Path | None = None) -> pd.DataFrame:
         cal = calendrier(f.code_calendrier, f.profil_paie, rng)
         flux = flux_journaliers(cal, anc)
         t = transactions_filiale(f, flux, texture, taux, rng)
-        verite.append(t)
-        log.info("  %-3s : %s opérations réelles (lots de %d), encours %s -> %s %s", f.code_filiale,
-                 f"{len(t):,}".replace(",", " "), POIDS,
-                 f"{anc.encours_zf_devise.iloc[0] / 1e9:,.1f} Md", f"{anc.encours_zf_devise.iloc[-1] / 1e9:,.1f} Md",
-                 f.code_devise)
+        exporter_filiale(rng_exports, t, f, dossier)
+        soldes.append(soldes_filiale(t))
+        del t
     FICHIER_ANCRAGES.parent.mkdir(parents=True, exist_ok=True)
     pd.concat(tous_ancrages).to_csv(FICHIER_ANCRAGES, index=False)
-    verite = pd.concat(verite, ignore_index=True)
-    ecrire_exports(verite, filiales)
-    return verite
+    ecrire_soldes(soldes, dossier)
+    return dossier
 
 
 if __name__ == "__main__":

@@ -34,3 +34,6 @@ logs/
 **/.pbi/cache.abf
 powerbi/outils/TomTool/bin/
 powerbi/outils/TomTool/obj/
+
+# Jeux de données générés en local (gros volumes, --regenerer --taille-lot N)
+data/generees/

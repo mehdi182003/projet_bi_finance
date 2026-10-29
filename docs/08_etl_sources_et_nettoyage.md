@@ -125,4 +125,5 @@ Choix de modélisation :
 - `python pipeline.py` : chargement incrémental (seuls les fichiers nouveaux ou modifiés sont rechargés), puis transformations, tests et prévisions.
 - **Nouveau mois** : déposer les exports des filiales dans `data/sources_internes/` et relancer.
 - **Fichier corrigé renvoyé par une filiale** : il est rechargé automatiquement (son empreinte MD5 a changé). S'il porte sur un mois ancien : `dbt build --full-refresh --select fct_flux_tresorerie_horaire`.
-- **Reconstruire les exports** à partir des séries réelles : `python pipeline.py --regenerer` (nécessite PaySim).
+- **Reconstruire les exports** à partir des séries réelles : `python pipeline.py --regenerer` (nécessite PaySim). À graine égale, le contenu est identique au jeu versionné (vérifié sur les 360 fichiers et les soldes comptables).
+- **Gros volume** : `python pipeline.py --regenerer --taille-lot 10` → `data/generees/lot_10/` (~29 M de lignes, non versionné). Le chargeur lit les fichiers par paquets de 500 000 lignes et le générateur traite une filiale à la fois, pour borner la mémoire.

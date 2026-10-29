@@ -66,6 +66,16 @@ docker compose up -d            # lance PostgreSQL sur localhost:5432 (base "cre
 python pipeline.py              # chaîne complète (~3,5 min) : load → dbt (nettoyage, étoile, tests) → prévision
 python pipeline.py --etapes dbt prevision dbt_prev   # relancer certaines étapes
 ```
+
+### Gros volume en local (plusieurs Go, non versionné)
+Le jeu versionné regroupe les opérations par **lots de 100** (2,9 M de lignes, 286 Mo). Pour travailler sur un volume réaliste, on génère le même jeu sur son PC avec des lots plus petits. Cela nécessite le CSV PaySim dans `data/raw/`.
+```powershell
+python pipeline.py --regenerer --taille-lot 10     # ~29 M de lignes, ~3 Go de CSV : génération ~20 min, puis load + dbt
+# lancements suivants : ajouter DOSSIER_SOURCES_INTERNES=data/generees/lot_10 dans .env
+```
+Les fichiers vont dans `data/generees/lot_10/` (ignoré par Git). Les montants, les ancrages et les tests sont identiques quel que soit le lot : seul le nombre de lignes change.
+
+**Reprise du projet** : le contexte complet (décisions, état, reste à faire) est dans [`CLAUDE.md`](CLAUDE.md), chargé automatiquement par Claude Code.
 Puis ouvrir **`powerbi/Cresus/Cresus.pbip`** dans Power BI Desktop → *Actualiser* (identifiants PostgreSQL `postgres` / `postgres`). Détails : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md).
 
 Lignage et dictionnaire de données (idéal en soutenance) : `cd dbt ; dbt docs generate --profiles-dir . ; dbt docs serve --profiles-dir .`

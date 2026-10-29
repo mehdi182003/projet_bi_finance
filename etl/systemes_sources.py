@@ -19,9 +19,11 @@ libellés et codes devise non normalisés, identifiants clients manquants ou mal
 Tous sont récupérables : après nettoyage, on doit retrouver exactement la vérité (vérifié par le
 rapprochement avec les soldes comptables journaliers, également exportés ici).
 
-Sorties (versionnées dans Git, compressées) :
-  data/sources_internes/<systeme>/<filiale>/<fichier mensuel>.csv.gz
-  data/sources_internes/comptabilite/soldes_comptables_journaliers.csv
+Sorties (compressées) :
+  <dossier>/<systeme>/<filiale>/<fichier mensuel>.csv.gz
+  <dossier>/comptabilite/soldes_comptables_journaliers.csv
+  avec <dossier> = data/sources_internes (lots de 100, versionné dans Git) ou data/generees/lot_<n>
+  (autres tailles de lot, générées en local et ignorées par Git : plusieurs Go).
 """
 from __future__ import annotations
 
@@ -103,7 +105,8 @@ def _ajouter_doublons(rng, df: pd.DataFrame) -> pd.DataFrame:
 def _ecrire(df: pd.DataFrame, chemin: Path, sep: str, encodage: str, preambule: str = "", pied: str = "") -> None:
     chemin.parent.mkdir(parents=True, exist_ok=True)
     corps = df.drop(columns=[c for c in df.columns if c.startswith("_")]).to_csv(index=False, sep=sep, lineterminator="\r\n")
-    with gzip.open(chemin, "wb", compresslevel=9) as f:
+    # mtime=0 : compression déterministe => une régénération à l'identique donne exactement les mêmes octets
+    with open(chemin, "wb") as brut, gzip.GzipFile(filename="", mode="wb", fileobj=brut, compresslevel=9, mtime=0) as f:
         if encodage == "utf-8-sig":
             f.write(b"\xef\xbb\xbf")
             encodage = "utf-8"
@@ -255,22 +258,30 @@ def export_delta(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
 EXPORTS = {"SAB": export_sab, "NORDIC": export_nordic, "AMERICORE": export_americore, "DELTA": export_delta}
 
 
-def ecrire_exports(verite: pd.DataFrame, filiales: pd.DataFrame) -> None:
-    rng = np.random.default_rng(GRAINE_DEFAUTS)
-    for _, f in filiales.iterrows():
-        v = verite[verite.code_filiale == f.code_filiale]
-        racine = DOSSIER_SOURCES_INTERNES / f.systeme_source.lower() / f.code_filiale
-        for ancien in racine.glob("*.csv.gz"):
-            ancien.unlink()
-        n = EXPORTS[f.systeme_source](rng, v, f, racine)
-        log.info("  %-3s : %s lignes brutes exportées (%s), %s opérations réelles",
-                 f.code_filiale, f"{n:,}".replace(",", " "), f.systeme_source, f"{len(v):,}".replace(",", " "))
-    # Soldes comptables journaliers (grand livre) : référence indépendante pour le rapprochement
-    s = verite.assign(date_comptable=verite.horodatage.dt.date,
-                      montant=verite.montant_devise * verite.poids * verite.code_type.map(SENS))
-    soldes = s.groupby(["code_filiale", "date_comptable"]).agg(
-        total_credits=("montant", lambda x: x[x > 0].sum()), total_debits=("montant", lambda x: -x[x < 0].sum()),
-        nb_operations=("poids", "sum")).reset_index()
-    FICHIER_SOLDES.parent.mkdir(parents=True, exist_ok=True)
-    soldes.round(2).to_csv(FICHIER_SOLDES, index=False)
-    log.info("Soldes comptables journaliers : %s lignes -> %s", len(soldes), FICHIER_SOLDES)
+def exporter_filiale(rng, v: pd.DataFrame, f: pd.Series, dossier: Path) -> int:
+    """Écrit les exports mensuels bruts d'une filiale dans le format de son système."""
+    racine = dossier / f.systeme_source.lower() / f.code_filiale
+    for ancien in racine.glob("*.csv.gz"):
+        ancien.unlink()
+    n = EXPORTS[f.systeme_source](rng, v, f, racine)
+    log.info("  %-3s : %s lignes brutes exportées (%s), %s opérations réelles",
+             f.code_filiale, f"{n:,}".replace(",", " "), f.systeme_source, f"{len(v):,}".replace(",", " "))
+    return n
+
+
+def soldes_filiale(v: pd.DataFrame) -> pd.DataFrame:
+    """Soldes comptables journaliers (grand livre) d'une filiale : référence pour le rapprochement."""
+    montant = v.montant_devise * v.poids * v.code_type.map(SENS)
+    s = pd.DataFrame({"code_filiale": v.code_filiale.values, "date_comptable": v.horodatage.dt.date.values,
+                      "total_credits": montant.clip(lower=0).values, "total_debits": (-montant).clip(lower=0).values,
+                      "nb_operations": v.poids.values})
+    return s.groupby(["code_filiale", "date_comptable"], sort=True).sum().reset_index()
+
+
+def ecrire_soldes(soldes: list[pd.DataFrame], dossier: Path) -> Path:
+    chemin = dossier / "comptabilite" / FICHIER_SOLDES.name
+    chemin.parent.mkdir(parents=True, exist_ok=True)
+    (pd.concat(soldes, ignore_index=True).sort_values(["code_filiale", "date_comptable"])
+       .round(2).to_csv(chemin, index=False))
+    log.info("Soldes comptables journaliers -> %s", chemin)
+    return chemin

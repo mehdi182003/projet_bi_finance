@@ -24,7 +24,9 @@ import subprocess
 import sys
 import time
 
-from etl.config import DOSSIER_DBT
+from pathlib import Path
+
+from etl.config import DOSSIER_DBT, DOSSIER_SOURCES_INTERNES_ACTIF
 
 ETAPES = ["extract", "generer", "load", "dbt", "prevision", "dbt_prev"]
 PAR_DEFAUT = ["extract", "load", "dbt", "prevision", "dbt_prev"]
@@ -49,6 +51,10 @@ def main() -> None:
     parser.add_argument("--demo-lignes", type=int, default=200_000, help="taille du jeu synthétique")
     parser.add_argument("--etapes", nargs="+", choices=ETAPES, default=None)
     parser.add_argument("--regenerer", action="store_true", help="reconstruire les exports bruts des filiales")
+    parser.add_argument("--taille-lot", type=int, default=100,
+                        help="opérations par ligne pour --regenerer (100 = jeu versionné ; 10 = ~28 M de lignes, plusieurs Go)")
+    parser.add_argument("--sources", type=Path, default=None,
+                        help="dossier des exports bruts à charger (défaut : .env DOSSIER_SOURCES_INTERNES ou data/sources_internes)")
     args = parser.parse_args()
     if args.etapes is None:
         args.etapes = (["extract", "generer"] + PAR_DEFAUT[1:]) if args.regenerer else PAR_DEFAUT
@@ -84,7 +90,11 @@ def main() -> None:
     if "generer" in args.etapes:
         log.info("=== 2. RECONSTRUCTION DES EXPORTS BRUTS DES FILIALES ===")
         from etl.generateur_flux import generer
-        generer(fichier_paysim)
+        if fichier_paysim is None:
+            raise SystemExit("--regenerer nécessite PaySim dans data/raw/ (voir README).")
+        args.sources = generer(fichier_paysim, taille_lot=args.taille_lot, dossier=args.sources)
+        if args.taille_lot != 100:
+            log.info("Pour les prochains lancements, ajouter dans .env : DOSSIER_SOURCES_INTERNES=%s", args.sources)
 
     if "load" in args.etapes:
         log.info("=== 3. LOAD (PostgreSQL, schéma raw) ===")
@@ -94,7 +104,7 @@ def main() -> None:
         if fichier_paysim is not None and fichier_paysim.exists():
             charger_paysim(fichier_paysim)
         charger_taux_bce(fichier_taux)
-        charger_exports_bruts()
+        charger_exports_bruts(args.sources or DOSSIER_SOURCES_INTERNES_ACTIF)
 
     if "dbt" in args.etapes:
         log.info("=== 4. TRANSFORM (dbt : seeds, modèles, tests) ===")
