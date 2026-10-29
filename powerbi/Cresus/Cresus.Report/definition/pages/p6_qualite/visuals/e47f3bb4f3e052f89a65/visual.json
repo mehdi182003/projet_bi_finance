@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Rappel de la règle « vide le compte » %"
+                  "Property": "Rejets inattendus"
                 }
               },
-              "queryRef": "_Mesures.Rappel de la règle « vide le compte » %",
-              "nativeQueryRef": "Rappel de la règle « vide le compte » %"
+              "queryRef": "_Mesures.Rejets inattendus",
+              "nativeQueryRef": "Rejets inattendus"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fraudes détectées (règle « vide le compte »)'"
+                  "Value": "'Rejets inattendus (à corriger)'"
                 }
               }
             }

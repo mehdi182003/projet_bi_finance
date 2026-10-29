@@ -3,56 +3,92 @@
   "name": "6339c5c8ea834a6788a0",
   "position": {
     "x": 660,
-    "y": 420,
+    "y": 130,
     "z": 12000,
     "width": 600,
     "height": 280,
     "tabOrder": 12000
   },
   "visual": {
-    "visualType": "clusteredColumnChart",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Category": {
+        "Values": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "mart_qualite_donnees"
+                      "Entity": "dim_filiale"
                     }
                   },
-                  "Property": "jour_simulation"
+                  "Property": "nom_filiale"
                 }
               },
-              "queryRef": "mart_qualite_donnees.jour_simulation",
-              "nativeQueryRef": "jour_simulation",
-              "displayName": "Jour"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
+              "queryRef": "dim_filiale.nom_filiale",
+              "nativeQueryRef": "nom_filiale",
+              "displayName": "Filiale"
+            },
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_qualite_donnees"
-                        }
-                      },
-                      "Property": "nb_fraudes"
+                    "SourceRef": {
+                      "Entity": "_Mesures"
                     }
                   },
-                  "Function": 0
+                  "Property": "Lignes brutes reçues"
                 }
               },
-              "queryRef": "Sum(mart_qualite_donnees.nb_fraudes)",
-              "nativeQueryRef": "Somme de nb_fraudes",
-              "displayName": "Fraudes"
+              "queryRef": "_Mesures.Lignes brutes reçues",
+              "nativeQueryRef": "Lignes brutes reçues",
+              "displayName": "Lignes brutes"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Lignes retenues après nettoyage"
+                }
+              },
+              "queryRef": "_Mesures.Lignes retenues après nettoyage",
+              "nativeQueryRef": "Lignes retenues après nettoyage",
+              "displayName": "Retenues"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Taux de rejet %"
+                }
+              },
+              "queryRef": "_Mesures.Taux de rejet %",
+              "nativeQueryRef": "Taux de rejet %",
+              "displayName": "Rejet %"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Doublons supprimés"
+                }
+              },
+              "queryRef": "_Mesures.Doublons supprimés",
+              "nativeQueryRef": "Doublons supprimés",
+              "displayName": "Doublons"
             }
           ]
         }
@@ -72,7 +108,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'PaySim : fraudes par jour, constantes quand le volume s''effondre (artefact)'"
+                  "Value": "'Qualité des exports par filiale'"
                 }
               }
             }

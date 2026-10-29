@@ -5,12 +5,11 @@
 --   RG-VOL-01 : une ligne représente `nb_operations` opérations (échantillon pondéré) :
 --               montant total = montant unitaire x nb_operations.
 --   RG-QUA-01 : les lignes de montant nul sont exclues.
---   (La v1 du POC répartissait les clients PaySim entre filiales par hachage : devenu inutile,
---    les flux 2023-2025 sont générés directement par filiale à partir des dépôts réels du pays.)
+--   Entrée : int_operations_nettoyees (exports bruts des 4 systèmes, nettoyés et dédoublonnés).
 
 with flux as (
     select *
-    from {{ ref('stg_zf__transactions') }}
+    from {{ ref('int_operations_nettoyees') }}
     where montant_unitaire_devise > 0
 ),
 

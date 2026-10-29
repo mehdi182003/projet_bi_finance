@@ -1,11 +1,11 @@
-code_filiale,nom_filiale,pays,code_pays_iso,region,code_devise,part_de_marche_depots_pct,taux_reserve_liquidite_pct,code_calendrier,profil_paie,source_depots,ordre_affichage
-FR,ZF Banque France,France,FR,France métropolitaine,EUR,1.00,15,FR,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),1
-BNL,ZF Banque Benelux,Belgique,BE,Europe du Nord,EUR,2.00,15,BE,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),2
-FI,ZF Banque Finlande,Finlande,FI,Europe du Nord,EUR,2.00,15,FI,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),3
-SE,ZF Banque Suède,Suède,SE,Europe du Nord,SEK,1.00,15,SE,fin_de_mois,SCB (M1),4
-DK,ZF Banque Danemark,Danemark,DK,Europe du Nord,DKK,1.00,15,DK,fin_de_mois,Danmarks Nationalbank (dépôts transférables),5
-NO,ZF Banque Norvège,Norvège,NO,Europe du Nord,NOK,1.00,15,NO,fin_de_mois,FMI MFS (dépôts transférables),6
-CI,ZF Banque Côte d'Ivoire,Côte d'Ivoire,CI,Afrique de l'Ouest (UEMOA),XOF,8.00,20,CI,fin_de_mois,FMI MFS (dépôts transférables),7
-CM,ZF Banque Cameroun,Cameroun,CM,Afrique centrale (CEMAC),XAF,8.00,20,CM,fin_de_mois,BEAC (monnaie scripturale des banques),8
-CA,ZF Banque Canada,Canada,CA,Amérique du Nord,CAD,0.20,12,CA,bimensuel,Banque du Canada (M1+ brut),9
-US,ZF Bank USA,États-Unis,US,Amérique du Nord,USD,0.03,12,US,bimensuel,Fed H.8 (dépôts des banques commerciales),10
+code_filiale,nom_filiale,pays,code_pays_iso,region,code_devise,part_de_marche_depots_pct,taux_reserve_liquidite_pct,code_calendrier,profil_paie,source_depots,systeme_source,code_entite_source,fuseau_horaire,ordre_affichage
+FR,ZF Banque France,France,FR,France métropolitaine,EUR,1.0,15,FR,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),SAB,ZF-FR,Europe/Paris,1
+BNL,ZF Banque Benelux,Belgique,BE,Europe du Nord,EUR,2.0,15,BE,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),SAB,ZF-BE,Europe/Brussels,2
+FI,ZF Banque Finlande,Finlande,FI,Europe du Nord,EUR,2.0,15,FI,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),SAB,ZF-FI,Europe/Helsinki,3
+SE,ZF Banque Suède,Suède,SE,Europe du Nord,SEK,1.0,15,SE,fin_de_mois,SCB (M1),NORDIC,SE01,Europe/Stockholm,4
+DK,ZF Banque Danemark,Danemark,DK,Europe du Nord,DKK,1.0,15,DK,fin_de_mois,Danmarks Nationalbank (dépôts transférables),NORDIC,DK01,Europe/Copenhagen,5
+NO,ZF Banque Norvège,Norvège,NO,Europe du Nord,NOK,1.0,15,NO,fin_de_mois,FMI MFS (dépôts transférables),NORDIC,NO01,Europe/Oslo,6
+CI,ZF Banque Côte d'Ivoire,Côte d'Ivoire,CI,Afrique de l'Ouest (UEMOA),XOF,8.0,20,CI,fin_de_mois,FMI MFS (dépôts transférables),DELTA,ZFCI,Africa/Abidjan,7
+CM,ZF Banque Cameroun,Cameroun,CM,Afrique centrale (CEMAC),XAF,8.0,20,CM,fin_de_mois,BEAC (monnaie scripturale des banques),DELTA,ZFCM,Africa/Douala,8
+CA,ZF Banque Canada,Canada,CA,Amérique du Nord,CAD,0.2,12,CA,bimensuel,Banque du Canada (M1+ brut),AMERICORE,ZFCAN,America/Toronto,9
+US,ZF Bank USA,États-Unis,US,Amérique du Nord,USD,0.03,12,US,bimensuel,Fed H.8 (dépôts des banques commerciales),AMERICORE,ZFUSA,America/New_York,10

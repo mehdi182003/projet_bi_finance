@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Taux de détection actuel %"
+                  "Property": "Taux de rejet %"
                 }
               },
-              "queryRef": "_Mesures.Taux de détection actuel %",
-              "nativeQueryRef": "Taux de détection actuel %"
+              "queryRef": "_Mesures.Taux de rejet %",
+              "nativeQueryRef": "Taux de rejet %"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fraudes détectées (système PaySim)'"
+                  "Value": "'Taux de rejet (doublons, annulations...)'"
                 }
               }
             }

@@ -437,6 +437,46 @@ table _Mesures
 		displayFolder: 6. simulateur de stress (what-if)
 		lineageTag: a880df7709b4b7f1831f
 
+	measure 'Lignes brutes reçues' = SUM ( mart_qualite_sources[nb_lignes_brutes] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 5786ac53f3591455505b
+
+	measure 'Lignes retenues après nettoyage' = SUM ( mart_qualite_sources[nb_lignes_retenues] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: b4f5c82582793a0c384e
+
+	measure 'Taux de rejet %' = DIVIDE ( [Lignes brutes reçues] - [Lignes retenues après nettoyage], [Lignes brutes reçues] )
+		formatString: 0.0 %
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 998f8222f89579341407
+
+	measure 'Doublons supprimés' = SUM ( mart_qualite_sources[nb_doublons] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 229a21f1492498213abb
+
+	measure 'Libellés corrigés' = SUM ( mart_qualite_sources[nb_libelles_corriges] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 3134496956e67832a6ff
+
+	measure 'Devises corrigées' = SUM ( mart_qualite_sources[nb_devises_corrigees] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 2f400783aece74698f63
+
+	measure 'Opérations annulées, tests et extournes écartés' = SUM ( mart_qualite_sources[nb_annulees] ) + SUM ( mart_qualite_sources[nb_comptes_test] ) + SUM ( mart_qualite_sources[nb_extournes] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 8d0a64d17344b7fe6972
+
+	measure 'Rejets inattendus' = SUM ( mart_qualite_sources[nb_rejets_inattendus] )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: c5c71cf0fc0cd97946b2
+
 	column Masque
 		dataType: int64
 		isHidden

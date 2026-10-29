@@ -1,6 +1,37 @@
 version: 2
 
 models:
+  - name: int_operations_controlees
+    description: >
+      Union des 4 systèmes sources avec indicateurs de qualité et motif de rejet (règles RG-NET-05 à 10).
+      Toutes les lignes brutes y figurent : rien n'est supprimé en silence.
+    columns:
+      - name: id_ligne_source
+        tests: [unique, not_null]
+      - name: motif_rejet
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Filiale inconnue', 'Doublon', 'Opération annulée', 'Compte de test', 'Extourne',
+                         'Écriture extournée', 'Libellé inconnu', 'Date invalide', 'Montant invalide',
+                         'Devise incohérente', 'Sens incohérent']
+
+  - name: int_operations_nettoyees
+    description: Opérations retenues après nettoyage, au format unique du groupe, avec leur lignage source.
+    columns:
+      - name: ref_operation
+        tests: [unique, not_null]
+      - name: code_type
+        tests:
+          - not_null
+          - relationships:
+              arguments: {to: ref('ref_types_transaction'), field: code_type}
+      - name: code_filiale
+        tests: [not_null]
+
+  - name: int_operations_rejetees
+    description: Lignes brutes écartées par le nettoyage, avec leur motif (audit, retour aux filiales).
+
   - name: int_taux_change_journalier
     description: Taux EUR->devise pour chaque jour calendaire (report des week-ends, parités fixes CFA).
     tests:

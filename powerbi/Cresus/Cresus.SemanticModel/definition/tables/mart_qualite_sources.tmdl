@@ -1,0 +1,134 @@
+table mart_qualite_sources
+	lineageTag: 96d56bcfdf41390ec923
+
+	column id_qualite_source
+		dataType: string
+		isHidden
+		lineageTag: 3596d29186fefc961fbf
+		summarizeBy: none
+		sourceColumn: id_qualite_source
+
+	column systeme_source
+		dataType: string
+		lineageTag: 021d40aa282ee321e8ff
+		summarizeBy: none
+		sourceColumn: systeme_source
+
+	column code_filiale
+		dataType: string
+		lineageTag: 100a68bd4ea30cbef02f
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column mois
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 0f8550784e9d3a5053eb
+		summarizeBy: none
+		sourceColumn: mois
+
+	column nb_lignes_brutes
+		dataType: int64
+		formatString: #,0
+		lineageTag: 2d000afc4c2583430f83
+		summarizeBy: sum
+		sourceColumn: nb_lignes_brutes
+
+	column nb_lignes_retenues
+		dataType: int64
+		formatString: #,0
+		lineageTag: eda56fc00d869937899e
+		summarizeBy: sum
+		sourceColumn: nb_lignes_retenues
+
+	column nb_doublons
+		dataType: int64
+		formatString: #,0
+		lineageTag: 396d0fc5afc4e591918c
+		summarizeBy: sum
+		sourceColumn: nb_doublons
+
+	column nb_annulees
+		dataType: int64
+		formatString: #,0
+		lineageTag: 50639130ee816330170b
+		summarizeBy: sum
+		sourceColumn: nb_annulees
+
+	column nb_comptes_test
+		dataType: int64
+		formatString: #,0
+		lineageTag: b8c7b48ed20b7a06e3f2
+		summarizeBy: sum
+		sourceColumn: nb_comptes_test
+
+	column nb_extournes
+		dataType: int64
+		formatString: #,0
+		lineageTag: f320ebd5f45c82042e68
+		summarizeBy: sum
+		sourceColumn: nb_extournes
+
+	column nb_rejets_inattendus
+		dataType: int64
+		formatString: #,0
+		lineageTag: 592cf27355377b241202
+		summarizeBy: sum
+		sourceColumn: nb_rejets_inattendus
+
+	column nb_libelles_corriges
+		dataType: int64
+		formatString: #,0
+		lineageTag: 7e1595bdaec7aeb70d95
+		summarizeBy: sum
+		sourceColumn: nb_libelles_corriges
+
+	column nb_devises_corrigees
+		dataType: int64
+		formatString: #,0
+		lineageTag: d38f45fe4d761c635d1e
+		summarizeBy: sum
+		sourceColumn: nb_devises_corrigees
+
+	column nb_clients_manquants
+		dataType: int64
+		formatString: #,0
+		lineageTag: 04be1ef1233de095536a
+		summarizeBy: sum
+		sourceColumn: nb_clients_manquants
+
+	column nb_heures_converties_utc
+		dataType: int64
+		lineageTag: 059c8cb2238ac1687265
+		summarizeBy: none
+		sourceColumn: nb_heures_converties_utc
+
+	column nb_montants_unites_mineures
+		dataType: int64
+		formatString: #,0
+		lineageTag: c7b8f59078291ec61683
+		summarizeBy: sum
+		sourceColumn: nb_montants_unites_mineures
+
+	column nb_indicateurs_fraude_vides
+		dataType: int64
+		formatString: #,0
+		lineageTag: 7b33dc5ef76c64e64192
+		summarizeBy: sum
+		sourceColumn: nb_indicateurs_fraude_vides
+
+	column taux_rejet_pct
+		dataType: double
+		lineageTag: 1433b60cc7f463a2ee01
+		summarizeBy: none
+		sourceColumn: taux_rejet_pct
+
+	partition mart_qualite_sources = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_qualite_sources"]}[Data]
+				in
+				    Donnees
+

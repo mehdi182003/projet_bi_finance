@@ -46,7 +46,7 @@ TABLES = [
     "mart_exposition_change", "mart_liquidite_placement", "mart_stress_test",
     "mart_prevision_tresorerie", "mart_prevision_change", "mart_qualite_prevision",
     "mart_backtest_journalier", "mart_qualite_donnees", "mart_qualite_ancrage", "mart_reserve_optimale",
-    "mart_controle_a_posteriori",
+    "mart_controle_a_posteriori", "mart_qualite_sources",
 ]
 
 # (table « plusieurs », colonne) -> (table « un », colonne)
@@ -76,6 +76,7 @@ RELATIONS = [
     ("mart_qualite_ancrage", "date_ancrage", "dim_date", "date_jour"),
     ("mart_reserve_optimale", "code_filiale", "dim_filiale", "code_filiale"),
     ("mart_controle_a_posteriori", "code_filiale", "dim_filiale", "code_filiale"),
+    ("mart_qualite_sources", "code_filiale", "dim_filiale", "code_filiale"),
 ]
 
 # Paramètres What-if : nom -> (min, max, pas, défaut)
@@ -488,23 +489,31 @@ def pages_rapport() -> list[tuple[str, str, list[dict]]]:
     # 6. Qualité et fiabilité des données
     n = "p6_qualite"
     vs = [segment(n, 1, 20, 10, 240, 60, colonne("dim_filiale", "nom_filiale", "Filiale"), "Filiale"),
-          carte(n, 2, 280, 10, "Écart max à l'encours réel %", "Écart max à l'encours réel publié"),
-          carte(n, 3, 530, 10, "Taux de détection actuel %", "Fraudes détectées (système PaySim)"),
-          carte(n, 4, 780, 10, "Rappel de la règle « vide le compte » %", "Fraudes détectées (règle « vide le compte »)"),
-          visuel(n, 10, "lineChart", 20, 130, 620, 570,
+          carte(n, 2, 280, 10, "Lignes brutes reçues", "Lignes brutes reçues des filiales"),
+          carte(n, 3, 530, 10, "Taux de rejet %", "Taux de rejet (doublons, annulations...)"),
+          carte(n, 4, 780, 10, "Rejets inattendus", "Rejets inattendus (à corriger)"),
+          carte(n, 5, 1030, 10, "Écart max à l'encours réel %", "Écart max à l'encours réel publié"),
+          visuel(n, 10, "clusteredBarChart", 20, 130, 620, 280,
+                 "Défauts des exports bruts détectés et corrigés par l'ETL, par système source",
+                 {"Category": [colonne("mart_qualite_sources", "systeme_source", "Système source")],
+                  "Y": [mesure("Doublons supprimés"), mesure("Libellés corrigés"), mesure("Devises corrigées"),
+                        mesure("Opérations annulées, tests et extournes écartés")]}),
+          visuel(n, 11, "lineChart", 20, 420, 620, 280,
                  "Encours de dépôts : réel publié par la banque centrale vs reconstitué par les flux (devise)",
                  {"Category": [colonne("mart_qualite_ancrage", "date_ancrage", "Date de publication")],
                   "Y": [somme("mart_qualite_ancrage", "encours_reel_devise", "Réel (banque centrale)"),
                         somme("mart_qualite_ancrage", "encours_reconstitue_devise", "Reconstitué")]}),
-          visuel(n, 11, "clusteredColumnChart", 660, 130, 600, 280,
-                 "PaySim (texture) : transactions par jour, retenus / exclus",
+          visuel(n, 12, "tableEx", 660, 130, 600, 280, "Qualité des exports par filiale",
+                 {"Values": [colonne("dim_filiale", "nom_filiale", "Filiale"),
+                             mesure("Lignes brutes reçues", libelle="Lignes brutes"),
+                             mesure("Lignes retenues après nettoyage", libelle="Retenues"),
+                             mesure("Taux de rejet %", libelle="Rejet %"),
+                             mesure("Doublons supprimés", libelle="Doublons")]}),
+          visuel(n, 13, "clusteredColumnChart", 660, 420, 600, 280,
+                 "PaySim (texture des opérations) : transactions par jour, retenus / exclus",
                  {"Category": [colonne("mart_qualite_donnees", "jour_simulation", "Jour")],
                   "Y": [somme("mart_qualite_donnees", "nb_transactions", "Transactions")],
-                  "Series": [colonne("mart_qualite_donnees", "statut", "Statut")]}),
-          visuel(n, 12, "clusteredColumnChart", 660, 420, 600, 280,
-                 "PaySim : fraudes par jour, constantes quand le volume s'effondre (artefact)",
-                 {"Category": [colonne("mart_qualite_donnees", "jour_simulation", "Jour")],
-                  "Y": [somme("mart_qualite_donnees", "nb_fraudes", "Fraudes")]})]
+                  "Series": [colonne("mart_qualite_donnees", "statut", "Statut")]})]
     p.append((n, "Qualité des données", vs))
     return p
 

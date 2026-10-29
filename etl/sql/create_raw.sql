@@ -5,17 +5,9 @@
 create schema if not exists raw;
 create schema if not exists ml;
 
--- Flux de ZF Banque 2023-2025 (etl/generateur_flux.py) : une ligne = `poids` opérations
-create table if not exists raw.transactions_zf (
-    horodatage        timestamp,
-    code_filiale      text,
-    code_type         text,             -- CASH_IN, VIREMENT_RECU, CASH_OUT, PAYMENT, DEBIT, TRANSFER
-    montant_devise    numeric(18, 2),   -- montant unitaire en devise locale
-    poids             integer,          -- nombre d'opérations représentées par la ligne
-    id_client         text,
-    est_fraude        smallint,
-    _date_chargement  timestamp default now()
-);
+-- Exports bruts des systèmes des filiales (raw.src_sab, raw.src_nordic, raw.src_americore, raw.src_delta),
+-- journal de chargement et soldes comptables : créés et alimentés par etl/chargement_sources_internes.py
+-- (chargement incrémental : ces tables ne sont PAS vidées ici).
 
 -- Encours de dépôts réels (banques centrales) à l'échelle de ZF Banque, aux dates publiées
 create table if not exists raw.ancrages_zf (
@@ -55,6 +47,4 @@ create table if not exists raw.bce_taux_change (
 );
 
 truncate table raw.paysim_transactions restart identity;
-truncate table raw.transactions_zf;
-truncate table raw.ancrages_zf;
 truncate table raw.bce_taux_change;

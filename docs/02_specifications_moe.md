@@ -4,17 +4,20 @@
 
 | Couche | Schéma PostgreSQL | Matérialisation | Responsable |
 |---|---|---|---|
-| Brute | `raw` | tables (COPY) | Python `etl/chargement_raw.py` |
+| Brute (bronze) | `raw` | tables en texte (COPY), chargement incrémental par fichier | Python `etl/chargement_sources_internes.py`, `etl/chargement_raw.py` |
 | Référentiels | `referentiel` | tables (dbt seed) | dbt `seeds/` |
-| Nettoyage | `staging` | vues | dbt `models/staging` |
-| Règles métier | `intermediate` | vues / tables | dbt `models/intermediate` |
-| Restitution | `marts` | tables | dbt `models/marts` |
+| Nettoyage par système source (argent) | `staging` | vues | dbt `models/staging` (`stg_sab__`, `stg_nordic__`, `stg_americore__`, `stg_delta__operations`) |
+| Union, dédoublonnage, rejets, règles métier (argent) | `intermediate` | vues / tables | dbt `models/intermediate` |
+| Restitution : schéma en étoile (or) | `marts` | tables (fait principal incrémental) | dbt `models/marts` |
 | Prédictif | `ml` | tables | Python `etl/prevision.py` |
 
 Ordonnancement (`pipeline.py`) : `extract → load → dbt build (hors prévision) → prévision Python → dbt build (tag prevision)`.
 Le pipeline est **rejouable** : les tables brutes sont vidées puis rechargées, et dbt reconstruit tout. Durée mesurée : environ 3 min (2,8 M de lignes de flux sur 3 ans + 6,4 M de lignes PaySim).
 
 ## 2. Règles de gestion
+
+Les règles de **nettoyage des exports bruts** (RG-NET-01 à 11), le dictionnaire des 4 systèmes sources et la description du modèle dimensionnel (grain, additivité) sont détaillés dans [docs/08_etl_sources_et_nettoyage.md](08_etl_sources_et_nettoyage.md). Les règles **métier** sont ci-dessous.
+
 
 | Code | Règle | Modèle |
 |---|---|---|
@@ -70,12 +73,13 @@ Flux du jour, `cible_reserve_mois_devise`, `position_ouverture_devise`, `positio
 
 Le dictionnaire complet et le graphe de lignage s'obtiennent avec `dbt docs generate && dbt docs serve`.
 
-## 4. Plan de tests (95 tests dbt)
+## 4. Plan de tests (111 tests dbt)
 
 | Famille | Exemples |
 |---|---|
 | Structure | `unique` / `not_null` sur toutes les clés |
 | Intégrité référentielle | faits → `dim_date`, `dim_filiale`, `dim_type_transaction` |
 | Domaines de valeurs | types PaySim, sens ±1, statuts de résilience, bornes du step et des montants |
+| ETL | complétude des fichiers (lignes et totaux de contrôle) ; **rapprochement comptable jour par jour** (10 960 jours-filiales) ; unicité des opérations nettoyées ; alerte sur rejets inattendus |
 | Métier | **ancrage : encours reconstitué = encours réel publié à chaque date (491 points)** ; conservation des volumes (aucune ligne perdue) ; taux disponibles sur toute la période |
 | Alertes (non bloquantes) | rupture de série de change (RUB) ; jour atypique dans la fenêtre d'analyse ; vraisemblance de l'encours (décaissements / dépôts entre 0,05 % et 5 % par jour) ; fraîcheur des cours BCE (> 10 jours) |

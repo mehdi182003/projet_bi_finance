@@ -2,7 +2,7 @@
 -- (aucune perte lors des jointures filiale / type / taux de change).
 with attendu as (
     select count(*) as nb, sum(nb_operations) as ops
-    from {{ ref('stg_zf__transactions') }}
+    from {{ ref('int_operations_nettoyees') }}
     where montant_unitaire_devise > 0
 ),
 obtenu as (

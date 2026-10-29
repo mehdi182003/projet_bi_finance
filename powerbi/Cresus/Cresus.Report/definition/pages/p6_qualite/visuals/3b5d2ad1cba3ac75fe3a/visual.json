@@ -6,11 +6,11 @@
     "y": 130,
     "z": 10000,
     "width": 620,
-    "height": 570,
+    "height": 280,
     "tabOrder": 10000
   },
   "visual": {
-    "visualType": "lineChart",
+    "visualType": "clusteredBarChart",
     "query": {
       "queryState": {
         "Category": {
@@ -20,15 +20,15 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "mart_qualite_ancrage"
+                      "Entity": "mart_qualite_sources"
                     }
                   },
-                  "Property": "date_ancrage"
+                  "Property": "systeme_source"
                 }
               },
-              "queryRef": "mart_qualite_ancrage.date_ancrage",
-              "nativeQueryRef": "date_ancrage",
-              "displayName": "Date de publication"
+              "queryRef": "mart_qualite_sources.systeme_source",
+              "nativeQueryRef": "systeme_source",
+              "displayName": "Système source"
             }
           ]
         },
@@ -36,43 +36,59 @@
           "projections": [
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_qualite_ancrage"
-                        }
-                      },
-                      "Property": "encours_reel_devise"
+                    "SourceRef": {
+                      "Entity": "_Mesures"
                     }
                   },
-                  "Function": 0
+                  "Property": "Doublons supprimés"
                 }
               },
-              "queryRef": "Sum(mart_qualite_ancrage.encours_reel_devise)",
-              "nativeQueryRef": "Somme de encours_reel_devise",
-              "displayName": "Réel (banque centrale)"
+              "queryRef": "_Mesures.Doublons supprimés",
+              "nativeQueryRef": "Doublons supprimés"
             },
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_qualite_ancrage"
-                        }
-                      },
-                      "Property": "encours_reconstitue_devise"
+                    "SourceRef": {
+                      "Entity": "_Mesures"
                     }
                   },
-                  "Function": 0
+                  "Property": "Libellés corrigés"
                 }
               },
-              "queryRef": "Sum(mart_qualite_ancrage.encours_reconstitue_devise)",
-              "nativeQueryRef": "Somme de encours_reconstitue_devise",
-              "displayName": "Reconstitué"
+              "queryRef": "_Mesures.Libellés corrigés",
+              "nativeQueryRef": "Libellés corrigés"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Devises corrigées"
+                }
+              },
+              "queryRef": "_Mesures.Devises corrigées",
+              "nativeQueryRef": "Devises corrigées"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Opérations annulées, tests et extournes écartés"
+                }
+              },
+              "queryRef": "_Mesures.Opérations annulées, tests et extournes écartés",
+              "nativeQueryRef": "Opérations annulées, tests et extournes écartés"
             }
           ]
         }
@@ -92,7 +108,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Encours de dépôts : réel publié par la banque centrale vs reconstitué par les flux (devise)'"
+                  "Value": "'Défauts des exports bruts détectés et corrigés par l''ETL, par système source'"
                 }
               }
             }

@@ -1,0 +1,104 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "4bd9df7f48d74e15b7ee",
+  "position": {
+    "x": 660,
+    "y": 420,
+    "z": 13000,
+    "width": 600,
+    "height": 280,
+    "tabOrder": 13000
+  },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_donnees"
+                    }
+                  },
+                  "Property": "jour_simulation"
+                }
+              },
+              "queryRef": "mart_qualite_donnees.jour_simulation",
+              "nativeQueryRef": "jour_simulation",
+              "displayName": "Jour"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "mart_qualite_donnees"
+                        }
+                      },
+                      "Property": "nb_transactions"
+                    }
+                  },
+                  "Function": 0
+                }
+              },
+              "queryRef": "Sum(mart_qualite_donnees.nb_transactions)",
+              "nativeQueryRef": "Somme de nb_transactions",
+              "displayName": "Transactions"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_donnees"
+                    }
+                  },
+                  "Property": "statut"
+                }
+              },
+              "queryRef": "mart_qualite_donnees.statut",
+              "nativeQueryRef": "statut",
+              "displayName": "Statut"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'PaySim (texture des opérations) : transactions par jour, retenus / exclus'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

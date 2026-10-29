@@ -3,7 +3,7 @@
 ## Option A (recommandée) : ouvrir le projet déjà construit
 
 Le rapport complet est fourni au format **projet Power BI (`.pbip`)** dans `powerbi/Cresus/` :
-modèle de données (25 tables, 25 relations, 65 mesures DAX, paramètres What-if) et 6 pages de visuels, sur 3 ans (2023-2025).
+modèle de données (26 tables, 26 relations, 73 mesures DAX, paramètres What-if) et 6 pages de visuels, sur 3 ans (2023-2025).
 
 1. Lancer le pipeline (`python pipeline.py`) pour remplir le schéma `marts` de PostgreSQL.
 2. Ouvrir **Power BI Desktop** (version de mi-2025 ou plus récente) → *Fichier → Ouvrir* → `powerbi/Cresus/Cresus.pbip`.
@@ -12,7 +12,7 @@ modèle de données (25 tables, 25 relations, 65 mesures DAX, paramètres What-i
 4. Si la base n'est pas sur `localhost:5432` / `cresus` : *Transformer les données → Modifier les paramètres* (`ServeurPostgres`, `BasePostgres`).
 5. Pour garder une copie en un seul fichier : *Fichier → Enregistrer sous → .pbix*.
 
-Comment le projet a été produit et vérifié (à mentionner en soutenance) : `powerbi/generer_pbip.py` lit la structure réelle des tables dans PostgreSQL, construit le modèle, puis le fait **valider et convertir au format TMDL par la bibliothèque officielle Microsoft** (Analysis Services TOM, outil `powerbi/outils/TomTool`). Les 67 fichiers du rapport sont validés contre les **schémas JSON publiés par Microsoft**. Un contrôle croisé vérifie enfin que chaque champ des visuels et chaque référence DAX existent dans le modèle. Limite : Power BI Desktop ne tournant que sous Windows, le projet n'a pas pu être ouvert dans Power BI pendant sa génération ; s'il signale un problème à l'ouverture, l'option B permet de reconstruire la page concernée à la main.
+Comment le projet a été produit et vérifié (à mentionner en soutenance) : `powerbi/generer_pbip.py` lit la structure réelle des tables dans PostgreSQL, construit le modèle, puis le fait **valider et convertir au format TMDL par la bibliothèque officielle Microsoft** (Analysis Services TOM, outil `powerbi/outils/TomTool`). Les 69 fichiers du rapport sont validés contre les **schémas JSON publiés par Microsoft**. Un contrôle croisé vérifie enfin que chaque champ des visuels et chaque référence DAX existent dans le modèle. Limite : Power BI Desktop ne tournant que sous Windows, le projet n'a pas pu être ouvert dans Power BI pendant sa génération ; s'il signale un problème à l'ouverture, l'option B permet de reconstruire la page concernée à la main.
 
 Les sections ci-dessous décrivent le contenu du rapport. Elles servent aussi de **guide pour le reconstruire à la main (option B)**.
 
@@ -87,6 +87,8 @@ Ensuite :
 - Matrice des scénarios précalculés : lignes = `dim_scenario_stress[libelle_scenario]`, colonnes = filiale, valeur = `mart_stress_test[horizon_survie_jours]`, couleur selon `statut_resilience`. Info-bulle : `reference_historique`.
 
 ### Page 6 — Qualité et fiabilité des données
+- Cartes : *Lignes brutes reçues*, *Taux de rejet %*, *Rejets inattendus*, *Écart max à l'encours réel %*.
+- Barres **défauts détectés et corrigés par l'ETL, par système source** (doublons, libellés, devises, annulations / tests / extournes) et tableau par filiale (`mart_qualite_sources`).
 - Courbe **encours réel publié par la banque centrale vs encours reconstitué** (segment filiale) : les deux courbes se superposent. C'est la preuve visuelle de l'ancrage sur le réel.
 - Carte *Écart max à l'encours réel %* (≈ 0).
 - Volume PaySim par jour (retenu ou exclu) et fraudes constantes : ils montrent **pourquoi** PaySim ne sert plus que de texture.

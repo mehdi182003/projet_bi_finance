@@ -1,16 +1,17 @@
 """Orchestrateur du POC Crésus : python pipeline.py [--demo] [--etapes ...]
 
 Étapes (dans l'ordre) :
-  extract   : récupère PaySim (Kaggle), les cours BCE (Webstat) et les séries réelles des banques
-              centrales (dépôts, taux directeurs ; mises en cache dans data/sources/)
-  generer   : construit les flux 2023-2025 de ZF Banque ancrés sur les dépôts réels (etl/generateur_flux.py)
-  load      : crée le schéma raw et charge les fichiers dans PostgreSQL (COPY)
+  extract   : cours BCE (Webstat), séries réelles des banques centrales (cache data/sources/), PaySim si présent
+  generer   : OPTIONNELLE (--regenerer) : reconstruit les exports bruts des filiales (data/sources_internes/,
+              versionnés dans Git) à partir des dépôts réels et de PaySim
+  load      : charge les exports bruts tels quels dans le schéma raw de PostgreSQL (incrémental, idempotent)
   dbt       : référentiels (seeds) + modèles staging/intermediate/marts + tests
   prevision : modèles prédictifs Python (Holt-Winters + Monte-Carlo) -> schéma ml
   dbt_prev  : marts de prévision (dbt) qui exploitent les sorties du schéma ml + tests
 
 Exemples :
-  python pipeline.py                  # tout, avec les vraies données
+  python pipeline.py                  # tout, à partir des fichiers versionnés (PaySim facultatif)
+  python pipeline.py --regenerer      # reconstruit aussi les exports bruts (nécessite PaySim)
   python pipeline.py --demo           # texture PaySim synthétique (test hors Kaggle) ; séries réelles conservées
   python pipeline.py --etapes dbt prevision dbt_prev
 """
@@ -26,6 +27,7 @@ import time
 from etl.config import DOSSIER_DBT
 
 ETAPES = ["extract", "generer", "load", "dbt", "prevision", "dbt_prev"]
+PAR_DEFAUT = ["extract", "load", "dbt", "prevision", "dbt_prev"]
 log = logging.getLogger("cresus")
 
 
@@ -45,8 +47,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--demo", action="store_true", help="transactions synthétiques au format PaySim (les taux restent réels)")
     parser.add_argument("--demo-lignes", type=int, default=200_000, help="taille du jeu synthétique")
-    parser.add_argument("--etapes", nargs="+", choices=ETAPES, default=ETAPES)
+    parser.add_argument("--etapes", nargs="+", choices=ETAPES, default=None)
+    parser.add_argument("--regenerer", action="store_true", help="reconstruire les exports bruts des filiales")
     args = parser.parse_args()
+    if args.etapes is None:
+        args.etapes = (["extract", "generer"] + PAR_DEFAUT[1:]) if args.regenerer else PAR_DEFAUT
     logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s %(message)s", datefmt="%H:%M:%S")
     debut = time.time()
 
@@ -57,9 +62,14 @@ def main() -> None:
         if args.demo:
             from etl.donnees_demo import generer_jeu_demo
             fichier_paysim = generer_jeu_demo(args.demo_lignes)
-        else:
+        elif args.regenerer:
             from etl.extraction_paysim import extraire_paysim
-            fichier_paysim = extraire_paysim()
+            fichier_paysim = extraire_paysim()   # indispensable pour reconstruire les exports
+        else:
+            from etl.extraction_paysim import trouver_fichier_paysim
+            fichier_paysim = trouver_fichier_paysim()   # facultatif : sert à la page Qualité
+            if fichier_paysim is None:
+                log.info("PaySim absent : facultatif (seule la page « Qualité » sur PaySim restera vide).")
         fichier_taux = extraire_taux_bce()
         from etl.sources_reelles import assurer_cache
         assurer_cache()
@@ -72,20 +82,19 @@ def main() -> None:
         fichier_taux = FICHIER_SORTIE
 
     if "generer" in args.etapes:
-        log.info("=== 2. FLUX 2023-2025 ANCRÉS SUR LES DÉPÔTS RÉELS ===")
+        log.info("=== 2. RECONSTRUCTION DES EXPORTS BRUTS DES FILIALES ===")
         from etl.generateur_flux import generer
         generer(fichier_paysim)
 
     if "load" in args.etapes:
         log.info("=== 3. LOAD (PostgreSQL, schéma raw) ===")
-        from etl.chargement_raw import (charger_ancrages, charger_paysim, charger_taux_bce,
-                                        charger_transactions_zf, creer_schema_raw)
-        from etl.generateur_flux import FICHIER_ANCRAGES, FICHIER_TRANSACTIONS
+        from etl.chargement_raw import charger_paysim, charger_taux_bce, creer_schema_raw
+        from etl.chargement_sources_internes import charger_exports_bruts
         creer_schema_raw()
-        charger_paysim(fichier_paysim)
-        charger_transactions_zf(FICHIER_TRANSACTIONS)
-        charger_ancrages(FICHIER_ANCRAGES)
+        if fichier_paysim is not None and fichier_paysim.exists():
+            charger_paysim(fichier_paysim)
         charger_taux_bce(fichier_taux)
+        charger_exports_bruts()
 
     if "dbt" in args.etapes:
         log.info("=== 4. TRANSFORM (dbt : seeds, modèles, tests) ===")

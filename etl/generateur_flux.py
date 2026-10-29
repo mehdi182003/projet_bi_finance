@@ -18,7 +18,10 @@ pas de flux entrants interbancaires). On construit donc 3 ans de flux en combina
 Volume : chaque ligne représente POIDS opérations (échantillon pondéré), ce qui donne ~4 M lignes
 pour 3 ans au lieu de ~400 M : le pipeline reste exécutable sur un ordinateur portable.
 
-Sorties : data/raw/transactions_zf_2023_2025.csv et data/raw/ancrages_zf.csv
+Sorties :
+  - la « vérité » (opérations réelles de ZF Banque), transmise à etl/systemes_sources.py qui écrit les
+    EXPORTS BRUTS de chaque système bancaire, avec leurs formats et leurs défauts (data/sources_internes/) ;
+  - data/sources/ancrages_zf.csv : encours de référence (dépôts réels x part de marché).
 """
 from __future__ import annotations
 
@@ -29,7 +32,7 @@ import holidays
 import numpy as np
 import pandas as pd
 
-from .config import DOSSIER_DBT, DOSSIER_RAW, FICHIER_WEBSTAT, GRAINE_ALEATOIRE
+from .config import DOSSIER_DBT, DOSSIER_SOURCES, FICHIER_WEBSTAT, GRAINE_ALEATOIRE
 from .extraction_bce import lire_webstat
 from .extraction_paysim import trouver_fichier_paysim
 from .sources_reelles import FICHIER_DEPOTS
@@ -44,8 +47,7 @@ PART_MIN_ENTREES = 0.30         # les encaissements d'une période valent au moi
 VALEUR_UNITE_PAYSIM_EUR = 0.01  # 1 unité PaySim = 0,01 EUR (transaction médiane ~750 EUR)
 BRUIT_JOUR = 0.15               # écart-type log du bruit quotidien
 STEPS_STABLES = (121, 408)      # fenêtre d'activité stable de PaySim (docs/06)
-FICHIER_TRANSACTIONS = DOSSIER_RAW / "transactions_zf_2023_2025.csv"
-FICHIER_ANCRAGES = DOSSIER_RAW / "ancrages_zf.csv"
+FICHIER_ANCRAGES = DOSSIER_SOURCES / "ancrages_zf.csv"
 
 TYPES_SORTIE_OUVRE = ["CASH_OUT", "PAYMENT", "DEBIT", "TRANSFER"]
 TYPES_SORTIE_WEEKEND = ["CASH_OUT", "PAYMENT"]          # cartes et retraits seulement le week-end
@@ -167,19 +169,26 @@ def transactions_filiale(f: pd.Series, flux: pd.DataFrame, texture: pd.DataFrame
     t["taux"] = pd.Series(taux_jour, index=jours).reindex(t.jour).values
     nb_clients = max(int(flux.decaissements.mean() * 120 / 2_000 / taux_jour.mean()), 1_000)
     rang = np.floor(nb_clients * rng.random(len(t)) ** 2.5).astype(int)   # quelques clients très actifs
-    return pd.DataFrame({
+    decimales = 0 if f.code_devise in ("XOF", "XAF") else 2                # le franc CFA n'a pas de centimes
+    v = pd.DataFrame({
         "horodatage": pd.to_datetime(t.jour) + pd.to_timedelta(t.heure, unit="h")
                       + pd.to_timedelta(rng.integers(0, 3600, len(t)), unit="s"),
         "code_filiale": f.code_filiale,
         "code_type": t.type.values,
-        "montant_devise": np.round(t.montant_eur.values * t.taux.values, 2),
+        "montant_devise": np.round(t.montant_eur.values * t.taux.values, decimales),
         "poids": POIDS,
         "id_client": [f"{f.code_filiale}-{r:07d}" for r in rang],
         "est_fraude": t.isFraud.values.astype(int),
     })
+    v = v[v.montant_devise > 0].sort_values("horodatage").reset_index(drop=True)
+    jour = v.horodatage.dt.strftime("%Y%m%d")
+    v.insert(0, "ref_operation", f.code_filiale + jour + "-" + (v.groupby(jour).cumcount() + 1).astype(str).str.zfill(6))
+    return v
 
 
-def generer(fichier_paysim: Path | None = None) -> tuple[Path, Path]:
+def generer(fichier_paysim: Path | None = None) -> pd.DataFrame:
+    """Construit la vérité 2023-2025 puis écrit les exports bruts des systèmes sources."""
+    from .systemes_sources import ecrire_exports
     rng = np.random.default_rng(GRAINE_ALEATOIRE)
     filiales = pd.read_csv(DOSSIER_DBT / "seeds" / "ref_filiales.csv")
     depots = pd.read_csv(FICHIER_DEPOTS, parse_dates=["date_ancrage"])
@@ -187,31 +196,30 @@ def generer(fichier_paysim: Path | None = None) -> tuple[Path, Path]:
     change["date_cours"] = pd.to_datetime(change.date_cours)
     texture = charger_texture(fichier_paysim)
 
-    tous_ancrages = []
-    FICHIER_TRANSACTIONS.parent.mkdir(parents=True, exist_ok=True)
-    with open(FICHIER_TRANSACTIONS, "w", encoding="utf-8", newline="") as sortie:
-        entete = True
-        for _, f in filiales.iterrows():
-            if f.code_devise == "EUR":
-                taux = pd.Series(1.0, index=pd.date_range(DATE_INITIALE, FIN))
-            elif f.code_devise in ("XOF", "XAF"):
-                taux = pd.Series(655.957, index=pd.date_range(DATE_INITIALE, FIN))
-            else:
-                taux = change[change.code_devise == f.code_devise].set_index("date_cours").taux
-            anc = ancrages_filiale(depots[depots.code_filiale == f.code_filiale], f.part_de_marche_depots_pct)
-            anc.insert(0, "code_filiale", f.code_filiale)
-            tous_ancrages.append(anc)
-            cal = calendrier(f.code_calendrier, f.profil_paie, rng)
-            flux = flux_journaliers(cal, anc)
-            t = transactions_filiale(f, flux, texture, taux, rng)
-            t.sort_values("horodatage").to_csv(sortie, index=False, header=entete, date_format="%Y-%m-%d %H:%M:%S")
-            entete = False
-            log.info("  %-3s : %s lignes (%s opérations), encours %s -> %s %s", f.code_filiale,
-                     f"{len(t):,}".replace(",", " "), f"{len(t) * POIDS:,}".replace(",", " "),
-                     f"{anc.encours_zf_devise.iloc[0] / 1e9:,.1f} Md", f"{anc.encours_zf_devise.iloc[-1] / 1e9:,.1f} Md",
-                     f.code_devise)
+    tous_ancrages, verite = [], []
+    for _, f in filiales.iterrows():
+        if f.code_devise == "EUR":
+            taux = pd.Series(1.0, index=pd.date_range(DATE_INITIALE, FIN))
+        elif f.code_devise in ("XOF", "XAF"):
+            taux = pd.Series(655.957, index=pd.date_range(DATE_INITIALE, FIN))
+        else:
+            taux = change[change.code_devise == f.code_devise].set_index("date_cours").taux
+        anc = ancrages_filiale(depots[depots.code_filiale == f.code_filiale], f.part_de_marche_depots_pct)
+        anc.insert(0, "code_filiale", f.code_filiale)
+        tous_ancrages.append(anc)
+        cal = calendrier(f.code_calendrier, f.profil_paie, rng)
+        flux = flux_journaliers(cal, anc)
+        t = transactions_filiale(f, flux, texture, taux, rng)
+        verite.append(t)
+        log.info("  %-3s : %s opérations réelles (lots de %d), encours %s -> %s %s", f.code_filiale,
+                 f"{len(t):,}".replace(",", " "), POIDS,
+                 f"{anc.encours_zf_devise.iloc[0] / 1e9:,.1f} Md", f"{anc.encours_zf_devise.iloc[-1] / 1e9:,.1f} Md",
+                 f.code_devise)
+    FICHIER_ANCRAGES.parent.mkdir(parents=True, exist_ok=True)
     pd.concat(tous_ancrages).to_csv(FICHIER_ANCRAGES, index=False)
-    return FICHIER_TRANSACTIONS, FICHIER_ANCRAGES
+    verite = pd.concat(verite, ignore_index=True)
+    ecrire_exports(verite, filiales)
+    return verite
 
 
 if __name__ == "__main__":

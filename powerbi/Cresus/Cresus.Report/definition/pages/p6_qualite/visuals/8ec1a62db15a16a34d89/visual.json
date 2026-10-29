@@ -2,15 +2,15 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "8ec1a62db15a16a34d89",
   "position": {
-    "x": 660,
-    "y": 130,
+    "x": 20,
+    "y": 420,
     "z": 11000,
-    "width": 600,
+    "width": 620,
     "height": 280,
     "tabOrder": 11000
   },
   "visual": {
-    "visualType": "clusteredColumnChart",
+    "visualType": "lineChart",
     "query": {
       "queryState": {
         "Category": {
@@ -20,15 +20,15 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "mart_qualite_donnees"
+                      "Entity": "mart_qualite_ancrage"
                     }
                   },
-                  "Property": "jour_simulation"
+                  "Property": "date_ancrage"
                 }
               },
-              "queryRef": "mart_qualite_donnees.jour_simulation",
-              "nativeQueryRef": "jour_simulation",
-              "displayName": "Jour"
+              "queryRef": "mart_qualite_ancrage.date_ancrage",
+              "nativeQueryRef": "date_ancrage",
+              "displayName": "Date de publication"
             }
           ]
         },
@@ -41,37 +41,38 @@
                     "Column": {
                       "Expression": {
                         "SourceRef": {
-                          "Entity": "mart_qualite_donnees"
+                          "Entity": "mart_qualite_ancrage"
                         }
                       },
-                      "Property": "nb_transactions"
+                      "Property": "encours_reel_devise"
                     }
                   },
                   "Function": 0
                 }
               },
-              "queryRef": "Sum(mart_qualite_donnees.nb_transactions)",
-              "nativeQueryRef": "Somme de nb_transactions",
-              "displayName": "Transactions"
-            }
-          ]
-        },
-        "Series": {
-          "projections": [
+              "queryRef": "Sum(mart_qualite_ancrage.encours_reel_devise)",
+              "nativeQueryRef": "Somme de encours_reel_devise",
+              "displayName": "Réel (banque centrale)"
+            },
             {
               "field": {
-                "Column": {
+                "Aggregation": {
                   "Expression": {
-                    "SourceRef": {
-                      "Entity": "mart_qualite_donnees"
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "mart_qualite_ancrage"
+                        }
+                      },
+                      "Property": "encours_reconstitue_devise"
                     }
                   },
-                  "Property": "statut"
+                  "Function": 0
                 }
               },
-              "queryRef": "mart_qualite_donnees.statut",
-              "nativeQueryRef": "statut",
-              "displayName": "Statut"
+              "queryRef": "Sum(mart_qualite_ancrage.encours_reconstitue_devise)",
+              "nativeQueryRef": "Somme de encours_reconstitue_devise",
+              "displayName": "Reconstitué"
             }
           ]
         }
@@ -91,7 +92,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'PaySim (texture) : transactions par jour, retenus / exclus'"
+                  "Value": "'Encours de dépôts : réel publié par la banque centrale vs reconstitué par les flux (devise)'"
                 }
               }
             }

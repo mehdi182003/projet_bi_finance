@@ -13,7 +13,7 @@ with initial as (
 
 clients as (
     select code_filiale, count(distinct id_client) as nb_clients
-    from {{ ref('stg_zf__transactions') }}
+    from {{ ref('int_operations_nettoyees') }}
     group by code_filiale
 ),
 

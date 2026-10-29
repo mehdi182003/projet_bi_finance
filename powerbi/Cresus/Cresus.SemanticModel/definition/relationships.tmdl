@@ -98,3 +98,7 @@ relationship d66f76d01c7097b7fb0e
 	fromColumn: mart_controle_a_posteriori.code_filiale
 	toColumn: dim_filiale.code_filiale
 
+relationship 1c083361e06348ee1b55
+	fromColumn: mart_qualite_sources.code_filiale
+	toColumn: dim_filiale.code_filiale
+

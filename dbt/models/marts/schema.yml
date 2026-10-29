@@ -3,12 +3,20 @@ version: 2
 models:
   # ----------------------------------------------------------------- dimensions
   - name: dim_date
+    meta:
+      type_table: "dimension"
+      grain: "1 ligne = 1 jour calendaire"
+      remarque: "conforme (partagée par tous les faits)"
     description: Calendrier en français (une ligne par jour).
     columns:
       - name: date_jour
         tests: [unique, not_null]
 
   - name: dim_filiale
+    meta:
+      type_table: "dimension"
+      grain: "1 ligne = 1 filiale"
+      remarque: "conforme ; clé métier stable (SCD type 1)"
     description: Les 6 filiales de ZF Banque, leur devise et leur situation de départ.
     columns:
       - name: code_filiale
@@ -19,18 +27,30 @@ models:
               arguments: {to: ref('dim_devise'), field: code_devise}
 
   - name: dim_devise
+    meta:
+      type_table: "dimension"
+      grain: "1 ligne = 1 devise"
+      remarque: "conforme ; code ISO 4217"
     description: Référentiel des devises (régime flottant / fixe / référence).
     columns:
       - name: code_devise
         tests: [unique, not_null]
 
   - name: dim_type_transaction
+    meta:
+      type_table: "dimension"
+      grain: "1 ligne = 1 type d'opération normalisé"
+      remarque: "conforme"
     description: Types d'opérations PaySim et leur sens de trésorerie.
     columns:
       - name: code_type
         tests: [unique, not_null]
 
   - name: dim_scenario_stress
+    meta:
+      type_table: "dimension"
+      grain: "1 ligne = 1 scénario de stress"
+      remarque: "référentiel"
     description: Scénarios de stress paramétrés (référence historique pour chacun).
     columns:
       - name: code_scenario
@@ -38,6 +58,10 @@ models:
 
   # ---------------------------------------------------------------------- faits
   - name: fct_flux_tresorerie_horaire
+    meta:
+      type_table: "fait transactionnel agrégé"
+      grain: "heure x filiale x type x fraude x gros ticket"
+      remarque: "mesures additives ; incrémental"
     description: Flux de trésorerie agrégés (heure x filiale x type x jambe x intragroupe x fraude).
     columns:
       - name: id_flux
@@ -59,6 +83,10 @@ models:
         tests: [not_null]
 
   - name: fct_position_tresorerie_quotidienne
+    meta:
+      type_table: "fait instantané périodique (snapshot)"
+      grain: "jour x filiale"
+      remarque: "positions et encours SEMI-additifs (pas de somme dans le temps)"
     description: Position de trésorerie de clôture par jour et par filiale (semi-additive dans le temps).
     columns:
       - name: id_position
@@ -78,6 +106,10 @@ models:
         tests: [not_null]
 
   - name: fct_taux_change
+    meta:
+      type_table: "fait instantané périodique"
+      grain: "jour x devise"
+      remarque: "taux NON additifs"
     description: Taux EUR->devise quotidiens, variation et volatilité (annualisée sur 60 cotations).
     columns:
       - name: id_taux
@@ -109,6 +141,12 @@ models:
         tests: [not_null]
       - name: jours_avant_seuil_100pct
         description: 0 si le ratio est déjà sous 100 % ; NULL si la position ne baisse pas.
+
+  - name: mart_qualite_sources
+    description: Défauts des exports bruts détectés et corrigés par l'ETL, par système, filiale et mois.
+    columns:
+      - name: id_qualite_source
+        tests: [unique, not_null]
 
   - name: mart_qualite_ancrage
     description: >

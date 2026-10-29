@@ -7,12 +7,12 @@ Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout
 
 | Brique | Outil | Rôle |
 |---|---|---|
-| Collecte | **Python** (pandas, requests) | Dépôts et taux directeurs réels des banques centrales (BCE, Fed, Banque du Canada, Riksbank, Norges Bank, Danmarks Nationalbank, FMI, BEAC, BCEAO), cours BCE (Webstat), PaySim (Kaggle) |
-| Génération des flux | **Python** | 3 ans de flux quotidiens ancrés sur les dépôts réels, avec la « texture » des vraies transactions PaySim |
-| Entrepôt de données | **PostgreSQL 16** | Couches `raw` → `staging` → `intermediate` → `marts` (+ `ml`) |
-| Transformation + qualité | **dbt** | Règles de gestion en SQL, modèle en étoile, 95 tests (dont l'ancrage sur les dépôts réels), lignage |
+| Sources | Fichiers versionnés | **Exports bruts (« sales ») des 4 systèmes bancaires des filiales** sur 2023-2025 (`data/sources_internes/`, 360 fichiers, 2,9 M de lignes) + séries réelles des banques centrales et cours BCE (`data/sources/`) |
+| Extract + Load | **Python** (pandas, psycopg) | Chargement tel quel dans la zone brute de PostgreSQL : incrémental, idempotent, tracé (fichier, ligne, MD5) |
+| Entrepôt de données | **PostgreSQL 16** | Architecture en couches : `raw` (bronze) → `staging` / `intermediate` (argent) → `marts` (or, schéma en étoile) + `ml` |
+| Transform + qualité | **dbt** | Nettoyage (11 règles RG-NET), dédoublonnage, rejets tracés, schéma en étoile, 111 tests (rapprochement comptable, complétude, ancrage sur les dépôts réels), lignage |
 | Analyse prédictive | **Python** (statsmodels, numpy) | Champion/challenger au pas quotidien, simulation Monte-Carlo, réserve optimale, contrôle sur des données réelles postérieures |
-| Restitution | **Power BI** | Projet `.pbip` prêt à ouvrir : 6 pages, 65 mesures DAX, simulateur What-if |
+| Restitution | **Power BI** | Projet `.pbip` prêt à ouvrir : 6 pages, 73 mesures DAX, simulateur What-if |
 
 ---
 
@@ -20,23 +20,24 @@ Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout
 
 ```mermaid
 flowchart LR
-    subgraph Sources réelles
-        BC[Banques centrales<br/>dépôts + taux directeurs 2023-2025]
-        W[Banque de France Webstat<br/>cours BCE 1999-2026]
-        K[Kaggle PaySim<br/>6,36 M transactions]
+    subgraph Sources
+        F[Exports bruts des filiales<br/>SAB · NORDIC · AMERICORE · DELTA<br/>360 fichiers 2023-2025]
+        GL[Soldes comptables<br/>journaliers]
+        BC[Banques centrales<br/>dépôts + taux réels]
+        W[Webstat<br/>cours BCE]
     end
-    G[Python : générateur de flux<br/>ancré sur les dépôts réels]
-    subgraph PostgreSQL
-        RAW[(raw)] --> STG[(staging)] --> INT[(intermediate)] --> MARTS[(marts<br/>étoile)]
-        MARTS --> ML[(ml<br/>prévisions)] --> MARTS
+    subgraph PostgreSQL [PostgreSQL = data warehouse · transformations SQL exécutées par dbt]
+        RAW[(raw<br/>bronze)] --> STG[(staging<br/>argent)] --> INT[(intermediate<br/>argent)] --> MARTS[(marts<br/>or : étoile)]
+        MARTS --> ML[(ml)] --> MARTS
     end
-    BC --> G
-    K -- texture --> G
-    G -- COPY --> RAW
-    W --> RAW
-    BC -- contrôle a posteriori --> ML
-    MARTS --> PBI[Power BI<br/>cockpit + simulateur]
+    F -- Python : load --> RAW
+    GL -- Python --> RAW
+    BC -- Python --> RAW
+    W -- Python --> RAW
+    MARTS --> PBI[Power BI]
 ```
+
+*Le générateur `etl/generateur_flux.py` + `etl/systemes_sources.py` a produit les exports bruts une fois pour toutes, à partir des dépôts réels et de PaySim ; ils sont versionnés. Le pipeline, lui, part de ces fichiers comme d'un vrai SI.*
 
 ---
 
@@ -57,14 +58,12 @@ docker compose up -d            # lance PostgreSQL sur localhost:5432 (base "cre
 *(macOS / Linux : `source .venv/bin/activate` et `cp .env.example .env`.)*
 
 ### Données
-- **PaySim** :
-  - **automatique** : renseigner `KAGGLE_USERNAME` / `KAGGLE_KEY` dans `.env` ;
-  - **manuel** : déposer `PS_20174392719_1491204439457_log.csv` (https://www.kaggle.com/datasets/ealaxi/paysim1) dans `data/raw/`.
-- **Séries des banques centrales et cours BCE** : déjà en cache dans `data/sources/` (versionnés), rien à télécharger. Pour les rafraîchir : `python -m etl.sources_reelles`.
+- **Tout est déjà dans le dépôt** : exports bruts des filiales (`data/sources_internes/`), séries des banques centrales et cours BCE (`data/sources/`). Rien à télécharger.
+- **PaySim est facultatif** : il ne sert qu'à la page « Qualité » (et à `--regenerer`). Pour l'avoir : `KAGGLE_USERNAME` / `KAGGLE_KEY` dans `.env`, ou déposer `PS_20174392719_1491204439457_log.csv` dans `data/raw/`.
 
 ### Lancement
 ```powershell
-python pipeline.py              # chaîne complète (~3 min)
+python pipeline.py              # chaîne complète (~3,5 min) : load → dbt (nettoyage, étoile, tests) → prévision
 python pipeline.py --etapes dbt prevision dbt_prev   # relancer certaines étapes
 ```
 Puis ouvrir **`powerbi/Cresus/Cresus.pbip`** dans Power BI Desktop → *Actualiser* (identifiants PostgreSQL `postgres` / `postgres`). Détails : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md).
@@ -100,19 +99,25 @@ Points d'attention métier relevés au passage :
 | Côte d'Ivoire / Cameroun | XOF / XAF | FMI / BEAC | 8 % chacune |
 | Canada / États-Unis | CAD / USD | Banque du Canada / Fed (hebdo) | 0,2 % / 0,03 % |
 
-Les flux quotidiens cumulés retombent **exactement** sur les dépôts réels à chaque date publiée : 491 points de contrôle, écart maximal de 0,000007 %, vérifié par un test dbt.
+Les opérations de chaque filiale, une fois nettoyées, retombent **exactement** sur les dépôts réels à chaque date publiée : 491 points de contrôle, écart maximal de 0,000007 %, vérifié par un test dbt.
 
-### Étape 4 — Ingénierie des données (ELT : Python → PostgreSQL → dbt)
-1. **Collecte** des séries officielles, mises en cache dans `data/sources/`.
-2. **Génération** de 2,8 M de lignes, chacune représentant 100 opérations (279 M d'opérations au total).
-3. **Chargement** dans PostgreSQL par `COPY`.
-4. **Transformation dbt** :
-   - valorisation au cours BCE du jour ;
-   - position de trésorerie **gérée** : la réserve est ramenée à sa cible chaque mois, par refinancement ou placement ;
-   - modèle en étoile.
-5. **Qualité** : 95 tests, dont l'ancrage sur les dépôts réels, la complétude, la disponibilité des taux et la fraîcheur des cours.
+### Étape 4 — ETL et data warehouse (Python → PostgreSQL → dbt)
+Les filiales n'ont pas le même système bancaire. On reçoit donc **4 formats d'exports bruts, avec leurs défauts** :
 
-→ [docs/02_specifications_moe.md](docs/02_specifications_moe.md)
+| Système | Filiales | Principales difficultés |
+|---|---|---|
+| SAB | France, Benelux, Finlande | `;`, cp1252, virgule décimale, sens D/C, libellés français variables, fichiers mensuels qui se chevauchent, opérations annulées |
+| NORDIC | Suède, Danemark, Norvège | Heures en UTC, montants signés, öre (centimes) en Suède, extournes |
+| AMERICORE | Canada, États-Unis | Dates MM/JJ/AAAA AM/PM, colonnes débit / crédit, séparateur de milliers, comptes de test, zéros de tête perdus |
+| DELTA | Côte d'Ivoire, Cameroun | Ligne de titre et ligne de total, dates aaaammjj, libellés sans norme, « FCFA » au lieu du code ISO |
+
+1. **Load (Python)** : chaque fichier est déposé **tel quel en texte** dans `raw` (bronze), avec fichier, ligne et date de chargement. Le chargement est incrémental et idempotent (empreinte MD5).
+2. **Staging (dbt)** : un modèle par système (typage, formats, fuseaux, unités, sens).
+3. **Intermediate (dbt)** : union des 4 systèmes, correspondances de libellés et de devises, dédoublonnage, exclusions, identifiants clients, et **table des rejets avec motif** (rien n'est supprimé en silence).
+4. **Marts (dbt)** : **schéma en étoile** (dimensions conformes, faits au grain documenté, fait principal incrémental), puis marts d'analyse.
+5. **Contrôles** : complétude des fichiers, **rapprochement comptable jour par jour**, ancrage sur les dépôts réels. Résultat : 2 896 020 lignes brutes → 2 788 404 opérations retenues (3,7 % écartées), **exactement** le nombre d'opérations réelles de chaque filiale.
+
+→ [docs/08_etl_sources_et_nettoyage.md](docs/08_etl_sources_et_nettoyage.md) (dictionnaire des sources, règles RG-NET, modèle dimensionnel) · [docs/02_specifications_moe.md](docs/02_specifications_moe.md)
 
 ### Étape 5 — Choix des KPI à partir des données
 Chaque KPI a été **testé statistiquement**. On n'a gardé que ceux qui varient, sont mesurés, résistent aux artefacts et éclairent une décision. → [docs/06](docs/06_profil_donnees_et_choix_kpi.md)
@@ -145,8 +150,8 @@ KPI **écartés après analyse** :
 
 ### Étape 7 — Restitution Power BI
 `powerbi/Cresus/Cresus.pbip`, prêt à ouvrir, compte 6 pages : Cockpit DAF · Flux · Prévisions · Change & couverture · Simulateur de stress · Qualité des données.
-- Le modèle est validé et converti par la bibliothèque officielle Microsoft (TOM).
-- Les 67 fichiers du rapport respectent les schémas JSON Microsoft.
+- Le modèle (26 tables, 73 mesures) est validé et converti par la bibliothèque officielle Microsoft (TOM).
+- Les 69 fichiers du rapport respectent les schémas JSON Microsoft.
 
 → [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md)
 
@@ -181,21 +186,24 @@ erDiagram
 ```
 ├── pipeline.py                 orchestrateur (extract → générer → load → dbt → prévision → dbt)
 ├── etl/
+│   ├── chargement_sources_internes.py  load des exports bruts dans raw (incrémental, idempotent)
 │   ├── sources_reelles.py      dépôts et taux directeurs réels (API des banques centrales)
-│   ├── generateur_flux.py      flux 2023-2025 ancrés sur les dépôts réels
+│   ├── generateur_flux.py      « vérité » 2023-2025 ancrée sur les dépôts réels (pour --regenerer)
+│   ├── systemes_sources.py     écrit les exports bruts des 4 systèmes, avec leurs défauts
 │   ├── prevision.py            champion/challenger, Monte-Carlo, réserve optimale, change
 │   ├── controle_a_posteriori.py prévision vs dépôts réels publiés ensuite (janvier 2026)
 │   ├── extraction_paysim.py / extraction_bce.py / chargement_raw.py
 │   └── donnees_demo.py         transactions synthétiques au format PaySim (tests hors Kaggle)
-├── data/sources/               séries réelles en cache (versionnées)
+├── data/sources_internes/      exports bruts des filiales (SAB, NORDIC, AMERICORE, DELTA) + soldes comptables
+├── data/sources/               séries réelles des banques centrales, cours BCE (versionnées)
 ├── dbt/                        seeds (référentiels), staging, intermediate, marts, tests, macros
 ├── powerbi/Cresus/             projet Power BI prêt à ouvrir (Cresus.pbip)
 ├── powerbi/                    générateur du projet, mesures DAX, thème, outil .NET TomTool
-└── docs/                       livrables AMOA / MOE (01 à 07)
+└── docs/                       livrables AMOA / MOE (01 à 08)
 ```
 
 ## 6. Hypothèses et limites (à assumer en soutenance)
-- **Les transactions individuelles sont simulées** : aucune banque ne publie les siennes. Sont réels : les niveaux de dépôts (mensuels, hebdomadaires aux États-Unis), les taux directeurs, le change et les jours fériés.
+- **Les transactions individuelles et leurs exports bruts sont simulés** (aucune banque ne publie les siennes) ; les défauts des exports sont injectés volontairement et documentés (docs/08). Sont réels : les niveaux de dépôts (mensuels, hebdomadaires aux États-Unis), les taux directeurs, le change et les jours fériés.
 - **Le profil à l'intérieur du mois et les parts de marché sont des hypothèses documentées.** La précision journalière du modèle en découle en partie ; le contrôle sur janvier 2026 réel, lui, n'en dépend pas.
 - **Le LCR est simplifié** : un seul taux de fuite de 10 %, pas de pondération des actifs liquides.
 - **Cameroun** : 10 mois interpolés. **BCEAO** : le taux de décembre 2022 est déduit (marqué `a_verifier`).

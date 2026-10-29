@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Écart max à l'encours réel %"
+                  "Property": "Lignes brutes reçues"
                 }
               },
-              "queryRef": "_Mesures.Écart max à l'encours réel %",
-              "nativeQueryRef": "Écart max à l'encours réel %"
+              "queryRef": "_Mesures.Lignes brutes reçues",
+              "nativeQueryRef": "Lignes brutes reçues"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Écart max à l''encours réel publié'"
+                  "Value": "'Lignes brutes reçues des filiales'"
                 }
               }
             }

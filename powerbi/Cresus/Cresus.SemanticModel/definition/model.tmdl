@@ -29,6 +29,7 @@ ref table mart_qualite_donnees
 ref table mart_qualite_ancrage
 ref table mart_reserve_optimale
 ref table mart_controle_a_posteriori
+ref table mart_qualite_sources
 ref table _Mesures
 ref table 'Choc retraits %'
 ref table 'Choc change %'

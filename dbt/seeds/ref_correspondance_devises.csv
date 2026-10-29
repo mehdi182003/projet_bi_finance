@@ -1,0 +1,15 @@
+valeur_normalisee,code_devise,est_code_iso
+EUR,EUR,true
+€,EUR,false
+USD,USD,true
+US$,USD,false
+CAD,CAD,true
+C$,CAD,false
+SEK,SEK,true
+DKK,DKK,true
+NOK,NOK,true
+XOF,XOF,true
+XAF,XAF,true
+FCFA,CFA,false
+F CFA,CFA,false
+F.CFA,CFA,false

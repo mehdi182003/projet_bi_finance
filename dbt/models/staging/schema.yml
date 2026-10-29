@@ -29,15 +29,36 @@ models:
       - name: id_client_emetteur
         tests: [not_null]
 
-  - name: stg_zf__transactions
-    description: Flux de ZF Banque 2023-2025 (montant total = montant unitaire x nombre d'opérations représentées).
+  - name: stg_sab__operations
+    description: Exports SAB typés et mis au format commun (aucune ligne supprimée à ce stade).
     columns:
-      - name: date_operation
-        tests:
-          - not_null
-          - entre_bornes:
-              arguments: {min_value: "'2023-01-01'", max_value: "'2025-12-31'"}
-      - name: nb_operations
+      - name: ref_operation
+        tests: [not_null]
+      - name: num_ligne
+        tests: [not_null]
+
+  - name: stg_nordic__operations
+    description: Exports NORDIC typés et mis au format commun (aucune ligne supprimée à ce stade).
+    columns:
+      - name: ref_operation
+        tests: [not_null]
+      - name: num_ligne
+        tests: [not_null]
+
+  - name: stg_americore__operations
+    description: Exports AMERICORE typés et mis au format commun (aucune ligne supprimée à ce stade).
+    columns:
+      - name: ref_operation
+        tests: [not_null]
+      - name: num_ligne
+        tests: [not_null]
+
+  - name: stg_delta__operations
+    description: Exports DELTA typés et mis au format commun (aucune ligne supprimée à ce stade).
+    columns:
+      - name: ref_operation
+        tests: [not_null]
+      - name: num_ligne
         tests: [not_null]
 
   - name: stg_zf__ancrages

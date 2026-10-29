@@ -5,30 +5,33 @@ sources:
     description: Données brutes chargées par Python (etl/chargement_raw.py), sans transformation.
     schema: raw
     tables:
-      - name: transactions_zf
-        description: >
-          Flux de ZF Banque 2023-2025 générés par etl/generateur_flux.py : encours ancrés sur les dépôts
-          réels publiés par les banques centrales, calendrier réel, texture des opérations tirée de PaySim.
-          Une ligne = `poids` opérations.
+      # --- Exports bruts des systèmes des filiales (zone bronze : tout en texte, tel que reçu)
+      - name: src_sab
+        description: Exports SAB (France, Benelux, Finlande), chargés tels quels par etl/chargement_sources_internes.py.
         columns:
-          - name: code_filiale
-            tests:
-              - not_null
-              - relationships:
-                  arguments: {to: ref('ref_filiales'), field: code_filiale}
-          - name: code_type
-            tests:
-              - relationships:
-                  arguments: {to: ref('ref_types_transaction'), field: code_type}
-          - name: montant_devise
-            tests:
-              - not_null
-              - entre_bornes:
-                  arguments: {min_value: 0}
-          - name: poids
-            tests:
-              - entre_bornes:
-                  arguments: {min_value: 1}
+          - name: ref_ope
+            tests: [not_null]
+      - name: src_nordic
+        description: Exports Nordic Core Banking (Suède, Danemark, Norvège), horodatages en UTC.
+        columns:
+          - name: txn_id
+            tests: [not_null]
+      - name: src_americore
+        description: Exports AmeriCore (Canada, États-Unis), colonnes débit / crédit séparées.
+        columns:
+          - name: txnref
+            tests: [not_null]
+      - name: src_delta
+        description: Exports DELTA (Côte d'Ivoire, Cameroun), avec ligne de titre et ligne de total de contrôle.
+        columns:
+          - name: numope
+            tests: [not_null]
+      - name: journal_chargement
+        description: Un enregistrement par fichier chargé (empreinte MD5, lignes lues, lignes et total annoncés).
+      - name: soldes_comptables
+        description: >
+          Soldes comptables journaliers par filiale (grand livre) : référence indépendante pour le
+          rapprochement des opérations nettoyées (test assert_rapprochement_comptable).
       - name: ancrages_zf
         description: >
           Encours de dépôts à vue réels par pays (BCE, Fed, Banque du Canada, SCB, Danmarks Nationalbank,

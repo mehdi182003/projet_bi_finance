@@ -303,3 +303,14 @@ RETURN
 // Pour la mise en forme conditionnelle (Format > Couleur > Valeur du champ)
 Couleur statut =
 SWITCH ( [Statut de résilience], "Résilient", "#1B7F3B", "Vigilance", "#C77700", "#B42318" )
+
+// ------------------------------------------------- 7. QUALITÉ DES DONNÉES SOURCES (ETL)
+Lignes brutes reçues = SUM ( mart_qualite_sources[nb_lignes_brutes] )
+Lignes retenues après nettoyage = SUM ( mart_qualite_sources[nb_lignes_retenues] )
+Taux de rejet % = DIVIDE ( [Lignes brutes reçues] - [Lignes retenues après nettoyage], [Lignes brutes reçues] )
+Doublons supprimés = SUM ( mart_qualite_sources[nb_doublons] )
+Libellés corrigés = SUM ( mart_qualite_sources[nb_libelles_corriges] )
+Devises corrigées = SUM ( mart_qualite_sources[nb_devises_corrigees] )
+Opérations annulées, tests et extournes écartés =
+SUM ( mart_qualite_sources[nb_annulees] ) + SUM ( mart_qualite_sources[nb_comptes_test] ) + SUM ( mart_qualite_sources[nb_extournes] )
+Rejets inattendus = SUM ( mart_qualite_sources[nb_rejets_inattendus] )

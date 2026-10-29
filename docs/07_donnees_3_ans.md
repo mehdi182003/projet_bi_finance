@@ -39,7 +39,8 @@ La baisse des dépôts à vue en zone euro est un phénomène réel : avec la ha
    - salaires sur les 2 derniers jours ouvrés (Europe, Afrique) ou le 15 et en fin de mois (Amérique du Nord) ;
    - bruit quotidien log-normal.
 4. **Texture** : chaque opération est tirée au hasard parmi les vraies transactions PaySim (type, montant, heure, fraude). Les montants d'une journée sont ajustés pour respecter le total du jour. Les virements reçus (salaires), absents de PaySim, reprennent la distribution des dépôts d'espèces.
-5. **Échantillon pondéré** : une ligne = 100 opérations. On obtient 2,8 M de lignes pour 279 M d'opérations, exécutables sur un portable.
+5. **Échantillon pondéré** : une ligne = un lot de 100 opérations. On obtient 2,8 M de lignes pour 279 M d'opérations, exécutables sur un portable.
+6. **Exports bruts** (`etl/systemes_sources.py`) : cette « vérité » n'est jamais chargée directement. Elle est exportée au format de chaque système bancaire (SAB, NORDIC, AMERICORE, DELTA), avec des défauts réalistes. Ce sont **ces fichiers sales** qui sont versionnés dans `data/sources_internes/` et que l'ETL nettoie (docs/08). Le rapprochement comptable prouve que le nettoyage restitue exactement la vérité.
 
 ## 4. Gestion de trésorerie modélisée (RG-POS-06/07)
 Au 1er de chaque mois, la trésorerie ramène la réserve à sa cible (15 % des dépôts en Europe, 20 % en Afrique, 12 % en Amérique du Nord) :
