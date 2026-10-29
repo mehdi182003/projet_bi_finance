@@ -1,0 +1,78 @@
+table mart_controle_a_posteriori
+	lineageTag: 7aceac0735cbcff008fb
+
+	column id_controle
+		dataType: string
+		isHidden
+		lineageTag: 678e6ddbea32b422a252
+		summarizeBy: none
+		sourceColumn: id_controle
+
+	column code_filiale
+		dataType: string
+		lineageTag: bdf73e840859f53a1fc0
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column date_controle
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: fbe49a723badd16d9373
+		summarizeBy: none
+		sourceColumn: date_controle
+
+	column depots_reels_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: e81000fb737aa3e93221
+		summarizeBy: sum
+		sourceColumn: depots_reels_devise
+
+	column depots_p05_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: da4c9bf419985edf9602
+		summarizeBy: sum
+		sourceColumn: depots_p05_devise
+
+	column depots_p50_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 3a334f437787ed8fad3f
+		summarizeBy: sum
+		sourceColumn: depots_p50_devise
+
+	column depots_p95_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: da2a1401e9ba8f081e85
+		summarizeBy: sum
+		sourceColumn: depots_p95_devise
+
+	column erreur_p50_pct
+		dataType: double
+		lineageTag: c894103f280f72ba352b
+		summarizeBy: none
+		sourceColumn: erreur_p50_pct
+
+	column dans_intervalle_90
+		dataType: boolean
+		lineageTag: cb6b8eb1024982f8b87a
+		summarizeBy: none
+		sourceColumn: dans_intervalle_90
+
+	column source
+		dataType: string
+		lineageTag: ff423bfa42b3a4f93ff1
+		summarizeBy: none
+		sourceColumn: source
+
+	partition mart_controle_a_posteriori = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_controle_a_posteriori"]}[Data]
+				in
+				    Donnees
+

@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Coût annuel de refinancement (EUR)"
+                  "Property": "Excédent placé (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Coût annuel de refinancement (EUR)",
-              "nativeQueryRef": "Coût annuel de refinancement (EUR)"
+              "queryRef": "_Mesures.Excédent placé (EUR)",
+              "nativeQueryRef": "Excédent placé (EUR)"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Coût annuel de refinancement'"
+                  "Value": "'Excédent placé'"
                 }
               }
             }

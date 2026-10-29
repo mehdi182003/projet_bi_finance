@@ -1,28 +1,28 @@
 """Étape ANALYSE PRÉDICTIVE : prévision des flux de trésorerie et des taux de change.
 
-1) Flux de trésorerie (par filiale, séries horaires en devise locale lues dans
-   marts.fct_flux_tresorerie_horaire)
-   a. Deux modèles candidats sont mis en concurrence (approche champion / challenger) :
-        - « naïf saisonnier » : pour chaque heure de la journée, moyenne des 7 derniers jours
+1) Flux de trésorerie (par filiale, au pas QUOTIDIEN, 3 ans d'historique 2023-2025)
+   a. Trois modèles candidats (approche champion / challenger) :
+        - « naïf hebdomadaire » : moyenne du même jour de la semaine sur les 4 dernières semaines
           (référence minimale qu'un modèle doit battre) ;
-        - « Holt-Winters » : lissage exponentiel avec saisonnalité journalière (24 h)
-          MULTIPLICATIVE (le profil horaire est proportionnel au niveau d'activité ; une
-          saisonnalité additive diverge quand le volume chute brutalement, comme dans PaySim).
-   b. Backtest : chaque modèle est réentraîné sans les 3 derniers jours complets puis
-      comparé au réalisé (WAPE sur les totaux journaliers). Le meilleur devient le
-      « champion » de la filiale, pour chaque série (encaissements / décaissements).
-   c. SIMULATION Monte-Carlo (simulation historique) : chaque trajectoire future est
-      construite en tirant au hasard des journées réellement observées (entrées ET
-      sorties du même jour, pour garder leur corrélation), remises à l'échelle du
-      niveau prévu par le champion. On cumule à partir de la dernière position
-      connue et on lit les quantiles P5 / P50 / P95 => « cône » de prévision et
-      probabilité de passer sous le besoin de liquidité.
+        - « Holt-Winters » : lissage exponentiel, tendance amortie, saisonnalité hebdomadaire ;
+        - « régression calendaire » : moindres carrés sur des variables de calendrier connues à l'avance
+          (jour de la semaine, jour ouvré ou férié, 3 premiers jours ouvrés, 2 derniers jours ouvrés,
+          mi-mois, MOIS DE L'ANNÉE, tendance), apprise sur tout l'historique (3 ans). L'effet « mois »
+          capte la saisonnalité réelle des dépôts (hausse en décembre, baisse en janvier).
+   b. Backtest sur 3 origines (fin septembre, octobre, novembre 2025), horizon d'un mois complet :
+      le WAPE (erreur absolue pondérée) désigne le champion de chaque série.
+   c. SIMULATION Monte-Carlo : les erreurs relatives du champion observées au backtest sont rééchantillonnées
+      par blocs de 7 jours (mêmes jours pour encaissements et décaissements => corrélation conservée),
+      auxquelles s'ajoute un choc MENSUEL sur le flux net, d'écart-type estimé sur les résidus mensuels
+      du modèle (corrigés des degrés de liberté) : l'incertitude sur le niveau du mois n'est pas sous-estimée.
+      On en déduit, pour janvier 2026 : le cône P5/P50/P95 de la position, la probabilité de passer sous
+      le besoin de liquidité Bâle III, et la RÉSERVE REQUISE pour ne pas passer sous 100 % dans 99 % des cas.
+   d. Valeur de la prévision : réserve actuelle (politique fixe) - réserve requise (prévision)
+      = liquidité libérable, valorisée au taux directeur réel en vigueur.
 
 2) Taux de change (devises flottantes)
-   - Mouvement brownien géométrique calibré sur la volatilité des 250 dernières
-     cotations (un taux de change se prévoit mal mieux qu'une marche aléatoire :
-     résultat classique de Meese & Rogoff, 1983) => on prévoit une FOURCHETTE,
-     utile pour dimensionner la couverture, plutôt qu'un point.
+   - Mouvement brownien géométrique calibré sur la volatilité des 250 dernières cotations (un taux de
+     change se prévoit mal mieux qu'une marche aléatoire : Meese & Rogoff, 1983) => FOURCHETTE à 30 jours.
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ import logging
 import warnings
 from datetime import datetime
 
+import holidays
 import numpy as np
 import pandas as pd
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
@@ -37,172 +38,211 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 from .config import (
     GRAINE_ALEATOIRE,
     PREVISION_CHANGE_HORIZON_JOURS,
-    PREVISION_HORIZON_JOURS,
-    PREVISION_JOURS_BACKTEST,
     PREVISION_NB_SIMULATIONS,
 )
 from .db import moteur
 
 log = logging.getLogger(__name__)
-SAISON = 24                # saisonnalité journalière sur données horaires
-JOURS_REFERENCE = 7        # fenêtre du modèle naïf et de la simulation historique
 QUANTILES = {"p05": 0.05, "p50": 0.50, "p95": 0.95}
+ORIGINES_BACKTEST = ["2025-09-30", "2025-10-31", "2025-11-30"]
+FENETRE_APPRENTISSAGE = 365
+TAUX_FUITE_LCR = 0.10
+CONFIANCE_RESERVE = 0.99
+NB_SIM_FLUX = max(PREVISION_NB_SIMULATIONS, 1000)
+
+
+# ------------------------------------------------------------------- calendrier
+def variables_calendrier(dates: pd.DatetimeIndex, code_pays: str, debut_tendance: pd.Timestamp) -> np.ndarray:
+    """Variables connues à l'avance : jours ouvrés/fériés, début/fin de mois, mi-mois, mois, jour, tendance."""
+    feries = holidays.country_holidays(code_pays, years=range(dates.min().year, dates.max().year + 1))
+    c = pd.DataFrame({"date": dates})
+    c["ferie"] = c.date.dt.date.map(lambda d: d in feries).astype(float)
+    c["ouvre"] = ((c.date.dt.weekday < 5) & (c.ferie == 0)).astype(float)
+    mois = c.date.dt.to_period("M")
+    c["rang"] = c.groupby(mois).ouvre.cumsum() * c.ouvre
+    c["rang_fin"] = c[::-1].groupby(mois[::-1]).ouvre.cumsum()[::-1] * c.ouvre
+    colonnes = [np.ones(len(c)), c.ouvre, c.ferie,
+                ((c.rang >= 1) & (c.rang <= 3)).astype(float),
+                ((c.rang_fin >= 1) & (c.rang_fin <= 2)).astype(float),
+                (c.ouvre * c.date.dt.day.between(13, 15)).astype(float),
+                (c.date - debut_tendance).dt.days.astype(float) / 365]
+    colonnes += [(c.date.dt.weekday == j).astype(float) for j in range(1, 7)]
+    colonnes += [(c.date.dt.month == m).astype(float) for m in range(2, 13)]
+    return np.column_stack(colonnes)
 
 
 # --------------------------------------------------------------------- modèles
-def prevoir_naif(y: np.ndarray, horizon_h: int) -> np.ndarray:
-    """Moyenne, heure par heure, des JOURS_REFERENCE derniers jours (y commence à 0 h)."""
-    profil = y[-JOURS_REFERENCE * SAISON:].reshape(-1, SAISON).mean(axis=0)
-    return np.resize(profil, horizon_h)
+def prevoir_naif(y: pd.Series, futur: pd.DatetimeIndex, code_pays: str) -> np.ndarray:
+    recent = y.iloc[-28:]
+    profil = recent.groupby(recent.index.weekday).mean()
+    return profil.reindex(futur.weekday).to_numpy()
 
 
-def prevoir_holt_winters(y: np.ndarray, horizon_h: int) -> np.ndarray:
-    # +1 : la saisonnalité multiplicative exige des valeurs strictement positives
+def prevoir_holt_winters(y: pd.Series, futur: pd.DatetimeIndex, code_pays: str) -> np.ndarray:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         ajuste = ExponentialSmoothing(
-            y + 1.0, trend=None, seasonal="mul", seasonal_periods=SAISON, initialization_method="estimated"
-        ).fit()
-    return np.clip(ajuste.forecast(horizon_h) - 1.0, 0, None)
+            y.iloc[-FENETRE_APPRENTISSAGE:].to_numpy() + 1.0, trend="add", damped_trend=True,
+            seasonal="mul", seasonal_periods=7, initialization_method="estimated").fit()
+    return np.clip(ajuste.forecast(len(futur)) - 1.0, 0, None)
 
 
-MODELES = {"naif_saisonnier": prevoir_naif, "holt_winters": prevoir_holt_winters}
+def ajuster_regression(y: pd.Series, code_pays: str) -> tuple[np.ndarray, pd.Timestamp]:
+    origine = y.index.min()
+    coef, *_ = np.linalg.lstsq(variables_calendrier(y.index, code_pays, origine), y.to_numpy(), rcond=None)
+    return coef, origine
+
+
+def prevoir_regression(y: pd.Series, futur: pd.DatetimeIndex, code_pays: str) -> np.ndarray:
+    coef, origine = ajuster_regression(y, code_pays)
+    return np.clip(variables_calendrier(futur, code_pays, origine) @ coef, 0, None)
+
+
+def ecart_type_mensuel(g: pd.DataFrame, code_pays: str) -> float:
+    """Incertitude sur le flux net d'un mois : écart-type des résidus mensuels de la régression,
+    corrigé des degrés de liberté (mois de l'année + tendance estimés sur le même historique)."""
+    net_prevu = 0
+    for serie, signe in (("encaissements", 1), ("decaissements", -1)):
+        y = g[f"{serie}_devise"]
+        coef, origine = ajuster_regression(y, code_pays)
+        net_prevu = net_prevu + signe * (variables_calendrier(y.index, code_pays, origine) @ coef)
+    residus = (g.encaissements_devise - g.decaissements_devise - net_prevu).groupby(g.index.to_period("M")).sum()
+    n, p = len(residus), 13
+    return float(residus.std(ddof=1) * np.sqrt(n / max(n - p, 1)))
+
+
+MODELES = {"naif_hebdomadaire": prevoir_naif, "holt_winters": prevoir_holt_winters,
+           "regression_calendaire": prevoir_regression}
 
 
 def wape(reel: np.ndarray, prevu: np.ndarray) -> float:
     return float(np.abs(reel - prevu).sum() / max(reel.sum(), 1e-9))
 
 
+def est_divergent(y: pd.Series, prevu: np.ndarray) -> bool:
+    return not np.all(np.isfinite(prevu)) or prevu.max() > 3 * max(y.max(), 1.0)
+
+
+def backtester(y: pd.Series, code_pays: str) -> tuple[pd.DataFrame, str, dict]:
+    """Backtest multi-origines ; renvoie le détail, le champion et ses erreurs relatives quotidiennes."""
+    lignes, erreurs, scores = [], {m: [] for m in MODELES}, {m: [] for m in MODELES}
+    for origine in pd.to_datetime(ORIGINES_BACKTEST):
+        fin = origine + pd.offsets.MonthEnd(1)
+        apprentissage, test = y[y.index <= origine], y[(y.index > origine) & (y.index <= fin)]
+        for nom, modele in MODELES.items():
+            prevu = modele(apprentissage, test.index, code_pays)
+            if est_divergent(apprentissage, prevu):
+                prevu = np.full(len(test), np.nan)
+                scores[nom].append(np.inf)
+            else:
+                scores[nom].append(wape(test.to_numpy(), prevu))
+                erreurs[nom].append(np.divide(test.to_numpy(), prevu, out=np.ones(len(test)), where=prevu > 0) - 1)
+            lignes.append(pd.DataFrame({"modele": nom, "origine": origine.date(), "date_jour": test.index.date,
+                                        "reel": test.to_numpy(), "prevu": prevu}))
+    moyenne = {m: float(np.mean(v)) for m, v in scores.items()}
+    champion = min(moyenne, key=moyenne.get)
+    return pd.concat(lignes, ignore_index=True), champion, np.concatenate(erreurs[champion])
+
+
 # ----------------------------------------------------------------------- flux
-def charger_series_horaires(engine) -> pd.DataFrame:
-    requete = """
-        select horodatage, code_filiale, code_devise,
-               sum(encaissements_devise) as encaissements,
-               sum(decaissements_devise) as decaissements
-        from marts.fct_flux_tresorerie_horaire
-        group by horodatage, code_filiale, code_devise
-    """
-    df = pd.read_sql(requete, engine, parse_dates=["horodatage"])
-    if df.empty:
-        raise SystemExit("marts.fct_flux_tresorerie_horaire est vide : lancer dbt avant la prévision.")
-    return df
+def charger_donnees(engine) -> tuple[pd.DataFrame, pd.DataFrame]:
+    pos = pd.read_sql(
+        """select date_position, code_filiale, code_devise, encaissements_devise, decaissements_devise,
+                  encours_depots_devise, position_cloture_devise, taux_eur_jour
+           from marts.fct_position_tresorerie_quotidienne order by code_filiale, date_position""",
+        engine, parse_dates=["date_position"])
+    if pos.empty:
+        raise SystemExit("marts.fct_position_tresorerie_quotidienne est vide : lancer dbt avant la prévision.")
+    filiales = pd.read_sql(
+        """select f.code_filiale, f.code_calendrier, f.taux_reserve_liquidite_pct,
+                  (select r.taux_directeur_pct from referentiel.ref_taux_directeurs r
+                    where r.code_devise = f.code_devise and r.date_effet <= %(d)s
+                    order by r.date_effet desc limit 1) as taux_directeur_pct
+           from referentiel.ref_filiales f""",
+        engine, params={"d": pos.date_position.max().date()}).set_index("code_filiale")
+    return pos, filiales
 
 
-def grille_jours_complets(flux: pd.DataFrame) -> pd.DatetimeIndex:
-    """Index horaire de minuit du 1er jour à 23 h du dernier jour COMPLET (24 heures)."""
-    premier = flux.horodatage.min().normalize()
-    dernier = flux.horodatage.max()
-    fin = dernier.normalize() + pd.Timedelta(hours=23)
-    if dernier < fin:  # dernier jour incomplet (cas de PaySim : step 743 = 22 h)
-        fin -= pd.Timedelta(days=1)
-    return pd.date_range(premier, fin, freq="h")
+def blocs_erreurs(erreurs: np.ndarray, horizon: int, nb_sim: int, rng: np.random.Generator) -> np.ndarray:
+    """Rééchantillonnage par blocs de 7 jours des erreurs relatives : matrice (horizon x nb_sim)."""
+    bloc = 7
+    nb_blocs = int(np.ceil(horizon / bloc))
+    debuts = rng.integers(0, max(len(erreurs) - bloc, 1), size=(nb_blocs, nb_sim))
+    idx = (debuts[:, None, :] + np.arange(bloc)[None, :, None]).reshape(nb_blocs * bloc, nb_sim)[:horizon]
+    return np.clip(erreurs[np.minimum(idx, len(erreurs) - 1)], -0.95, 5)
 
 
-def serie_complete(df: pd.DataFrame, colonne: str, index: pd.DatetimeIndex) -> np.ndarray:
-    """Série horaire sans trou (heures sans transaction = 0)."""
-    return df.set_index("horodatage")[colonne].astype(float).reindex(index, fill_value=0.0).to_numpy()
-
-
-def par_jour(valeurs: np.ndarray) -> np.ndarray:
-    return valeurs.reshape(-1, SAISON).sum(axis=1)
-
-
-def est_divergent(entrainement: np.ndarray, prevu_horaire: np.ndarray) -> bool:
-    """Garde-fou : une prévision horaire au-delà de 3x le pic observé est jugée divergente."""
-    return not np.all(np.isfinite(prevu_horaire)) or prevu_horaire.max() > 3 * max(entrainement.max(), 1.0)
-
-
-def backtester(y: np.ndarray, jours_test: int) -> tuple[pd.DataFrame, str]:
-    """Évalue chaque modèle sur les derniers jours ; renvoie le détail et le champion.
-
-    Un modèle divergent est écarté (prévu = NaN, donc WAPE NULL dans dbt) au lieu
-    d'afficher une erreur absurde ; le naïf saisonnier reste toujours disponible.
-    """
-    h = jours_test * SAISON
-    entrainement, reel = y[:-h], par_jour(y[-h:])
-    lignes, scores = [], {}
-    for nom, modele in MODELES.items():
-        prevu_horaire = modele(entrainement, h)
-        if est_divergent(entrainement, prevu_horaire):
-            log.warning("    modèle %s divergent sur cette série : écarté", nom)
-            prevu, scores[nom] = np.full(jours_test, np.nan), np.inf
-        else:
-            prevu = par_jour(prevu_horaire)
-            scores[nom] = wape(reel, prevu)
-        lignes.append(pd.DataFrame({"modele": nom, "jour_test": range(1, jours_test + 1), "reel": reel, "prevu": prevu}))
-    return pd.concat(lignes, ignore_index=True), min(scores, key=scores.get)
-
-
-def simuler_trajectoires(enc: np.ndarray, dec: np.ndarray, niveau_enc: np.ndarray, niveau_dec: np.ndarray,
-                         nb_sim: int, rng: np.random.Generator) -> np.ndarray:
-    """Simulation historique : (jours x simulations) de flux nets journaliers."""
-    enc_j, dec_j = par_jour(enc)[-JOURS_REFERENCE:], par_jour(dec)[-JOURS_REFERENCE:]
-    tirages = rng.integers(0, JOURS_REFERENCE, size=(len(niveau_enc), nb_sim))
-    # mise à l'échelle : le jour tiré est ramené au niveau prévu par le champion
-    echelle_enc = niveau_enc / max(enc_j.mean(), 1e-9)
-    echelle_dec = niveau_dec / max(dec_j.mean(), 1e-9)
-    return enc_j[tirages] * echelle_enc[:, None] - dec_j[tirages] * echelle_dec[:, None]
-
-
-def prevoir_tresorerie(engine, rng: np.random.Generator) -> tuple[pd.DataFrame, pd.DataFrame]:
-    flux = charger_series_horaires(engine)
-    situation = pd.read_sql(
-        """
-        select p.code_filiale, p.code_devise, p.date_position, p.position_cloture_devise, p.taux_eur_jour,
-               l.besoin_liquidite_30j_eur
-        from marts.fct_position_tresorerie_quotidienne p
-        join marts.mart_liquidite_placement l using (date_position, code_filiale)
-        where p.date_position = (select max(date_position) from marts.fct_position_tresorerie_quotidienne)
-        """,
-        engine,
-    ).set_index("code_filiale")
-    index = grille_jours_complets(flux)
-    date_arrete = situation.date_position.iloc[0]
-    horizon_h = PREVISION_HORIZON_JOURS * SAISON
-    dates_futures = pd.date_range(pd.Timestamp(date_arrete) + pd.Timedelta(days=1), periods=PREVISION_HORIZON_JOURS)
-    debut_test = index[-PREVISION_JOURS_BACKTEST * SAISON].normalize()
-
-    previsions, backtests = [], []
-    for filiale, groupe in flux.groupby("code_filiale"):
-        s = situation.loc[filiale]
-        series = {nom: serie_complete(groupe, nom, index) for nom in ("encaissements", "decaissements")}
-
-        niveaux, champions = {}, {}
-        for nom, y in series.items():
-            detail, champion = backtester(y, PREVISION_JOURS_BACKTEST)
-            detail["date_jour"] = [debut_test + pd.Timedelta(days=j - 1) for j in detail.jour_test]
+def prevoir_tresorerie(engine, rng: np.random.Generator):
+    pos, filiales = charger_donnees(engine)
+    date_arrete = pos.date_position.max()
+    futur = pd.date_range(date_arrete + pd.Timedelta(days=1), date_arrete + pd.offsets.MonthEnd(1), freq="D")
+    previsions, backtests, reserves = [], [], []
+    for filiale, g in pos.groupby("code_filiale"):
+        f = filiales.loc[filiale]
+        g = g.set_index("date_position")
+        niveaux, champions, erreurs_relatives = {}, {}, {}
+        for serie in ("encaissements", "decaissements"):
+            y = g[f"{serie}_devise"]
+            detail, champion, err = backtester(y, f.code_calendrier)
             detail.insert(0, "code_filiale", filiale)
-            detail.insert(1, "serie", nom)
+            detail.insert(1, "serie", serie)
             detail["est_champion"] = detail.modele == champion
-            backtests.append(detail.drop(columns="jour_test"))
-            champions[nom] = champion
-            niveaux[nom] = par_jour(MODELES[champion](y, horizon_h))  # réentraîné sur tout l'historique
+            backtests.append(detail)
+            champions[serie], erreurs_relatives[serie] = champion, err
+            niveaux[serie] = MODELES[champion](y, futur, f.code_calendrier)
 
-        net = simuler_trajectoires(series["encaissements"], series["decaissements"],
-                                   niveaux["encaissements"], niveaux["decaissements"],
-                                   PREVISION_NB_SIMULATIONS, rng)
-        position = s.position_cloture_devise + net.cumsum(axis=0)
-        seuil_devise = s.besoin_liquidite_30j_eur * s.taux_eur_jour
+        # Monte-Carlo : mêmes tirages d'erreurs (indices) pour les deux séries
+        n = min(len(erreurs_relatives["encaissements"]), len(erreurs_relatives["decaissements"]))
+        etat = rng.bit_generator.state
+        e_enc = blocs_erreurs(erreurs_relatives["encaissements"][:n], len(futur), NB_SIM_FLUX, rng)
+        rng.bit_generator.state = etat
+        e_dec = blocs_erreurs(erreurs_relatives["decaissements"][:n], len(futur), NB_SIM_FLUX, rng)
+        net = niveaux["encaissements"][:, None] * (1 + e_enc) - niveaux["decaissements"][:, None] * (1 + e_dec)
+        sigma_mois = ecart_type_mensuel(g, f.code_calendrier)
+        net = net + rng.normal(0, sigma_mois, NB_SIM_FLUX)[None, :] / len(futur)   # choc mensuel réparti
+        depots_fin = g.encours_depots_devise.iloc[-1]
+        depots = depots_fin + net.cumsum(axis=0)
+        reserve_pct = f.taux_reserve_liquidite_pct / 100
+        position = reserve_pct * depots_fin + net.cumsum(axis=0)          # rééquilibrage au 1er du mois
+        besoin = TAUX_FUITE_LCR * depots
 
-        resultat = pd.DataFrame({"date_prevision": dates_futures.date, "code_filiale": filiale,
-                                 "code_devise": s.code_devise})
+        resultat = pd.DataFrame({"date_prevision": futur.date, "code_filiale": filiale,
+                                 "code_devise": g.code_devise.iloc[-1]})
         for nom, q in QUANTILES.items():
             resultat[f"flux_net_{nom}_devise"] = np.quantile(net, q, axis=1)
             resultat[f"position_{nom}_devise"] = np.quantile(position, q, axis=1)
-        resultat["proba_sous_besoin_liquidite"] = (position < seuil_devise).mean(axis=1)
+            resultat[f"depots_{nom}_devise"] = np.quantile(depots, q, axis=1)
+        resultat["proba_sous_besoin_liquidite"] = (position < besoin).mean(axis=1)
         resultat["modele_encaissements"] = champions["encaissements"]
         resultat["modele_decaissements"] = champions["decaissements"]
         previsions.append(resultat)
-        log.info("  %-3s : champions %s / %s ; position P50 à J+%d = %s %s", filiale,
-                 champions["encaissements"], champions["decaissements"], PREVISION_HORIZON_JOURS,
-                 f"{resultat.position_p50_devise.iloc[-1]:,.0f}".replace(",", " "), s.code_devise)
+
+        # Réserve requise : plus petite réserve (en % des dépôts) qui garde la position au-dessus du
+        # besoin Bâle III tout le mois dans 99 % des trajectoires.
+        manque = ((besoin - net.cumsum(axis=0)) / depots_fin).max(axis=0)     # réserve nécessaire par trajectoire
+        reserve_requise = float(np.quantile(manque, CONFIANCE_RESERVE))
+        liberable = (reserve_pct - reserve_requise) * depots_fin
+        taux = float(f.taux_directeur_pct)
+        reserves.append({
+            "code_filiale": filiale, "code_devise": g.code_devise.iloc[-1], "date_arrete": date_arrete.date(),
+            "encours_depots_devise": depots_fin, "taux_reserve_actuel_pct": 100 * reserve_pct,
+            "reserve_requise_p99_pct": 100 * reserve_requise,
+            "liquidite_liberable_devise": liberable,
+            "liquidite_liberable_eur": liberable / g.taux_eur_jour.iloc[-1],
+            "taux_directeur_pct": taux,
+            "gain_annuel_eur": liberable / g.taux_eur_jour.iloc[-1] * taux / 100,
+            "proba_sous_100_politique_actuelle": float((position < besoin).any(axis=0).mean()),
+        })
+        log.info("  %-3s : champions %s / %s ; réserve requise P99 %.1f %% (actuelle %.0f %%) ; libérable %s EUR",
+                 filiale, champions["encaissements"], champions["decaissements"], 100 * reserve_requise,
+                 100 * reserve_pct, f"{liberable / g.taux_eur_jour.iloc[-1]:,.0f}".replace(",", " "))
 
     prev = pd.concat(previsions, ignore_index=True)
-    prev["date_arrete"] = date_arrete
-    prev["methode_simulation"] = f"Simulation historique ({JOURS_REFERENCE} derniers jours), {PREVISION_NB_SIMULATIONS} trajectoires"
+    prev["date_arrete"] = date_arrete.date()
+    prev["methode_simulation"] = (f"Erreurs du champion rééchantillonnées par blocs de 7 jours, "
+                                  f"{NB_SIM_FLUX} trajectoires")
     bt = pd.concat(backtests, ignore_index=True)
-    bt["date_jour"] = pd.to_datetime(bt["date_jour"]).dt.date
-    return prev, bt
+    return prev, bt, pd.DataFrame(reserves)
 
 
 # ------------------------------------------------------------------------ change
@@ -253,11 +293,12 @@ def lancer_previsions() -> None:
     horodatage_calcul = datetime.now()
 
     log.info("Prévision des flux de trésorerie par filiale...")
-    prev, bt = prevoir_tresorerie(engine, rng)
+    prev, bt, reserves = prevoir_tresorerie(engine, rng)
     log.info("Prévision des taux de change...")
     chg = prevoir_change(engine, rng)
 
-    for nom, df in (("prevision_tresorerie_quotidienne", prev), ("backtest_prevision", bt), ("prevision_change", chg)):
+    for nom, df in (("prevision_tresorerie_quotidienne", prev), ("backtest_prevision", bt),
+                    ("reserve_optimale", reserves), ("prevision_change", chg)):
         df["date_calcul"] = horodatage_calcul
         df.to_sql(nom, engine, schema="ml", if_exists="replace", index=False)
         log.info("ml.%s : %d lignes écrites", nom, len(df))

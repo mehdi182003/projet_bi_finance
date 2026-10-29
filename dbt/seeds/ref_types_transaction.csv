@@ -1,6 +1,7 @@
 code_type,libelle_type,categorie_tresorerie,sens_jambe_emetteur,genere_jambe_beneficiaire,description
 CASH_IN,Dépôt d'espèces,Encaissement,1,false,Le client dépose des espèces : la liquidité de la filiale augmente
+VIREMENT_RECU,Virement reçu d'une autre banque,Encaissement,1,false,Salaires et virements entrants (absents de PaySim ; ajoutés par le générateur ancré sur les dépôts réels)
 CASH_OUT,Retrait d'espèces,Décaissement,-1,false,Le client retire des espèces : la liquidité de la filiale diminue
 DEBIT,Débit vers banque externe,Décaissement,-1,false,Transfert vers un compte dans une autre banque : sortie de liquidité
 PAYMENT,Paiement commerçant,Décaissement,-1,false,Paiement à un commerçant hors groupe : sortie de liquidité
-TRANSFER,Virement entre clients,Virement,-1,true,Débit chez l'émetteur et crédit chez le bénéficiaire ; neutre si même filiale
+TRANSFER,Virement émis,Décaissement,-1,false,Virement vers un client d'une autre banque : sortie de liquidité

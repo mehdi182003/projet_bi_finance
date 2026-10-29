@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "c18624441b080000a73e",
   "position": {
-    "x": 560,
+    "x": 530,
     "y": 10,
     "z": 3000,
     "width": 200,
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Erreur du modèle champion (WAPE)'"
+                  "Value": "'Erreur du champion (WAPE, backtest)'"
                 }
               }
             }

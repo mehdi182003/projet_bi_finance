@@ -20,15 +20,15 @@
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "fct_flux_tresorerie_horaire"
+                      "Entity": "dim_date"
                     }
                   },
-                  "Property": "heure"
+                  "Property": "annee_mois"
                 }
               },
-              "queryRef": "fct_flux_tresorerie_horaire.heure",
-              "nativeQueryRef": "heure",
-              "displayName": "Heure"
+              "queryRef": "dim_date.annee_mois",
+              "nativeQueryRef": "annee_mois",
+              "displayName": "Mois"
             }
           ]
         },
@@ -42,11 +42,25 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Solde net (EUR)"
+                  "Property": "Refinancement levé (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Solde net (EUR)",
-              "nativeQueryRef": "Solde net (EUR)"
+              "queryRef": "_Mesures.Refinancement levé (EUR)",
+              "nativeQueryRef": "Refinancement levé (EUR)"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Excédent placé (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Excédent placé (EUR)",
+              "nativeQueryRef": "Excédent placé (EUR)"
             }
           ]
         }
@@ -66,7 +80,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Profil horaire du solde net (EUR)'"
+                  "Value": "'Opérations de trésorerie de fin de mois : refinancement levé / excédent placé (EUR)'"
                 }
               }
             }

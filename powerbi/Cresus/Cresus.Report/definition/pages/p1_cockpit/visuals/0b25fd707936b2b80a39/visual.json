@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Gain annuel de placement (EUR)"
+                  "Property": "Refinancement levé (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Gain annuel de placement (EUR)",
-              "nativeQueryRef": "Gain annuel de placement (EUR)"
+              "queryRef": "_Mesures.Refinancement levé (EUR)",
+              "nativeQueryRef": "Refinancement levé (EUR)"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Gain annuel de placement'"
+                  "Value": "'Refinancement levé'"
                 }
               }
             }

@@ -1,50 +1,128 @@
 code_devise,banque_centrale,libelle_taux,date_effet,taux_directeur_pct,a_verifier,source
-EUR,BCE,Taux de la facilité de dépôt,2023-09-20,4.00,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2024-06-12,3.75,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2024-09-18,3.50,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2024-10-23,3.25,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2024-12-18,3.00,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2025-02-05,2.75,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2025-03-12,2.50,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2025-04-23,2.25,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-EUR,BCE,Taux de la facilité de dépôt,2025-06-11,2.00,false,https://www.ecb.europa.eu/stats/policy_and_exchange_rates/key_ecb_interest_rates/html/index.fr.html
-USD,Federal Reserve,Fed Funds (borne haute),2023-07-27,5.50,false,https://www.federalreserve.gov/monetarypolicy/openmarket.htm
-USD,Federal Reserve,Fed Funds (borne haute),2024-09-19,5.00,false,https://www.federalreserve.gov/monetarypolicy/openmarket.htm
-USD,Federal Reserve,Fed Funds (borne haute),2024-11-08,4.75,false,https://www.federalreserve.gov/monetarypolicy/openmarket.htm
-USD,Federal Reserve,Fed Funds (borne haute),2024-12-19,4.50,false,https://www.federalreserve.gov/monetarypolicy/openmarket.htm
-USD,Federal Reserve,Fed Funds (borne haute),2025-09-18,4.25,false,https://www.federalreserve.gov/monetarypolicy/openmarket.htm
-USD,Federal Reserve,Fed Funds (borne haute),2025-10-30,4.00,true,https://www.federalreserve.gov/monetarypolicy/openmarket.htm
-CAD,Banque du Canada,Taux directeur,2023-07-12,5.00,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2024-06-05,4.75,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2024-07-24,4.50,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2024-09-04,4.25,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2024-10-23,3.75,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2024-12-11,3.25,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2025-01-29,3.00,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2025-03-12,2.75,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2025-09-17,2.50,false,https://www.banqueducanada.ca/taux/taux-directeur/
-CAD,Banque du Canada,Taux directeur,2025-10-29,2.25,true,https://www.banqueducanada.ca/taux/taux-directeur/
-XOF,BCEAO,Taux minimum de soumission aux appels d'offres,2023-12-16,3.50,true,https://www.bceao.int/fr/content/taux-directeurs-de-la-bceao
-XOF,BCEAO,Taux minimum de soumission aux appels d'offres,2025-06-16,3.25,true,https://www.bceao.int/fr/content/taux-directeurs-de-la-bceao
-XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2023-03-27,5.00,true,https://www.beac.int/
-XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2025-03-24,4.50,true,https://www.beac.int/
-SEK,Riksbank,Taux directeur,2023-09-27,4.00,false,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2024-05-15,3.75,false,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2024-08-21,3.50,true,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2024-10-02,3.25,true,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2024-11-13,2.75,true,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2025-01-31,2.25,true,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2025-06-25,2.00,true,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-SEK,Riksbank,Taux directeur,2025-10-01,1.75,true,https://www.riksbank.se/en-gb/statistics/interest-rates-and-exchange-rates/policy-rate-deposit-and-lending-rate/
-NOK,Norges Bank,Taux directeur,2023-12-15,4.50,false,https://www.norges-bank.no/en/topics/Monetary-policy/Policy-rate/
-NOK,Norges Bank,Taux directeur,2025-06-20,4.25,true,https://www.norges-bank.no/en/topics/Monetary-policy/Policy-rate/
-NOK,Norges Bank,Taux directeur,2025-09-19,4.00,true,https://www.norges-bank.no/en/topics/Monetary-policy/Policy-rate/
-DKK,Danmarks Nationalbank,Taux du compte courant,2023-09-22,3.60,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2024-06-07,3.35,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2024-09-13,3.10,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2024-10-18,2.85,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2024-12-13,2.60,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2025-01-31,2.35,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2025-03-07,2.10,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2025-04-17,1.85,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
-DKK,Danmarks Nationalbank,Taux du compte courant,2025-06-06,1.60,true,https://www.nationalbanken.dk/en/what-we-do/stable-prices-monetary-policy-and-the-danish-economy/official-interest-rates
+CAD,Banque du Canada,Taux directeur,2022-01-04,0.25,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-03-03,0.5,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-04-14,1.0,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-06-02,1.5,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-07-14,2.5,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-09-08,3.25,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-10-27,3.75,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2022-12-08,4.25,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2023-01-26,4.5,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2023-06-08,4.75,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2023-07-13,5.0,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2024-06-06,4.75,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2024-07-25,4.5,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2024-09-05,4.25,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2024-10-24,3.75,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2024-12-12,3.25,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2025-01-30,3.0,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2025-03-13,2.75,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2025-09-18,2.5,False,Banque du Canada Valet V39079
+CAD,Banque du Canada,Taux directeur,2025-10-30,2.25,False,Banque du Canada Valet V39079
+DKK,Danmarks Nationalbank,Taux du compte courant,2022-01-03,-0.6,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2022-07-22,-0.1,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2022-09-09,0.65,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2022-10-28,1.25,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2022-12-16,1.75,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2023-02-03,2.1,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2023-03-17,2.6,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2023-05-08,2.85,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2023-06-16,3.1,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2023-07-28,3.35,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2023-09-15,3.6,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2024-06-07,3.35,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2024-09-13,3.1,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2024-10-18,2.85,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2024-12-13,2.6,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2025-01-31,2.35,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2025-03-07,2.1,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2025-04-22,1.85,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2025-06-06,1.6,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2026-06-12,1.85,False,Statbank DNRENTD
+DKK,Danmarks Nationalbank,Taux du compte courant,2026-09-11,2.1,False,Statbank DNRENTD
+EUR,BCE,Taux de la facilité de dépôt,2022-01-01,-0.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2022-07-27,0.0,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2022-09-14,0.75,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2022-11-02,1.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2022-12-21,2.0,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2023-02-08,2.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2023-03-22,3.0,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2023-05-10,3.25,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2023-06-21,3.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2023-08-02,3.75,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2023-09-20,4.0,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2024-06-12,3.75,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2024-09-18,3.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2024-10-23,3.25,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2024-12-18,3.0,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2025-02-05,2.75,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2025-03-12,2.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2025-04-23,2.25,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2025-06-11,2.0,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2026-06-17,2.25,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+EUR,BCE,Taux de la facilité de dépôt,2026-09-16,2.5,False,API BCE FM.D.U2.EUR.4F.KR.DFR.LEV
+NOK,Norges Bank,Taux directeur,2022-01-03,0.5,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2022-03-25,0.75,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2022-06-24,1.25,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2022-08-19,1.75,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2022-09-23,2.25,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2022-11-04,2.5,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2022-12-16,2.75,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2023-03-24,3.0,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2023-05-05,3.25,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2023-06-23,3.75,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2023-08-18,4.0,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2023-09-22,4.25,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2023-12-15,4.5,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2025-06-20,4.25,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2025-09-19,4.0,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2026-05-08,4.25,False,API Norges Bank IR/B.KPRA.SD.R
+NOK,Norges Bank,Taux directeur,2026-09-25,4.5,False,API Norges Bank IR/B.KPRA.SD.R
+SEK,Riksbank,Taux directeur,2022-01-03,0.0,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2022-05-04,0.25,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2022-07-06,0.75,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2022-09-21,1.75,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2022-11-30,2.5,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2023-02-15,3.0,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2023-05-03,3.5,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2023-07-05,3.75,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2023-09-27,4.0,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2024-05-15,3.75,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2024-08-21,3.5,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2024-10-02,3.25,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2024-11-13,2.75,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2025-01-08,2.5,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2025-02-05,2.25,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2025-06-25,2.0,False,API Riksbank SECBREPOEFF
+SEK,Riksbank,Taux directeur,2025-10-01,1.75,False,API Riksbank SECBREPOEFF
+USD,Federal Reserve,Fed Funds (borne haute),2022-01-01,0.25,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-03-17,0.5,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-05-05,1.0,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-06-16,1.75,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-07-28,2.5,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-09-22,3.25,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-11-03,4.0,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2022-12-15,4.5,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2023-02-02,4.75,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2023-03-23,5.0,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2023-05-04,5.25,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2023-07-27,5.5,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2024-09-19,5.0,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2024-11-08,4.75,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2024-12-19,4.5,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2025-09-18,4.25,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2025-10-30,4.0,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2025-12-11,3.75,False,FRED DFEDTARU
+USD,Federal Reserve,Fed Funds (borne haute),2026-09-17,4.0,False,FRED DFEDTARU
+XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2022-09-26,4.5,False,"beac.int - communiqué CPM du 26 septembre 2022 (relèvement de 4,00 % à 4,50 %)"
+XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2023-03-27,5.0,False,"beac.int - communiqué CPM du 27 mars 2023 (relèvement de 4,50 % à 5,00 %)"
+XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2025-03-24,4.5,False,"beac.int - communiqué CPM du 24 mars 2025 (baisse de 5,00 % à 4,50 % ; maintenu le 29 septembre 2025)"
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2020-06-24,2.0,False,bceao.int - communiqué CPM du 8 décembre 2021 (niveau en vigueur depuis le 24 juin 2020)
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2022-06-16,2.25,False,bceao.int - communiqué CPM du 1er juin 2022
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2022-09-16,2.5,False,bceao.int - communiqué CPM du 14 septembre 2022
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2022-12-16,2.75,True,"déduit : 2,50 % au 16/09/2022 puis +25 pb pour atteindre 3,00 % au 16/03/2023 (date d'effet supposée)"
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2023-03-16,3.0,False,bceao.int - communiqué CPM du 1er mars 2023
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2023-09-16,3.25,False,bceao.int - communiqué CPM du 6 septembre 2023
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2023-12-16,3.5,False,bceao.int - communiqué CPM du 6 décembre 2023
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2025-06-16,3.25,False,bceao.int - communiqué CPM du 4 juin 2025
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2026-03-16,3.0,False,bceao.int - communiqué CPM du 4 mars 2026

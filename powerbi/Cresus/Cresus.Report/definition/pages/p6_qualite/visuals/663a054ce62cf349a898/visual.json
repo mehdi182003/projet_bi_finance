@@ -5,29 +5,30 @@
     "x": 20,
     "y": 10,
     "z": 1000,
-    "width": 200,
-    "height": 110,
+    "width": 240,
+    "height": 60,
     "tabOrder": 1000
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "slicer",
     "query": {
       "queryState": {
         "Values": {
           "projections": [
             {
               "field": {
-                "Measure": {
+                "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "_Mesures"
+                      "Entity": "dim_filiale"
                     }
                   },
-                  "Property": "Taux de détection actuel %"
+                  "Property": "nom_filiale"
                 }
               },
-              "queryRef": "_Mesures.Taux de détection actuel %",
-              "nativeQueryRef": "Taux de détection actuel %"
+              "queryRef": "dim_filiale.nom_filiale",
+              "nativeQueryRef": "nom_filiale",
+              "displayName": "Filiale"
             }
           ]
         }
@@ -47,7 +48,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fraudes détectées par le système actuel'"
+                  "Value": "'Filiale'"
                 }
               }
             }
@@ -57,26 +58,13 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "data": [
         {
           "properties": {
-            "fontSize": {
+            "mode": {
               "expr": {
                 "Literal": {
-                  "Value": "20D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "categoryLabels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
+                  "Value": "'Dropdown'"
                 }
               }
             }

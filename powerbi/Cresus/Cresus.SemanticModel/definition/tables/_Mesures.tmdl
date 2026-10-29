@@ -26,16 +26,6 @@ table _Mesures
 		displayFolder: 1. flux
 		lineageTag: 5b89cf27d9ae7167bf9f
 
-	measure 'Flux intragroupe sortants (EUR)' = CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_intragroupe] = TRUE () )
-		formatString: #,0
-		displayFolder: 1. flux
-		lineageTag: 429ee08aa1adb9427dc4
-
-	measure 'Taux de netting potentiel %' = DIVIDE ( [Flux intragroupe sortants (EUR)], [Décaissements (EUR)] )
-		formatString: 0.0 %
-		displayFolder: 1. flux
-		lineageTag: 96c67d070fd6ac1247a5
-
 	measure 'Décaissements frauduleux (EUR)' = CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_fraude] = TRUE () )
 		formatString: #,0
 		displayFolder: 1. flux
@@ -151,6 +141,25 @@ table _Mesures
 		displayFolder: 3. liquidité, placement, refinancement
 		lineageTag: 3bfd565f7787cc754baf
 
+	measure 'Jours sous 100 %' = CALCULATE ( COUNTROWS ( mart_liquidite_placement ), mart_liquidite_placement[ratio_couverture_liquidite_pct] < 100 )
+		formatString: 0.0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 9e761d4601db37c7b47e
+
+	measure 'Refinancement levé (EUR)' =
+			CALCULATE ( SUM ( fct_position_tresorerie_quotidienne[operation_tresorerie_eur] ),
+			            fct_position_tresorerie_quotidienne[operation_tresorerie_eur] > 0 )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 084f20df1646b5b9fa9b
+
+	measure 'Excédent placé (EUR)' =
+			- CALCULATE ( SUM ( fct_position_tresorerie_quotidienne[operation_tresorerie_eur] ),
+			              fct_position_tresorerie_quotidienne[operation_tresorerie_eur] < 0 )
+		formatString: #,0
+		displayFolder: 3. liquidité, placement, refinancement
+		lineageTag: 4c9df02143bb465e77ae
+
 	measure 'Économie annuelle grâce à l''anticipation (EUR)' =
 			VAR DerniereDate = [Date d'arrêté]
 			RETURN
@@ -247,6 +256,43 @@ table _Mesures
 		formatString: 0.0 %
 		displayFolder: 4. risque de change
 		lineageTag: f62d17df79868a4a74ab
+
+	measure 'Réserve requise P99 %' = AVERAGE ( mart_reserve_optimale[reserve_requise_p99_pct] ) / 100
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: 8457f84a078bdece0c4b
+
+	measure 'Réserve actuelle %' = AVERAGE ( mart_reserve_optimale[taux_reserve_actuel_pct] ) / 100
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: 13a540c8869f6428c918
+
+	measure 'Liquidité libérable ou à lever (EUR)' = SUM ( mart_reserve_optimale[liquidite_liberable_eur] )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: f61a5c133057520ca4a6
+
+	measure 'Gain ou coût annuel de la réserve optimisée (EUR)' = SUM ( mart_reserve_optimale[gain_annuel_eur] )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: 84946b5e0326342a62e4
+
+	measure 'Couverture de l''intervalle à 90 % %' =
+			DIVIDE ( CALCULATE ( COUNTROWS ( mart_controle_a_posteriori ), mart_controle_a_posteriori[dans_intervalle_90] = TRUE () ),
+			         COUNTROWS ( mart_controle_a_posteriori ) )
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: 1cbba8a1e8564eda67b0
+
+	measure 'Erreur médiane absolue sur les dépôts %' = MEDIANX ( mart_controle_a_posteriori, ABS ( mart_controle_a_posteriori[erreur_p50_pct] ) ) / 100
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: 9713dec0e0181863f217
+
+	measure 'Écart max à l''encours réel %' = MAXX ( mart_qualite_ancrage, ABS ( mart_qualite_ancrage[ecart_pct] ) ) / 100
+		formatString: 0.0 %
+		displayFolder: 5. prévision
+		lineageTag: 0d3e5e21450fe88e6485
 
 	measure 'Position prévue P50 (EUR)' = SUM ( mart_prevision_tresorerie[position_p50_eur] )
 		formatString: #,0

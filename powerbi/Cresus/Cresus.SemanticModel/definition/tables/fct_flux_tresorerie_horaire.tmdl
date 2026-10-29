@@ -46,18 +46,6 @@ table fct_flux_tresorerie_horaire
 		summarizeBy: none
 		sourceColumn: code_type
 
-	column role_jambe
-		dataType: string
-		lineageTag: 8b1b2f6703c8af45169b
-		summarizeBy: none
-		sourceColumn: role_jambe
-
-	column est_intragroupe
-		dataType: boolean
-		lineageTag: 0a5c6d5839c6598626ca
-		summarizeBy: none
-		sourceColumn: est_intragroupe
-
 	column est_fraude
 		dataType: boolean
 		lineageTag: fb501660aefddc2a0367

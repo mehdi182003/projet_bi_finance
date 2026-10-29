@@ -2,11 +2,11 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "8ec1a62db15a16a34d89",
   "position": {
-    "x": 20,
-    "y": 450,
+    "x": 660,
+    "y": 130,
     "z": 11000,
-    "width": 820,
-    "height": 250,
+    "width": 600,
+    "height": 280,
     "tabOrder": 11000
   },
   "visual": {
@@ -44,15 +44,34 @@
                           "Entity": "mart_qualite_donnees"
                         }
                       },
-                      "Property": "nb_fraudes"
+                      "Property": "nb_transactions"
                     }
                   },
                   "Function": 0
                 }
               },
-              "queryRef": "Sum(mart_qualite_donnees.nb_fraudes)",
-              "nativeQueryRef": "Somme de nb_fraudes",
-              "displayName": "Fraudes"
+              "queryRef": "Sum(mart_qualite_donnees.nb_transactions)",
+              "nativeQueryRef": "Somme de nb_transactions",
+              "displayName": "Transactions"
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_qualite_donnees"
+                    }
+                  },
+                  "Property": "statut"
+                }
+              },
+              "queryRef": "mart_qualite_donnees.statut",
+              "nativeQueryRef": "statut",
+              "displayName": "Statut"
             }
           ]
         }
@@ -72,7 +91,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Fraudes par jour : constantes alors que le volume s''effondre'"
+                  "Value": "'PaySim (texture) : transactions par jour, retenus / exclus'"
                 }
               }
             }

@@ -1,12 +1,6 @@
 version: 2
 
 models:
-  - name: int_filiales_affectation
-    description: Plages de seaux de hachage (0-9999) attribuées à chaque filiale au prorata de sa clientèle.
-    columns:
-      - name: code_filiale
-        tests: [unique, not_null]
-
   - name: int_taux_change_journalier
     description: Taux EUR->devise pour chaque jour calendaire (report des week-ends, parités fixes CFA).
     tests:
@@ -15,7 +9,7 @@ models:
             colonnes: [date_cours, code_devise]
 
   - name: int_encours_initial
-    description: Encours de dépôts et réserve de liquidité de chaque filiale au premier jour.
+    description: Encours de dépôts réel (x part de marché) et réserve de liquidité de chaque filiale au 31/12/2022.
     columns:
       - name: code_filiale
         tests: [unique, not_null]
@@ -24,9 +18,8 @@ models:
 
   - name: int_mouvements_tresorerie
     description: >
-      Une ligne par jambe de trésorerie (émetteur / bénéficiaire), rattachée à une filiale,
-      valorisée en devise locale et en EUR au cours du jour. Vue (non matérialisée) car
-      volumineuse : elle est agrégée dans fct_flux_tresorerie_horaire.
+      Une ligne par flux (représentant nb_operations opérations), valorisée en devise locale et en EUR
+      au cours du jour. Vue (non matérialisée) car volumineuse : elle est agrégée dans fct_flux_tresorerie_horaire.
     columns:
       - name: sens
         tests:

@@ -110,8 +110,18 @@ models:
       - name: jours_avant_seuil_100pct
         description: 0 si le ratio est déjà sous 100 % ; NULL si la position ne baisse pas.
 
+  - name: mart_qualite_ancrage
+    description: >
+      Fiabilité : à chaque date publiée par une banque centrale, encours réel (x part de marché) vs encours
+      reconstitué par cumul des flux quotidiens. Écart attendu : nul.
+    columns:
+      - name: id_ancrage
+        tests: [unique, not_null]
+      - name: ecart_pct
+        tests: [not_null]
+
   - name: mart_qualite_donnees
-    description: Profil quotidien de PaySim (volume, fraude, cohérence des soldes) et jours retenus / exclus.
+    description: Profil quotidien de PaySim (source de « texture ») et jours retenus / exclus comme matière première.
     columns:
       - name: jour_simulation
         tests: [unique, not_null]
@@ -144,6 +154,16 @@ models:
     description: Précision de chaque modèle candidat (WAPE, MAPE, biais) et champion retenu.
     columns:
       - name: id_qualite
+        tests: [unique, not_null]
+  - name: mart_controle_a_posteriori
+    description: Prévision des dépôts au 31/01/2026 vs encours réels publiés ensuite (test hors échantillon).
+    columns:
+      - name: id_controle
+        tests: [unique, not_null]
+  - name: mart_reserve_optimale
+    description: Réserve requise (P99) vs réserve actuelle par filiale, liquidité libérable et gain annuel au taux réel.
+    columns:
+      - name: id_reserve
         tests: [unique, not_null]
   - name: mart_backtest_journalier
     description: Réel vs prévu, jour par jour, sur la période de backtest.

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "56914ed9a28489e07c1c",
+  "position": {
+    "x": 660,
+    "y": 430,
+    "z": 13000,
+    "width": 600,
+    "height": 270,
+    "tabOrder": 13000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_controle_a_posteriori"
+                    }
+                  },
+                  "Property": "code_filiale"
+                }
+              },
+              "queryRef": "mart_controle_a_posteriori.code_filiale",
+              "nativeQueryRef": "code_filiale",
+              "displayName": "Filiale"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_controle_a_posteriori"
+                    }
+                  },
+                  "Property": "depots_reels_devise"
+                }
+              },
+              "queryRef": "mart_controle_a_posteriori.depots_reels_devise",
+              "nativeQueryRef": "depots_reels_devise",
+              "displayName": "Réel"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_controle_a_posteriori"
+                    }
+                  },
+                  "Property": "depots_p50_devise"
+                }
+              },
+              "queryRef": "mart_controle_a_posteriori.depots_p50_devise",
+              "nativeQueryRef": "depots_p50_devise",
+              "displayName": "Prévu P50"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_controle_a_posteriori"
+                    }
+                  },
+                  "Property": "erreur_p50_pct"
+                }
+              },
+              "queryRef": "mart_controle_a_posteriori.erreur_p50_pct",
+              "nativeQueryRef": "erreur_p50_pct",
+              "displayName": "Erreur %"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_controle_a_posteriori"
+                    }
+                  },
+                  "Property": "dans_intervalle_90"
+                }
+              },
+              "queryRef": "mart_controle_a_posteriori.dans_intervalle_90",
+              "nativeQueryRef": "dans_intervalle_90",
+              "displayName": "Dans [P5 ; P95]"
+            }
+          ]
+        }
+      }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Contrôle a posteriori : dépôts réels au 31/01/2026 vs prévus'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -6,28 +6,29 @@
     "y": 10,
     "z": 2000,
     "width": 200,
-    "height": 110,
+    "height": 60,
     "tabOrder": 2000
   },
   "visual": {
-    "visualType": "card",
+    "visualType": "slicer",
     "query": {
       "queryState": {
         "Values": {
           "projections": [
             {
               "field": {
-                "Measure": {
+                "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "_Mesures"
+                      "Entity": "dim_date"
                     }
                   },
-                  "Property": "Solde net quotidien moyen (EUR)"
+                  "Property": "annee"
                 }
               },
-              "queryRef": "_Mesures.Solde net quotidien moyen (EUR)",
-              "nativeQueryRef": "Solde net quotidien moyen (EUR)"
+              "queryRef": "dim_date.annee",
+              "nativeQueryRef": "annee",
+              "displayName": "Année"
             }
           ]
         }
@@ -47,7 +48,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Solde net quotidien moyen'"
+                  "Value": "'Année'"
                 }
               }
             }
@@ -57,26 +58,13 @@
     },
     "drillFilterOtherVisuals": true,
     "objects": {
-      "labels": [
+      "data": [
         {
           "properties": {
-            "fontSize": {
+            "mode": {
               "expr": {
                 "Literal": {
-                  "Value": "20D"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "categoryLabels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
+                  "Value": "'Dropdown'"
                 }
               }
             }

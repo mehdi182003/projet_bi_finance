@@ -8,6 +8,13 @@ table mart_backtest_journalier
 		summarizeBy: none
 		sourceColumn: id_backtest
 
+	column origine
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 545bdb8fc2fa1e5e37a5
+		summarizeBy: none
+		sourceColumn: origine
+
 	column code_filiale
 		dataType: string
 		lineageTag: 14c1f1e0d703eedd80f5

@@ -1,5 +1,5 @@
 {{ config(tags=['prevision']) }}
--- Précision des modèles de flux sur la période de backtest (jours exclus de l'apprentissage).
+-- Précision des modèles de flux sur le backtest (3 origines : fin sept., oct. et nov. 2025 ; horizon 1 mois).
 --   WAPE  = somme |réel - prévu| / somme réel   (robuste aux jours à faible volume)
 --   MAPE  = moyenne des |réel - prévu| / réel
 --   Biais = somme(prévu - réel) / somme réel   (> 0 : le modèle surestime)

@@ -6,7 +6,7 @@
 {%- endmacro %}
 
 {#- Dernière date (incluse) de la fenêtre d'analyse. -#}
-{% macro date_fin_analyse() -%}
+{% macro date_fin_paysim() -%}
     cast(cast('{{ var("date_debut_paysim") }}' as timestamp)
         + ({{ var("step_fin_analyse") }} - {{ var("step_debut_analyse") }}) * interval '1 hour' as date)
 {%- endmacro %}

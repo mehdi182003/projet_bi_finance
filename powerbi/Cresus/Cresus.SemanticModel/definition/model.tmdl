@@ -26,6 +26,9 @@ ref table mart_prevision_change
 ref table mart_qualite_prevision
 ref table mart_backtest_journalier
 ref table mart_qualite_donnees
+ref table mart_qualite_ancrage
+ref table mart_reserve_optimale
+ref table mart_controle_a_posteriori
 ref table _Mesures
 ref table 'Choc retraits %'
 ref table 'Choc change %'

@@ -82,3 +82,19 @@ relationship 27636d3ff40c926034b0
 	fromColumn: mart_stress_test.code_scenario
 	toColumn: dim_scenario_stress.code_scenario
 
+relationship bd2338b59a7c2c04c1f2
+	fromColumn: mart_qualite_ancrage.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship 22f8b870d3c471e875cd
+	fromColumn: mart_qualite_ancrage.date_ancrage
+	toColumn: dim_date.date_jour
+
+relationship d3f6135434230e174af5
+	fromColumn: mart_reserve_optimale.code_filiale
+	toColumn: dim_filiale.code_filiale
+
+relationship d66f76d01c7097b7fb0e
+	fromColumn: mart_controle_a_posteriori.code_filiale
+	toColumn: dim_filiale.code_filiale
+

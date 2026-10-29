@@ -11,19 +11,17 @@ target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
 vars:
-  # Fenêtre d'analyse retenue dans PaySim (1 step = 1 heure ; 743 steps = 31 jours simulés).
-  # Le profilage des données (docs/06_profil_donnees_et_choix_kpi.md) montre que l'activité n'est
-  # « normale » que les jours 1-2 et 6-17 : ailleurs le volume chute de 94 à 99 % alors que la fraude
-  # reste constante (artefact de simulation). On retient le plus long bloc continu et stable :
-  # jours 6 à 17 = steps 121 à 408 = 12 jours, 77 % des opérations, 80 % des montants (RG-QUA-02).
+  # Période d'analyse : 3 ans de flux de ZF Banque, ancrés sur les dépôts réels publiés par les
+  # banques centrales (etl/generateur_flux.py, docs/07_donnees_3_ans.md).
+  date_debut_analyse: "2023-01-01"
+  date_fin_analyse: "2025-12-31"
+  # --- PaySim : utilisé comme « texture » des opérations (types, montants, heures, fraude).
+  # Seule sa fenêtre d'activité stable est échantillonnée : jours 6 à 17 = steps 121 à 408 (RG-QUA-02).
+  # date_debut_paysim sert uniquement à dater les steps dans la page « Qualité des données ».
   step_debut_analyse: 121
   step_fin_analyse: 408
-  # Date réelle à laquelle on « rejoue » le premier step de la fenêtre d'analyse.
   date_debut_paysim: "2025-09-01"
-  # Valeur d'une unité monétaire PaySim en EUR (calibrage : transaction moyenne ~1 800 EUR).
   valeur_unite_paysim_eur: 0.01
-  # Part des virements (TRANSFER) dont le bénéficiaire est dans la même filiale que l'émetteur.
-  part_virements_domestiques_pct: 85
   # Profondeur d'historique de change conservée (calcul de volatilité).
   annees_historique_change: 3
   # Report maximal (jours) d'un taux non publié (week-end, jour férié). Au-delà : rupture de série.
@@ -32,13 +30,14 @@ vars:
   taux_fuite_depots_lcr_pct: 10
   # Seuil de pilotage interne du ratio de liquidité (marge de prudence au-dessus des 100 % réglementaires).
   seuil_pilotage_lcr_pct: 110
-  # Écart entre refinancement d'urgence (facilité de prêt marginal BCE 2,40 %) et refinancement
-  # programmé (opérations principales 2,15 %) en sept. 2025 : gain d'un besoin anticipé.
+  # Écart entre refinancement d'urgence (facilité de prêt marginal BCE) et refinancement programmé
+  # (opérations principales) : 25 points de base sur toute la période 2023-2025 => gain d'un besoin anticipé.
   ecart_urgence_vs_programme_pct: 0.25
   # Seuil « gros ticket » (EUR) pour le suivi de la concentration des décaissements.
   seuil_gros_ticket_eur: 10000
-  # Fenêtre (jours) pour la moyenne des flux utilisée dans les projections.
-  fenetre_moyenne_flux_jours: 7
+  # Fenêtre (jours) pour la moyenne des flux utilisée dans les projections : un mois complet, pour
+  # lisser le cycle mensuel réel (prélèvements en début de mois, salaires en fin de mois).
+  fenetre_moyenne_flux_jours: 30
   # Marge de refinancement au-dessus du taux directeur (points de pourcentage).
   marge_refinancement_pct: 0.50
   # Quantile de la loi normale pour la VaR à 95 %.
@@ -61,7 +60,7 @@ seeds:
     +schema: referentiel
     ref_filiales:
       +column_types:
-        poids_clientele_pct: numeric
+        part_de_marche_depots_pct: numeric
         taux_reserve_liquidite_pct: numeric
         ordre_affichage: integer
     ref_devises:

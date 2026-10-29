@@ -1,0 +1,103 @@
+table mart_reserve_optimale
+	lineageTag: a6d9164aec6d8197bd36
+
+	column id_reserve
+		dataType: string
+		isHidden
+		lineageTag: 446dbe9f5a4d3247adb0
+		summarizeBy: none
+		sourceColumn: id_reserve
+
+	column code_filiale
+		dataType: string
+		lineageTag: 54884dbbb597b298bc92
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column code_devise
+		dataType: string
+		lineageTag: eb501c539226ee5089cf
+		summarizeBy: none
+		sourceColumn: code_devise
+
+	column date_arrete
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: bfbf7dd3f4f347bb0d89
+		summarizeBy: none
+		sourceColumn: date_arrete
+
+	column encours_depots_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: f584132ced6062a348d2
+		summarizeBy: sum
+		sourceColumn: encours_depots_devise
+
+	column taux_reserve_actuel_pct
+		dataType: double
+		lineageTag: a9af45a7476d37b8c03c
+		summarizeBy: none
+		sourceColumn: taux_reserve_actuel_pct
+
+	column reserve_requise_p99_pct
+		dataType: double
+		lineageTag: aee8f86b06521b6b1b01
+		summarizeBy: none
+		sourceColumn: reserve_requise_p99_pct
+
+	column ecart_reserve_pts
+		dataType: double
+		formatString: #,0
+		lineageTag: 28f9b4ff641cf260bfe9
+		summarizeBy: sum
+		sourceColumn: ecart_reserve_pts
+
+	column liquidite_liberable_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 6393d6a18349e283acbe
+		summarizeBy: sum
+		sourceColumn: liquidite_liberable_devise
+
+	column liquidite_liberable_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 019af0c6a5389998e92a
+		summarizeBy: sum
+		sourceColumn: liquidite_liberable_eur
+
+	column taux_directeur_pct
+		dataType: double
+		lineageTag: 6aafe75a35b0133d69cf
+		summarizeBy: none
+		sourceColumn: taux_directeur_pct
+
+	column gain_annuel_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 19bf3209797c922427f9
+		summarizeBy: sum
+		sourceColumn: gain_annuel_eur
+
+	column proba_sous_100_politique_actuelle
+		dataType: double
+		lineageTag: 29ded2c4746efb8008a1
+		summarizeBy: none
+		sourceColumn: proba_sous_100_politique_actuelle
+
+	column diagnostic
+		dataType: string
+		lineageTag: 4430bbb472d5bd7d0b5f
+		summarizeBy: none
+		sourceColumn: diagnostic
+
+	partition mart_reserve_optimale = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_reserve_optimale"]}[Data]
+				in
+				    Donnees
+

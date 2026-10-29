@@ -19,10 +19,10 @@ cotations as (
 
 bornes as (
     select
-        cast('{{ var("date_debut_paysim") }}' as date) - interval '{{ var("annees_historique_change") }} years' as date_min,
+        cast('{{ var("date_debut_analyse") }}' as date) - interval '{{ var("annees_historique_change") }} years' as date_min,
         greatest(
             (select max(date_cours) from cotations),
-            cast('{{ var("date_debut_paysim") }}' as date) + 90
+            cast('{{ var("date_fin_analyse") }}' as date) + 90
         ) as date_max
 ),
 

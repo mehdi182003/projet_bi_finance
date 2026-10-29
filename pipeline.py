@@ -1,7 +1,9 @@
 """Orchestrateur du POC Crésus : python pipeline.py [--demo] [--etapes ...]
 
 Étapes (dans l'ordre) :
-  extract   : récupère PaySim (Kaggle) et les taux BCE dans data/raw/
+  extract   : récupère PaySim (Kaggle), les cours BCE (Webstat) et les séries réelles des banques
+              centrales (dépôts, taux directeurs ; mises en cache dans data/sources/)
+  generer   : construit les flux 2023-2025 de ZF Banque ancrés sur les dépôts réels (etl/generateur_flux.py)
   load      : crée le schéma raw et charge les fichiers dans PostgreSQL (COPY)
   dbt       : référentiels (seeds) + modèles staging/intermediate/marts + tests
   prevision : modèles prédictifs Python (Holt-Winters + Monte-Carlo) -> schéma ml
@@ -9,7 +11,7 @@
 
 Exemples :
   python pipeline.py                  # tout, avec les vraies données
-  python pipeline.py --demo           # transactions synthétiques + vrais taux Webstat (test rapide)
+  python pipeline.py --demo           # texture PaySim synthétique (test hors Kaggle) ; séries réelles conservées
   python pipeline.py --etapes dbt prevision dbt_prev
 """
 from __future__ import annotations
@@ -23,7 +25,7 @@ import time
 
 from etl.config import DOSSIER_DBT
 
-ETAPES = ["extract", "load", "dbt", "prevision", "dbt_prev"]
+ETAPES = ["extract", "generer", "load", "dbt", "prevision", "dbt_prev"]
 log = logging.getLogger("cresus")
 
 
@@ -59,32 +61,50 @@ def main() -> None:
             from etl.extraction_paysim import extraire_paysim
             fichier_paysim = extraire_paysim()
         fichier_taux = extraire_taux_bce()
+        from etl.sources_reelles import assurer_cache
+        assurer_cache()
+
+    if fichier_paysim is None:  # étape extract sautée : on reprend les fichiers existants
+        from etl.config import DOSSIER_DEMO
+        from etl.extraction_bce import FICHIER_SORTIE
+        from etl.extraction_paysim import trouver_fichier_paysim
+        fichier_paysim = DOSSIER_DEMO / "paysim_demo.csv" if args.demo else trouver_fichier_paysim()
+        fichier_taux = FICHIER_SORTIE
+
+    if "generer" in args.etapes:
+        log.info("=== 2. FLUX 2023-2025 ANCRÉS SUR LES DÉPÔTS RÉELS ===")
+        from etl.generateur_flux import generer
+        generer(fichier_paysim)
 
     if "load" in args.etapes:
-        log.info("=== 2. LOAD (PostgreSQL, schéma raw) ===")
-        from etl.chargement_raw import charger_paysim, charger_taux_bce, creer_schema_raw
-        if fichier_paysim is None:  # étape extract sautée : on reprend les fichiers existants
-            from etl.config import DOSSIER_DEMO
-            from etl.extraction_bce import FICHIER_SORTIE
-            from etl.extraction_paysim import trouver_fichier_paysim
-            fichier_paysim = DOSSIER_DEMO / "paysim_demo.csv" if args.demo else trouver_fichier_paysim()
-            fichier_taux = FICHIER_SORTIE
+        log.info("=== 3. LOAD (PostgreSQL, schéma raw) ===")
+        from etl.chargement_raw import (charger_ancrages, charger_paysim, charger_taux_bce,
+                                        charger_transactions_zf, creer_schema_raw)
+        from etl.generateur_flux import FICHIER_ANCRAGES, FICHIER_TRANSACTIONS
         creer_schema_raw()
         charger_paysim(fichier_paysim)
+        charger_transactions_zf(FICHIER_TRANSACTIONS)
+        charger_ancrages(FICHIER_ANCRAGES)
         charger_taux_bce(fichier_taux)
 
     if "dbt" in args.etapes:
-        log.info("=== 3. TRANSFORM (dbt : seeds, modèles, tests) ===")
+        log.info("=== 4. TRANSFORM (dbt : seeds, modèles, tests) ===")
         executer_dbt("source", "freshness", bloquant=False)   # alerte si l'export Webstat est ancien
         executer_dbt("build", "--exclude", "tag:prevision")
 
     if "prevision" in args.etapes:
-        log.info("=== 4. ANALYSE PRÉDICTIVE (Python) ===")
+        log.info("=== 5. ANALYSE PRÉDICTIVE (Python) ===")
         from etl.prevision import lancer_previsions
         lancer_previsions()
+        log.info("Contrôle a posteriori sur les dépôts réels de janvier 2026...")
+        try:
+            from etl.controle_a_posteriori import controler
+            controler()
+        except Exception as exc:          # sans Internet : on continue sans ce contrôle
+            log.warning("Contrôle a posteriori ignoré : %s", exc)
 
     if "dbt_prev" in args.etapes:
-        log.info("=== 5. MARTS DE PRÉVISION (dbt) ===")
+        log.info("=== 6. MARTS DE PRÉVISION (dbt) ===")
         executer_dbt("build", "--select", "tag:prevision")
 
     log.info("Pipeline terminé en %.1f min. Ouvrir Power BI et se connecter au schéma 'marts'.", (time.time() - debut) / 60)

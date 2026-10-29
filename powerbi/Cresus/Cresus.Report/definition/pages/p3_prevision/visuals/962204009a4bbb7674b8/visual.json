@@ -2,96 +2,93 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "962204009a4bbb7674b8",
   "position": {
-    "x": 780,
-    "y": 480,
+    "x": 20,
+    "y": 430,
     "z": 12000,
-    "width": 480,
-    "height": 220,
+    "width": 620,
+    "height": 270,
     "tabOrder": 12000
   },
   "visual": {
-    "visualType": "clusteredColumnChart",
+    "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Category": {
+        "Values": {
           "projections": [
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "mart_backtest_journalier"
+                      "Entity": "dim_filiale"
                     }
                   },
-                  "Property": "date_jour"
+                  "Property": "nom_filiale"
                 }
               },
-              "queryRef": "mart_backtest_journalier.date_jour",
-              "nativeQueryRef": "date_jour",
-              "displayName": "Date"
-            }
-          ]
-        },
-        "Y": {
-          "projections": [
-            {
-              "field": {
-                "Aggregation": {
-                  "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_backtest_journalier"
-                        }
-                      },
-                      "Property": "reel_devise"
-                    }
-                  },
-                  "Function": 0
-                }
-              },
-              "queryRef": "Sum(mart_backtest_journalier.reel_devise)",
-              "nativeQueryRef": "Somme de reel_devise",
-              "displayName": "Réel"
+              "queryRef": "dim_filiale.nom_filiale",
+              "nativeQueryRef": "nom_filiale",
+              "displayName": "Filiale"
             },
             {
               "field": {
-                "Aggregation": {
+                "Column": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_backtest_journalier"
-                        }
-                      },
-                      "Property": "prevu_devise"
+                    "SourceRef": {
+                      "Entity": "mart_reserve_optimale"
                     }
                   },
-                  "Function": 0
+                  "Property": "taux_reserve_actuel_pct"
                 }
               },
-              "queryRef": "Sum(mart_backtest_journalier.prevu_devise)",
-              "nativeQueryRef": "Somme de prevu_devise",
-              "displayName": "Prévu"
-            }
-          ]
-        },
-        "Series": {
-          "projections": [
+              "queryRef": "mart_reserve_optimale.taux_reserve_actuel_pct",
+              "nativeQueryRef": "taux_reserve_actuel_pct",
+              "displayName": "Réserve actuelle %"
+            },
             {
               "field": {
                 "Column": {
                   "Expression": {
                     "SourceRef": {
-                      "Entity": "mart_backtest_journalier"
+                      "Entity": "mart_reserve_optimale"
                     }
                   },
-                  "Property": "modele"
+                  "Property": "reserve_requise_p99_pct"
                 }
               },
-              "queryRef": "mart_backtest_journalier.modele",
-              "nativeQueryRef": "modele",
-              "displayName": "Modèle"
+              "queryRef": "mart_reserve_optimale.reserve_requise_p99_pct",
+              "nativeQueryRef": "reserve_requise_p99_pct",
+              "displayName": "Réserve requise %"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_reserve_optimale"
+                    }
+                  },
+                  "Property": "liquidite_liberable_eur"
+                }
+              },
+              "queryRef": "mart_reserve_optimale.liquidite_liberable_eur",
+              "nativeQueryRef": "liquidite_liberable_eur",
+              "displayName": "Libérable (+) / à lever (-)"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "mart_reserve_optimale"
+                    }
+                  },
+                  "Property": "diagnostic"
+                }
+              },
+              "queryRef": "mart_reserve_optimale.diagnostic",
+              "nativeQueryRef": "diagnostic",
+              "displayName": "Diagnostic"
             }
           ]
         }
@@ -111,7 +108,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Réel vs prévu (choisir une filiale)'"
+                  "Value": "'Réserve requise (P99) pour le mois prévu vs réserve actuelle'"
                 }
               }
             }

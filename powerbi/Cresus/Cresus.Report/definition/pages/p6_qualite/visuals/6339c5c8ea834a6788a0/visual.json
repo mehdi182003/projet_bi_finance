@@ -2,18 +2,18 @@
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "6339c5c8ea834a6788a0",
   "position": {
-    "x": 860,
-    "y": 140,
+    "x": 660,
+    "y": 420,
     "z": 12000,
-    "width": 400,
-    "height": 560,
+    "width": 600,
+    "height": 280,
     "tabOrder": 12000
   },
   "visual": {
-    "visualType": "tableEx",
+    "visualType": "clusteredColumnChart",
     "query": {
       "queryState": {
-        "Values": {
+        "Category": {
           "projections": [
             {
               "field": {
@@ -29,22 +29,11 @@
               "queryRef": "mart_qualite_donnees.jour_simulation",
               "nativeQueryRef": "jour_simulation",
               "displayName": "Jour"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "mart_qualite_donnees"
-                    }
-                  },
-                  "Property": "statut"
-                }
-              },
-              "queryRef": "mart_qualite_donnees.statut",
-              "nativeQueryRef": "statut",
-              "displayName": "Statut"
-            },
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
             {
               "field": {
                 "Aggregation": {
@@ -55,30 +44,15 @@
                           "Entity": "mart_qualite_donnees"
                         }
                       },
-                      "Property": "nb_transactions"
+                      "Property": "nb_fraudes"
                     }
                   },
                   "Function": 0
                 }
               },
-              "queryRef": "Sum(mart_qualite_donnees.nb_transactions)",
-              "nativeQueryRef": "Somme de nb_transactions",
-              "displayName": "Transactions"
-            },
-            {
-              "field": {
-                "Column": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "mart_qualite_donnees"
-                    }
-                  },
-                  "Property": "volume_vs_median_pct"
-                }
-              },
-              "queryRef": "mart_qualite_donnees.volume_vs_median_pct",
-              "nativeQueryRef": "volume_vs_median_pct",
-              "displayName": "% du volume médian"
+              "queryRef": "Sum(mart_qualite_donnees.nb_fraudes)",
+              "nativeQueryRef": "Somme de nb_fraudes",
+              "displayName": "Fraudes"
             }
           ]
         }
@@ -98,7 +72,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Détail par jour'"
+                  "Value": "'PaySim : fraudes par jour, constantes quand le volume s''effondre (artefact)'"
                 }
               }
             }

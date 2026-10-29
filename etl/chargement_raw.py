@@ -48,3 +48,13 @@ def charger_paysim(fichier: Path) -> int:
 
 def charger_taux_bce(fichier: Path) -> int:
     return _copier(fichier, "raw.bce_taux_change", "date_cours, code_devise, taux, source")
+
+
+def charger_transactions_zf(fichier: Path) -> int:
+    return _copier(fichier, "raw.transactions_zf",
+                   "horodatage, code_filiale, code_type, montant_devise, poids, id_client, est_fraude")
+
+
+def charger_ancrages(fichier: Path) -> int:
+    return _copier(fichier, "raw.ancrages_zf",
+                   "code_filiale, date_ancrage, encours_zf_devise, est_point_initial, est_interpole, source")

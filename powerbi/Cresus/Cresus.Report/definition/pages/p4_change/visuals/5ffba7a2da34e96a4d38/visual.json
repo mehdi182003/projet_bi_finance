@@ -42,11 +42,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Exposition au change (EUR)"
+                  "Property": "Effet de change cumulé (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Exposition au change (EUR)",
-              "nativeQueryRef": "Exposition au change (EUR)"
+              "queryRef": "_Mesures.Effet de change cumulé (EUR)",
+              "nativeQueryRef": "Effet de change cumulé (EUR)"
             }
           ]
         }
@@ -66,7 +66,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Exposition au change par devise (EUR)'"
+                  "Value": "'Effet de change cumulé par devise (EUR)'"
                 }
               }
             }

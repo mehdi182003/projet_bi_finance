@@ -1,0 +1,78 @@
+table mart_qualite_ancrage
+	lineageTag: 0e36f0ac7f5ac9cae93a
+
+	column id_ancrage
+		dataType: string
+		isHidden
+		lineageTag: 616c7d275dba8939f21c
+		summarizeBy: none
+		sourceColumn: id_ancrage
+
+	column code_filiale
+		dataType: string
+		lineageTag: c78a44e0b6c6ec535203
+		summarizeBy: none
+		sourceColumn: code_filiale
+
+	column date_ancrage
+		dataType: dateTime
+		formatString: dd/mm/yyyy
+		lineageTag: 8fff80552109866f5865
+		summarizeBy: none
+		sourceColumn: date_ancrage
+
+	column source_depots
+		dataType: string
+		lineageTag: 455bb9826192802927e2
+		summarizeBy: none
+		sourceColumn: source_depots
+
+	column est_interpole
+		dataType: boolean
+		lineageTag: 2811acfbc1d054f4fa15
+		summarizeBy: none
+		sourceColumn: est_interpole
+
+	column encours_reel_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: e3a652dd1997ee529b5a
+		summarizeBy: sum
+		sourceColumn: encours_reel_devise
+
+	column encours_reconstitue_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: a6bb33b75260d70d2973
+		summarizeBy: sum
+		sourceColumn: encours_reconstitue_devise
+
+	column ecart_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: b55a67b13eb6f99fe036
+		summarizeBy: sum
+		sourceColumn: ecart_devise
+
+	column ecart_pct
+		dataType: double
+		lineageTag: 77865400bc7808493e4c
+		summarizeBy: none
+		sourceColumn: ecart_pct
+
+	column encours_reconstitue_eur
+		dataType: double
+		formatString: #,0
+		lineageTag: 610bb4f0097b3d12beff
+		summarizeBy: sum
+		sourceColumn: encours_reconstitue_eur
+
+	partition mart_qualite_ancrage = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database(ServeurPostgres, BasePostgres),
+				    Donnees = Source{[Schema="marts",Item="mart_qualite_ancrage"]}[Data]
+				in
+				    Donnees
+

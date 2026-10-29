@@ -1,0 +1,495 @@
+code_filiale,date_ancrage,encours,est_interpole,source
+FR,2022-12-31,1307883000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-01-31,1249629000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-02-28,1235759000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-03-31,1217708000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-04-30,1205552000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-05-31,1190656000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-06-30,1191208000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-07-31,1181638000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-08-31,1165446000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-09-30,1160735000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-10-31,1121743000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-11-30,1128088000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2023-12-31,1138279000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-01-31,1100041000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-02-29,1093774000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-03-31,1093231000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-04-30,1093569000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-05-31,1088979000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-06-30,1108926000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-07-31,1110382000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-08-31,1101240000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-09-30,1092266000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-10-31,1075340000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-11-30,1093065000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2024-12-31,1105610000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-01-31,1079060000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-02-28,1081002000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-03-31,1092594000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-04-30,1096394000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-05-31,1101019000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-06-30,1110536000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-07-31,1119391000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-08-31,1116416000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-09-30,1112876000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-10-31,1103114000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-11-30,1112889000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FR,2025-12-31,1129677000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2022-12-31,241168000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-01-31,231606000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-02-28,227760000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-03-31,222984000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-04-30,217436000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-05-31,219051000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-06-30,214865000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-07-31,208581000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-08-31,208942000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-09-30,198108000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-10-31,195784000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-11-30,196570000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2023-12-31,194384000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-01-31,190179000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-02-29,190592000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-03-31,189469000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-04-30,189806000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-05-31,194032000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-06-30,195847000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-07-31,194401000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-08-31,197488000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-09-30,194947000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-10-31,192900000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-11-30,196261000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2024-12-31,200724000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-01-31,195496000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-02-28,198788000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-03-31,203471000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-04-30,200977000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-05-31,207620000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-06-30,211834000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-07-31,206164000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-08-31,205244000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-09-30,213060000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-10-31,208606000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-11-30,210766000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+BNL,2025-12-31,215349000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2022-12-31,143177000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-01-31,133207000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-02-28,130068000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-03-31,129178000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-04-30,129364000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-05-31,126611000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-06-30,127250000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-07-31,124424000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-08-31,121726000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-09-30,121961000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-10-31,118942000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-11-30,118403000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2023-12-31,119954000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-01-31,115599000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-02-29,113328000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-03-31,115825000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-04-30,113527000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-05-31,113675000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-06-30,114470000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-07-31,111299000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-08-31,113393000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-09-30,113291000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-10-31,114153000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-11-30,115623000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2024-12-31,116348000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-01-31,115114000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-02-28,114614000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-03-31,116983000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-04-30,116030000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-05-31,118022000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-06-30,117033000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-07-31,116886000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-08-31,117770000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-09-30,117855000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-10-31,119253000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-11-30,120582000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+FI,2025-12-31,121405000000.0,False,"BCE BSI - dépôts à vue ménages + SNF (L21, 2250+2240)"
+US,2022-12-07,17905012000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2022-12-14,17974869000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2022-12-21,17958156000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2022-12-28,17944410000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-01-04,17918121000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-01-11,17797666000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-01-18,17758589000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-01-25,17634506000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-02-01,17679323000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-02-08,17625802000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-02-15,17670202000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-02-22,17613595000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-03-01,17683258000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-03-08,17639001000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-03-15,17515503000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-03-22,17333789000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-03-29,17366312999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-04-05,17432639000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-04-12,17383276000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-04-19,17230865000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-04-26,17106447000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-05-03,17173474999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-05-10,17117418000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-05-17,17149097000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-05-24,17116271000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-05-31,17305614000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-06-07,17218312000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-06-14,17262481000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-06-21,17199661000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-06-28,17262154999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-07-05,17356199000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-07-12,17259239000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-07-19,17234001000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-07-26,17203914000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-08-02,17328162000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-08-09,17316035000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-08-16,17310095000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-08-23,17247577000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-08-30,17285376000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-09-06,17338357000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-09-13,17322198000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-09-20,17237710000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-09-27,17282650000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-10-04,17319705999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-10-11,17341100999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-10-18,17213900000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-10-25,17191676000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-11-01,17345939999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-11-08,17306308000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-11-15,17406826000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-11-22,17364597000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-11-29,17392007000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-12-06,17457386999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-12-13,17534601999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-12-20,17596557000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2023-12-27,17617027000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-01-03,17583949000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-01-10,17505148000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-01-17,17514045999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-01-24,17338833999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-01-31,17484117999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-02-07,17429025000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-02-14,17482295999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-02-21,17406642000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-02-28,17492471000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-03-06,17570848000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-03-13,17615947000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-03-20,17577737000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-03-27,17690177000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-04-03,17703194000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-04-10,17723128000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-04-17,17467842000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-04-24,17444788000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-05-01,17522170999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-05-08,17452595000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-05-15,17522447000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-05-22,17413133000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-05-29,17505267000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-06-05,17555966000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-06-12,17564744999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-06-19,17541140000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-06-26,17526577000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-07-03,17569196000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-07-10,17541170999999.998,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-07-17,17529006000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-07-24,17472991000000.002,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-07-31,17664775000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-08-07,17592264000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-08-14,17662242000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-08-21,17577697000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-08-28,17637350000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-09-04,17752583000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-09-11,17737327000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-09-18,17671031000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-09-25,17651969000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-10-02,17777368000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-10-09,17720669000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-10-16,17790563000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-10-23,17660976000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-10-30,17808472000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-11-06,17813653000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-11-13,17870548000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-11-20,17796012000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-11-27,17934717000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-12-04,17939838000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-12-11,17990614000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-12-18,18013293000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2024-12-25,18047887000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-01-01,17959379000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-01-08,18001793000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-01-15,18012640000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-01-22,17918990000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-01-29,17875038000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-02-05,17888739000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-02-12,17896293000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-02-19,17926916000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-02-26,17943304000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-03-05,18017670000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-03-12,18068963000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-03-19,18059808000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-03-26,18124911000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-04-02,18261437000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-04-09,18235634000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-04-16,18155861000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-04-23,17955796000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-04-30,18048314000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-05-07,18017822000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-05-14,18075711000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-05-21,18007579000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-05-28,18086474000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-06-04,18157712000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-06-11,18190790000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-06-18,18124775000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-06-25,18168979000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-07-02,18316378000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-07-09,18222492000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-07-16,18248154000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-07-23,18178544000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-07-30,18285364000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-08-06,18281892000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-08-13,18360011000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-08-20,18271385000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-08-27,18306993000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-09-03,18418431000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-09-10,18430856000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-09-17,18334780000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-09-24,18312121000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-10-01,18509892000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-10-08,18413171000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-10-15,18509278000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-10-22,18359040000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-10-29,18388729000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-11-05,18397496000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-11-12,18543373000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-11-19,18462701000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-11-26,18572634000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-12-03,18601803000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-12-10,18660773000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-12-17,18752590000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-12-24,18806168000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+US,2025-12-31,18732678000000.0,False,"Fed H.8 via FRED - DPSACBW027NBOG (hebdo, non CVS)"
+CA,2022-12-31,1551762000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-01-31,1527355000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-02-28,1520632000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-03-31,1500770000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-04-30,1504233000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-05-31,1502342000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-06-30,1504959000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-07-31,1510109000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-08-31,1510896000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-09-30,1510922000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-10-31,1513599000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-11-30,1520805000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2023-12-31,1506382000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-01-31,1487120000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-02-29,1495079000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-03-31,1496618000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-04-30,1523379000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-05-31,1541560000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-06-30,1556711000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-07-31,1560101000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-08-31,1560173000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-09-30,1568095000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-10-31,1596580000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-11-30,1614679000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2024-12-31,1625047000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-01-31,1631612000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-02-28,1639883000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-03-31,1634954000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-04-30,1648816000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-05-31,1665961000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-06-30,1681229000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-07-31,1685943000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-08-31,1702459000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-09-30,1706925000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-10-31,1735135000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-11-30,1752770000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+CA,2025-12-31,1749525000000.0,False,Banque du Canada - V37258 M1+ brut non CVS
+SE,2022-12-31,4326514000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-01-31,4360047000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-02-28,4232943000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-03-31,4155927000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-04-30,4137953000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-05-31,4079857000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-06-30,4094376000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-07-31,4053737000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-08-31,4013874000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-09-30,3961708000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-10-31,3911633000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-11-30,3933199000000.0,False,"SCB (Suède) - M1, encours"
+SE,2023-12-31,3963122000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-01-31,3910520000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-02-29,3824251000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-03-31,3844091000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-04-30,3843881000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-05-31,3824570000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-06-30,3900206000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-07-31,3851120000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-08-31,3813365000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-09-30,3899351000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-10-31,3866205000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-11-30,3907094000000.0,False,"SCB (Suède) - M1, encours"
+SE,2024-12-31,3990594000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-01-31,4029824000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-02-28,4014058000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-03-31,4050043000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-04-30,4111492000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-05-31,4091387000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-06-30,4116745000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-07-31,4090790000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-08-31,4037394000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-09-30,4104050000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-10-31,4073126000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-11-30,4055490000000.0,False,"SCB (Suède) - M1, encours"
+SE,2025-12-31,4118476000000.0,False,"SCB (Suède) - M1, encours"
+DK,2022-12-31,1224719200000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-01-31,1206646900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-02-28,1214257100000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-03-31,1199351000000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-04-30,1199883200000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-05-31,1200085300000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-06-30,1212818400000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-07-31,1194682700000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-08-31,1203083900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-09-30,1197816500000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-10-31,1179974000000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-11-30,1176759400000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2023-12-31,1183063600000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-01-31,1172330500000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-02-29,1180955900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-03-31,1166396700000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-04-30,1162344900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-05-31,1176414700000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-06-30,1190830600000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-07-31,1186926500000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-08-31,1203579700000.0002,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-09-30,1200710200000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-10-31,1200683500000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-11-30,1221051600000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2024-12-31,1231249900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-01-31,1214841200000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-02-28,1241388600000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-03-31,1244631700000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-04-30,1235185000000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-05-31,1266765900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-06-30,1282403500000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-07-31,1283148600000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-08-31,1301292900000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-09-30,1299765799999.9998,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-10-31,1306861000000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-11-30,1317842800000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+DK,2025-12-31,1328877100000.0,False,Danmarks Nationalbank - DNRUIPI dépôts transférables SNF + ménages
+NO,2022-12-31,2773329000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-01-31,2835016000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-02-28,2757823000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-03-31,2821274000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-04-30,2769166000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-05-31,2799306000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-06-30,2725215000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-07-31,2756473000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-08-31,2686680000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-09-30,2702114000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-10-31,2660274000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-11-30,2691865000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2023-12-31,2635703000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-01-31,2643837000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-02-29,2591531000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-03-31,2656346000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-04-30,2649732000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-05-31,2720279000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-06-30,2749619000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-07-31,2749328000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-08-31,2732278000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-09-30,2702497000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-10-31,2712488000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-11-30,2769443000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2024-12-31,2715374000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-01-31,2779815000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-02-28,2752432000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-03-31,2828805000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-04-30,2833175000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-05-31,2890727000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-06-30,2930001000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-07-31,2959238000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-08-31,2928795000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-09-30,2902072000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-10-31,2914189000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-11-30,2950008000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+NO,2025-12-31,2939830000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2022-12-31,8192156000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-01-31,8130387000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-02-28,8141630000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-03-31,8140371000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-04-30,8100884000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-05-31,8250073000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-06-30,8217154000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-07-31,7955045000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-08-31,7902399000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-09-30,7968708000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-10-31,8115649000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-11-30,8229356000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2023-12-31,8340466000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-01-31,8019397000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-02-29,8213430000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-03-31,8306950000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-04-30,8260578000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-05-31,8396617000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-06-30,8470759000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-07-31,8340034000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-08-31,8968446000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-09-30,8707766000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-10-31,8800944000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-11-30,9267539000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2024-12-31,9978316000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-01-31,9922246000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-02-28,10224807000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-03-31,10293020000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-04-30,10248653000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-05-31,10562371000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-06-30,10508750000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-07-31,10458312000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-08-31,10324144000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-09-30,10754684000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-10-31,10538912000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-11-30,11182001000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CI,2025-12-31,11986529000000.0,False,FMI MFS - dépôts transférables inclus dans la masse monétaire (F22)
+CM,2022-12-31,3719262000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls (fin 2022 révisée)
+CM,2023-01-31,3656121000000.0,False,BEAC - bulletin CAMEROUN_2023.xls (provisoire)
+CM,2023-02-28,3671786000000.0,False,BEAC - bulletin CAMEROUN_2023.xls (provisoire)
+CM,2023-03-31,3785274000000.0,False,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-04-30,3878605000000.0,False,BEAC - bulletin CAMEROUN_2023.xls (provisoire)
+CM,2023-05-31,3959335000000.0,False,BEAC - bulletin CAMEROUN_2023.xls (provisoire)
+CM,2023-06-30,3740585000000.0,False,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-07-31,3768572666666.6665,True,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-08-31,3796560333333.3335,True,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-09-30,3824548000000.0,False,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-10-31,3729724666666.6665,True,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-11-30,3634901333333.3335,True,BEAC - bulletin CAMEROUN_2025.xls (révisé)
+CM,2023-12-31,3540078000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls (révisé)
+CM,2024-01-31,3720642000000.0,False,BEAC - bulletin CAMEROUN_2024.xls
+CM,2024-02-29,3708169000000.0,False,BEAC - bulletin CAMEROUN_2024.xls
+CM,2024-03-31,3708169000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2024-04-30,3859446000000.0,False,BEAC - bulletin CAMEROUN_2024.xls
+CM,2024-05-31,3952583000000.0,False,BEAC - bulletin CAMEROUN_2024.xls
+CM,2024-06-30,4087468000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2024-07-31,3991720000000.0,False,BEAC - bulletin CAMEROUN_2024.xls
+CM,2024-08-31,4059788000000.0,False,BEAC - bulletin CAMEROUN_2024.xls
+CM,2024-09-30,3951875000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2024-10-31,4040990000000.0,True,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2024-11-30,4130105000000.0,True,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2024-12-31,4219220000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-01-31,4323927000000.0,False,BEAC - bulletin CAMEROUN_2025.xls
+CM,2025-02-28,4407180000000.0,False,BEAC - bulletin CAMEROUN_2025.xls
+CM,2025-03-31,4341205000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-04-30,4502362000000.0,False,BEAC - bulletin CAMEROUN_2025.xls
+CM,2025-05-31,4488054000000.0,False,BEAC - bulletin CAMEROUN_2025.xls
+CM,2025-06-30,4485737300000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-07-31,4504452800000.0,True,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-08-31,4523168300000.0,True,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-09-30,4541883800000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-10-31,4654189866666.667,True,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-11-30,4766495933333.333,True,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls
+CM,2025-12-31,4878802000000.0,False,BEAC - bulletin BULLETIN_CAMEROUN_mars-2026.xls

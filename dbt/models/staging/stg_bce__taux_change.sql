@@ -10,5 +10,5 @@ select
     source                   as source_taux
 from source
 where taux > 0
-  and date_cours >= cast('{{ var("date_debut_paysim") }}' as date)
+  and date_cours >= cast('{{ var("date_debut_analyse") }}' as date)
                     - interval '{{ var("annees_historique_change") }} years'

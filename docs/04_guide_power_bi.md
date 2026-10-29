@@ -3,7 +3,7 @@
 ## Option A (recommandée) : ouvrir le projet déjà construit
 
 Le rapport complet est fourni au format **projet Power BI (`.pbip`)** dans `powerbi/Cresus/` :
-modèle de données (22 tables, 21 relations, 57 mesures DAX, paramètres What-if) et 6 pages de visuels.
+modèle de données (25 tables, 25 relations, 65 mesures DAX, paramètres What-if) et 6 pages de visuels, sur 3 ans (2023-2025).
 
 1. Lancer le pipeline (`python pipeline.py`) pour remplir le schéma `marts` de PostgreSQL.
 2. Ouvrir **Power BI Desktop** (version de mi-2025 ou plus récente) → *Fichier → Ouvrir* → `powerbi/Cresus/Cresus.pbip`.
@@ -12,7 +12,7 @@ modèle de données (22 tables, 21 relations, 57 mesures DAX, paramètres What-i
 4. Si la base n'est pas sur `localhost:5432` / `cresus` : *Transformer les données → Modifier les paramètres* (`ServeurPostgres`, `BasePostgres`).
 5. Pour garder une copie en un seul fichier : *Fichier → Enregistrer sous → .pbix*.
 
-Comment le projet a été produit et vérifié (à mentionner en soutenance) : `powerbi/generer_pbip.py` lit la structure réelle des tables dans PostgreSQL, construit le modèle, puis le fait **valider et convertir au format TMDL par la bibliothèque officielle Microsoft** (Analysis Services TOM, outil `powerbi/outils/TomTool`). Les 59 fichiers du rapport sont validés contre les **schémas JSON publiés par Microsoft**. Un contrôle croisé vérifie enfin que chaque champ des visuels et chaque référence DAX existent dans le modèle. Limite : Power BI Desktop ne tournant que sous Windows, le projet n'a pas pu être ouvert dans Power BI pendant sa génération ; s'il signale un problème à l'ouverture, l'option B permet de reconstruire la page concernée à la main.
+Comment le projet a été produit et vérifié (à mentionner en soutenance) : `powerbi/generer_pbip.py` lit la structure réelle des tables dans PostgreSQL, construit le modèle, puis le fait **valider et convertir au format TMDL par la bibliothèque officielle Microsoft** (Analysis Services TOM, outil `powerbi/outils/TomTool`). Les 67 fichiers du rapport sont validés contre les **schémas JSON publiés par Microsoft**. Un contrôle croisé vérifie enfin que chaque champ des visuels et chaque référence DAX existent dans le modèle. Limite : Power BI Desktop ne tournant que sous Windows, le projet n'a pas pu être ouvert dans Power BI pendant sa génération ; s'il signale un problème à l'ouverture, l'option B permet de reconstruire la page concernée à la main.
 
 Les sections ci-dessous décrivent le contenu du rapport. Elles servent aussi de **guide pour le reconstruire à la main (option B)**.
 
@@ -24,7 +24,7 @@ Les sections ci-dessous décrivent le contenu du rapport. Elles servent aussi de
    - Si une erreur SSL apparaît : *Fichier → Options → Sécurité des sources de données → Modifier les autorisations* → décocher « Chiffrer les connexions ».
    - Si le connecteur réclame Npgsql (anciennes versions de Power BI) : installer Npgsql 4.0.x en cochant « Npgsql GAC Installation ».
 3. Cocher les tables du schéma **marts** :
-   `dim_date, dim_filiale, dim_devise, dim_type_transaction, dim_scenario_stress, fct_flux_tresorerie_horaire, fct_position_tresorerie_quotidienne, fct_taux_change, mart_exposition_change, mart_liquidite_placement, mart_stress_test, mart_prevision_tresorerie, mart_prevision_change, mart_qualite_prevision, mart_backtest_journalier, mart_qualite_donnees` (cette dernière n'a pas de relation : c'est une table autonome par jour de simulation).
+   `dim_date, dim_filiale, dim_devise, dim_type_transaction, dim_scenario_stress, fct_flux_tresorerie_horaire, fct_position_tresorerie_quotidienne, fct_taux_change, mart_exposition_change, mart_liquidite_placement, mart_stress_test, mart_prevision_tresorerie, mart_prevision_change, mart_qualite_prevision, mart_backtest_journalier, mart_qualite_donnees, mart_qualite_ancrage, mart_reserve_optimale, mart_controle_a_posteriori` (`mart_qualite_donnees` n'a pas de relation : c'est une table autonome par jour de simulation PaySim).
 4. Dans Power Query, renommer les tables pour enlever le préfixe `marts ` (sinon adapter les noms dans les mesures DAX).
 
 ## 2. Modèle (vue Modèle)
@@ -55,28 +55,28 @@ Ensuite :
 ## 4. Pages du rapport
 
 ### Page 1 — Cockpit Direction Financière
-- Segments : période (`dim_date`), région, filiale.
-- Cartes : *Position de trésorerie*, *Consommation quotidienne de la position %*, *Ratio de couverture liquidité %*, **Jours avant passage sous 100 %** (KPI phare, rouge si < 7), *Gain annuel de placement*, *Coût annuel de refinancement*, *VaR change 95 % 10 j*, *Résultat net de trésorerie annuel*.
-- Ne **pas** mettre sur cette page : *Taux de netting* (simple reflet d'une hypothèse) et *Taux de fraude* (artefact), voir docs/06.
-- Courbe : position (`fct_position…[position_cloture_eur]`) par date, légende = filiale.
-- Carte géographique : `dim_filiale[pays]`, taille = *Position de trésorerie*.
-- Tableau par filiale : position, ratio de couverture (mise en forme conditionnelle : vert ≥ 100 %, rouge < 100 %), excédent, refinancement.
+- Segments : région, filiale, année.
+- Cartes : *Position de trésorerie*, *Ratio de couverture liquidité %*, **Jours sous 100 %**, *Encours de dépôts*, *Refinancement levé*, *Excédent placé*, *VaR change 95 % 10 j*, *Effet de change cumulé*.
+- Courbe : position par filiale sur 3 ans (creux de début de mois, remontée avec les salaires).
+- Tableau par filiale : ratio, jours sous 100 %, refinancement, placements.
+- Ne **pas** mettre sur cette page : *Taux de fraude* (artefact du simulateur), voir docs/06.
 
 ### Page 2 — Flux de trésorerie
-- Histogramme groupé : *Encaissements* / *Décaissements* par `date_jour`.
-- Matrice (carte de chaleur) : lignes = `fct_flux…[heure]`, colonnes = `dim_date[libelle_jour]`, valeur = *Solde net*, couleur divergente → profil intrajournalier.
-- Barres : *Décaissements* par `dim_type_transaction[libelle_type]`.
-- Carte : *Part des gros décaissements %* (0,4 % des décaissements, à partir de 10 k€, pèsent environ 10 % des montants).
+- Encaissements / décaissements **par mois** (`dim_date[annee_mois]`).
+- **Opérations de trésorerie de fin de mois** : *Refinancement levé* vs *Excédent placé* par mois. On y voit 2023 (refinancement pendant la fuite des dépôts) et 2025 (placements).
+- Décaissements par type d'opération ; profil horaire du solde net ; carte *Part des gros décaissements %* (~31 %).
 
 ### Page 3 — Prévisions (analyse prédictive)
-- Graphique en courbes : axe = `mart_prevision_tresorerie[date_jour]`, valeur = *Position prévue P50*, légende = `type_valeur` (Réalisé / Prévision). Volet **Analyse → Barres d'erreur** : limite haute = *P95*, limite basse = *P05* → **cône d'incertitude**.
-- Carte : *Probabilité de passer sous le besoin de liquidité %*.
-- Tableau `mart_qualite_prevision` : filiale, série, modèle, WAPE, biais, champion (icône).
-- Histogramme réel vs prévu : `mart_backtest_journalier` filtré sur `est_champion = Vrai`.
+- Cartes : *Probabilité de passer sous 100 %* (mois prévu), *WAPE du champion*, et le **contrôle sur données réelles de janvier 2026** (*Couverture de l'intervalle à 90 %*, *Erreur médiane*).
+- Courbe : position réalisée puis prévue (P5 / P50 / P95).
+- Tableau de backtest (3 origines, 3 modèles, champion).
+- Tableau **réserve requise (P99) vs réserve actuelle** par filiale, avec le diagnostic.
+- Tableau du **contrôle a posteriori** : dépôts réels au 31/01/2026 vs prévus.
 
 ### Page 4 — Change & couverture
 - Courbe `mart_prevision_change` : *Taux de change prévu P50* + barres d'erreur P05/P95, avec *Taux de change réalisé* en superposition (contrôle a posteriori), segment = devise.
-- Barres : *Exposition au change* par devise ; cartes *VaR 95 % 10 j*, *Coût annuel de couverture*, *Effet de change cumulé*.
+- Cartes : *Exposition au change*, *Part de la position en devises*, *VaR 95 % 10 j*, *Coût annuel de couverture*.
+- Barres : *Effet de change cumulé* par devise. Sur 2023-2025, la remontée de l'euro coûte −57 M€ sur l'USD et −46 M€ sur la NOK.
 - Tableau de décision : devise, exposition, volatilité, *Rapport coût / risque de la couverture*, *Recommandation de couverture*.
 - Tableau `fct_taux_change` : volatilité annualisée par devise ; mettre en évidence le RUB (`est_rupture_serie`).
 
@@ -86,12 +86,14 @@ Ensuite :
 - Tableau par filiale avec *Statut de résilience* coloré via *Couleur statut* (Format → Couleur d'arrière-plan → Valeur du champ).
 - Matrice des scénarios précalculés : lignes = `dim_scenario_stress[libelle_scenario]`, colonnes = filiale, valeur = `mart_stress_test[horizon_survie_jours]`, couleur selon `statut_resilience`. Info-bulle : `reference_historique`.
 
-### Page 6 — Qualité des données
-- Histogramme `mart_qualite_donnees[nb_transactions]` par `jour_simulation`, couleur = `statut` (Retenu / Exclu) : montre **pourquoi** on n'analyse que les jours 6 à 17.
-- Courbe `nb_fraudes` sur le même axe : la fraude reste constante quand le volume s'effondre, preuve d'un artefact du simulateur.
-- Cartes : *Taux de détection actuel %* (0,2 %) vs *Rappel de la règle « vide le compte » %* (97,6 %).
+### Page 6 — Qualité et fiabilité des données
+- Courbe **encours réel publié par la banque centrale vs encours reconstitué** (segment filiale) : les deux courbes se superposent. C'est la preuve visuelle de l'ancrage sur le réel.
+- Carte *Écart max à l'encours réel %* (≈ 0).
+- Volume PaySim par jour (retenu ou exclu) et fraudes constantes : ils montrent **pourquoi** PaySim ne sert plus que de texture.
+- Cartes de détection de fraude (0,2 % pour le système PaySim, 97,6 % pour la règle « vide le compte »).
 
 ## 5. Conseils pour la soutenance
 - Démonstration en direct : régler *Choc retraits* sur 20 % (scénario SVB) et montrer quelles filiales passent en « Critique ».
+- Montrer la page Qualité : encours réel vs reconstitué, puis la page Prévisions : la fourchette contenait le réel de janvier 2026 pour 7 filiales sur 9.
 - Montrer le cône de prévision et le contrôle a posteriori du change : c'est la preuve concrète que le prédictif fonctionne.
 - Afficher le lignage `dbt docs` pour démontrer la traçabilité (exigence Bâle III / BCBS 239).

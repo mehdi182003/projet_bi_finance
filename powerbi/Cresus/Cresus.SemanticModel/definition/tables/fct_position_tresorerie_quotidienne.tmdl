@@ -76,13 +76,6 @@ table fct_position_tresorerie_quotidienne
 		summarizeBy: sum
 		sourceColumn: flux_net_eur
 
-	column flux_net_intragroupe_eur
-		dataType: double
-		formatString: #,0
-		lineageTag: 78d526ce4ca9a52ad148
-		summarizeBy: sum
-		sourceColumn: flux_net_intragroupe_eur
-
 	column decaissements_frauduleux_eur
 		dataType: double
 		formatString: #,0
@@ -96,6 +89,12 @@ table fct_position_tresorerie_quotidienne
 		lineageTag: b4c3ed84248700ef6640
 		summarizeBy: sum
 		sourceColumn: decaissements_gros_tickets_eur
+
+	column cible_reserve_mois_devise
+		dataType: double
+		lineageTag: d21d71ac3bccb4a8b35e
+		summarizeBy: none
+		sourceColumn: cible_reserve_mois_devise
 
 	column position_ouverture_devise
 		dataType: double
@@ -117,6 +116,18 @@ table fct_position_tresorerie_quotidienne
 		lineageTag: 25af5c2ab79591a7cb57
 		summarizeBy: sum
 		sourceColumn: encours_depots_devise
+
+	column operation_tresorerie_devise
+		dataType: double
+		lineageTag: 8d545c48da8ff7f5a386
+		summarizeBy: none
+		sourceColumn: operation_tresorerie_devise
+
+	column operation_tresorerie_eur
+		dataType: double
+		lineageTag: f67024190c96d7e0e6ff
+		summarizeBy: none
+		sourceColumn: operation_tresorerie_eur
 
 	column taux_eur_jour
 		dataType: double
@@ -156,6 +167,19 @@ table fct_position_tresorerie_quotidienne
 		lineageTag: 970cfc27534d824f6956
 		summarizeBy: none
 		sourceColumn: ratio_reserve_sur_depots
+
+	column encours_reel_publie_devise
+		dataType: double
+		formatString: #,0
+		lineageTag: 7efd058a69ed957800de
+		summarizeBy: sum
+		sourceColumn: encours_reel_publie_devise
+
+	column est_date_publication
+		dataType: boolean
+		lineageTag: c315a3586a0ddee9b52b
+		summarizeBy: none
+		sourceColumn: est_date_publication
 
 	partition fct_position_tresorerie_quotidienne = m
 		mode: import

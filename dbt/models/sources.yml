@@ -5,10 +5,47 @@ sources:
     description: Données brutes chargées par Python (etl/chargement_raw.py), sans transformation.
     schema: raw
     tables:
+      - name: transactions_zf
+        description: >
+          Flux de ZF Banque 2023-2025 générés par etl/generateur_flux.py : encours ancrés sur les dépôts
+          réels publiés par les banques centrales, calendrier réel, texture des opérations tirée de PaySim.
+          Une ligne = `poids` opérations.
+        columns:
+          - name: code_filiale
+            tests:
+              - not_null
+              - relationships:
+                  arguments: {to: ref('ref_filiales'), field: code_filiale}
+          - name: code_type
+            tests:
+              - relationships:
+                  arguments: {to: ref('ref_types_transaction'), field: code_type}
+          - name: montant_devise
+            tests:
+              - not_null
+              - entre_bornes:
+                  arguments: {min_value: 0}
+          - name: poids
+            tests:
+              - entre_bornes:
+                  arguments: {min_value: 1}
+      - name: ancrages_zf
+        description: >
+          Encours de dépôts à vue réels par pays (BCE, Fed, Banque du Canada, SCB, Danmarks Nationalbank,
+          FMI, BEAC) x part de marché de ZF Banque, aux dates de publication (data/sources/).
+        tests:
+          - unicite_combinee:
+              arguments: {colonnes: [code_filiale, date_ancrage]}
+        columns:
+          - name: encours_zf_devise
+            tests:
+              - not_null
+              - entre_bornes:
+                  arguments: {min_value: 0}
       - name: paysim_transactions
         description: >
           Logs PaySim (Kaggle ealaxi/paysim1) : 6,36 M de transactions mobiles simulées sur 743 heures.
-          Utilisés comme proxy des flux de la banque de détail ZF Banque.
+          Utilisés comme « texture » des opérations (types, montants, heures, fraude) et pour la page Qualité.
           Jeu de données historique figé (2017) : pas de contrôle de fraîcheur.
         columns:
           - name: id_ligne
@@ -42,4 +79,8 @@ sources:
       - name: prevision_change
         description: Projection Monte-Carlo des taux de change (quantiles P5/P50/P95).
       - name: backtest_prevision
-        description: Mesure de la précision du modèle de flux sur les derniers jours observés.
+        description: Précision des modèles de flux (3 origines de backtest, horizon d'un mois).
+      - name: controle_depots_reels
+        description: Encours réels de janvier 2026 (publiés après la date d'arrêté) vs fourchette prévue.
+      - name: reserve_optimale
+        description: Réserve de liquidité requise (P99) issue de la simulation vs réserve actuelle, et gain associé.

@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Résultat net de trésorerie annuel (EUR)"
+                  "Property": "Effet de change cumulé (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Résultat net de trésorerie annuel (EUR)",
-              "nativeQueryRef": "Résultat net de trésorerie annuel (EUR)"
+              "queryRef": "_Mesures.Effet de change cumulé (EUR)",
+              "nativeQueryRef": "Effet de change cumulé (EUR)"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Résultat net de trésorerie / an'"
+                  "Value": "'Effet de change cumulé'"
                 }
               }
             }

@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Part des gros décaissements %"
+                  "Property": "Nb opérations"
                 }
               },
-              "queryRef": "_Mesures.Part des gros décaissements %",
-              "nativeQueryRef": "Part des gros décaissements %"
+              "queryRef": "_Mesures.Nb opérations",
+              "nativeQueryRef": "Nb opérations"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Part des gros décaissements (≥ 10 k€)'"
+                  "Value": "'Nombre d''opérations'"
                 }
               }
             }

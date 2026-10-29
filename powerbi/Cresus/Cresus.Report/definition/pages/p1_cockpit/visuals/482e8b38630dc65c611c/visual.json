@@ -23,11 +23,11 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Jours avant passage sous 100 %"
+                  "Property": "Encours de dépôts (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Jours avant passage sous 100 %",
-              "nativeQueryRef": "Jours avant passage sous 100 %"
+              "queryRef": "_Mesures.Encours de dépôts (EUR)",
+              "nativeQueryRef": "Encours de dépôts (EUR)"
             }
           ]
         }
@@ -47,7 +47,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Jours avant 100 % (filiale la plus exposée)'"
+                  "Value": "'Encours de dépôts'"
                 }
               }
             }

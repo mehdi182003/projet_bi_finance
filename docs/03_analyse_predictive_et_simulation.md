@@ -1,62 +1,74 @@
 # 03 — Analyse prédictive et simulation
 
-## 1. Prévision des flux de trésorerie
+> Données : 3 ans (2023-2025) de flux quotidiens par filiale, ancrés sur les dépôts réels (docs/07).
+> Date d'arrêté : 31/12/2025. Mois prévu : janvier 2026.
 
-**Données** : séries horaires d'encaissements et de décaissements par filiale (en devise locale), sans trou (une heure sans opération vaut 0). On ne garde que des journées complètes (le dernier jour de PaySim s'arrête à 22 h).
+## 1. Prévision des flux de trésorerie (pas quotidien)
 
-**Modèles candidats**
-| Modèle | Principe | Pourquoi |
+| Modèle | Principe | Rôle |
 |---|---|---|
-| Naïf saisonnier | Pour chaque heure, moyenne des 7 derniers jours | Référence minimale : un modèle « intelligent » doit faire mieux |
-| Holt-Winters | Lissage exponentiel (niveau + saisonnalité journalière de 24 h **multiplicative**) | Modèle de série temporelle classique, explicable, rapide |
+| Naïf hebdomadaire | Moyenne du même jour de la semaine sur les 4 dernières semaines | Référence minimale |
+| Holt-Winters | Lissage exponentiel, tendance amortie, saisonnalité hebdomadaire | Modèle de série temporelle classique |
+| **Régression calendaire** | Moindres carrés sur des variables connues à l'avance : jour de la semaine, jour ouvré ou férié (calendrier de chaque pays), 3 premiers jours ouvrés, 2 derniers jours ouvrés, mi-mois, **mois de l'année**, tendance ; apprise sur les 3 ans | Capte les cycles de paie et de prélèvements, et la saisonnalité annuelle des dépôts |
 
-**Backtest et sélection du champion** : chaque modèle est réentraîné sans les 3 derniers jours complets, puis on compare ses prévisions au réalisé, jour par jour.
-- WAPE = Σ|réel − prévu| / Σ réel (indicateur principal, robuste aux jours à faible volume) ;
-- MAPE et biais (le biais indique si le modèle sur- ou sous-estime) ;
-- le modèle au WAPE le plus faible devient le **champion** de la série.
+**Backtest** : 3 origines (fin septembre, octobre et novembre 2025), avec chaque fois un mois complet prévu. Le WAPE (Σ|réel − prévu| / Σ réel) désigne le champion de chaque série.
 
-**Ce que le backtest nous a appris** (versions successives testées pendant le POC) :
-| Version | Résultat | Cause |
+| Série | Naïf | Holt-Winters | Régression calendaire | Champion |
+|---|---|---|---|---|
+| Décaissements | 18,3 % | 16,5 % | **13,7 %** | régression (9 filiales sur 10) |
+| Encaissements | 45,5 % | 69,3 % | **16,7 %** | régression (10 sur 10) |
+
+Holt-Winters échoue sur les encaissements : les salaires arrivent en fin de mois, ce qui n'est pas une saisonnalité hebdomadaire.
+
+## 2. Simulation Monte-Carlo et réserve requise
+Pour chaque filiale, 1 000 trajectoires de janvier 2026 sont simulées :
+- **erreurs quotidiennes** : on rééchantillonne, par blocs de 7 jours, les erreurs relatives du champion observées au backtest, avec les mêmes tirages pour les encaissements et les décaissements (leur corrélation est conservée) ;
+- **choc mensuel** sur le flux net : son écart-type est estimé sur les résidus mensuels du modèle, corrigés des degrés de liberté. Il représente l'incertitude sur le niveau du mois, que le bruit quotidien seul sous-estime ;
+- **position simulée** : réserve cible au 1er janvier + cumul des flux simulés.
+
+On en tire :
+- le cône **P5 / P50 / P95** de la position et des dépôts ;
+- la **probabilité de passer sous le besoin Bâle III** (10 % des dépôts) ;
+- la **réserve requise à 99 %** : la plus petite réserve qui maintient la position au-dessus du besoin tout le mois dans 99 % des trajectoires.
+
+**Résultat pour janvier 2026** :
+
+| Filiales | Réserve requise vs actuelle | Lecture |
 |---|---|---|
-| Holt-Winters sur log(1 + montant) | Biais de −70 à −99 % | Biais de retransformation : exp(moyenne des log) < moyenne, surtout quand il y a beaucoup d'heures à 0 |
-| Holt-Winters additif | WAPE d'environ 1 500 % | La saisonnalité apprise pendant la forte activité ne diminue pas quand le volume chute (après la 400ᵉ heure de PaySim) |
-| Holt-Winters **multiplicatif** | WAPE médian d'environ 10 % | Le profil horaire est proportionnel au niveau d'activité |
-| Naïf saisonnier | WAPE de 3,5 à 7,7 % sur la fenêtre stable du vrai PaySim (champion sur 19 séries sur 20) | Robuste ; les flux journaliers sont stables |
-| Backtest sur les jours 28-30 (avant correction) | WAPE de 74 % (naïf), 902 559 % (Holt-Winters) | Le test portait sur des jours « morts » : fenêtre d'analyse restreinte aux jours 6-17 + garde-fou de divergence |
+| France, Benelux, Finlande | 18 à 19,5 % vs 15 % | Janvier est un mois de **décollecte réelle** (−3,4 % en moyenne en France) : il faut **pré-financer** en décembre |
+| Suède, Danemark | 16 à 17 % vs 15 % | Idem, dans une moindre mesure |
+| États-Unis, Canada | 13,6 % vs 12 % | Réserve insuffisante tout au long de l'année (sous 100 % 42 à 45 jours en 3 ans) |
+| Côte d'Ivoire, Cameroun, Norvège | 14 à 18 % vs 15-20 % | **Sur-réserve** : liquidité à placer localement (~90 M€) |
 
-## 2. Simulation Monte-Carlo de la position
-Une prévision ponctuelle ne suffit pas : le trésorier doit connaître le **risque**. Pour chaque filiale :
-1. on tire au hasard, pour chaque jour futur, une des 7 dernières journées réellement observées (encaissements **et** décaissements du même jour, pour conserver leur corrélation) ;
-2. on la met à l'échelle du niveau prévu par le champion ;
-3. on cumule les flux nets à partir de la dernière position connue ;
-4. on répète 500 fois, puis on lit les quantiles **P5 / P50 / P95** et la **probabilité de passer sous le besoin de liquidité à 30 jours**.
+La valeur de la prévision n'est donc pas une « économie » uniforme : elle **module la réserve selon le mois et la filiale**. On relève la réserve avant les mois de décollecte (pour éviter un ratio sous 100 %, sanctionnable), et on place les excédents structurels (zone CFA).
 
-C'est une *simulation historique*, la même logique que la VaR historique utilisée en salle des marchés : elle ne suppose pas de loi normale et respecte les queues de distribution réelles.
+## 3. Contrôle sur des données réelles postérieures (hors échantillon)
+Les banques centrales ont publié depuis les encours de **janvier 2026**. On les compare à la prévision arrêtée au 31/12/2025 (`etl/controle_a_posteriori.py`) :
 
-## 3. Prévision du change
-Les cours de change sont proches d'une **marche aléatoire** : aucun modèle ne bat durablement la prévision « demain = aujourd'hui » (Meese & Rogoff, 1983). On ne cherche donc pas à prédire le cours exact, mais une **fourchette** :
-- mouvement brownien géométrique, volatilité estimée sur les 250 dernières cotations ;
-- 2 000 trajectoires sur 30 jours → quantiles P5 / P50 / P95 ;
-- **contrôle a posteriori** : comme l'export Webstat va jusqu'en septembre 2026, on compare la fourchette prévue au 12/09/2025 (date d'arrêté) aux cours réellement observés ensuite. Résultat : 100 % des 20 jours de cotation dans la fourchette à 90 %, pour les 6 devises. C'est plus que les 90 % attendus : l'intervalle est **prudent** (plutôt large), et les jours successifs sont autocorrélés. Un premier essai depuis le 01/10/2025 donnait 82 % pour le JPY : la fourchette est utile, pas infaillible.
-- Le RUB est exclu automatiquement (dernière cotation le 01/03/2022).
-- La DKK, ancrée à l'euro (MCE II), a une fourchette très étroite (±0,1 %) : couvrir une position en couronnes danoises n'a presque aucun intérêt.
+| Version du modèle | Erreur médiane sur l'encours fin janvier | Réel dans la fourchette à 90 % |
+|---|---|---|
+| v1 (sans effet « mois », bruit quotidien seul) | +0,7 à +9,6 %, biais à la hausse | 4 filiales sur 9 |
+| **v2 (effet « mois » + choc mensuel)** | **−3,7 à +2,0 %** (France −0,3 %, États-Unis +0,3 %) | **7 sur 9** |
 
-## 4. Stress tests
-| Scénario | Retraits | Change | Taux | Sorties ×  | Référence historique |
+C'est ce contrôle qui a révélé la saisonnalité de janvier. Le Cameroun est exclu du contrôle : aucun point mensuel BEAC pour janvier 2026 n'est disponible par API.
+
+## 4. Prévision du change
+Les cours de change sont proches d'une **marche aléatoire** (Meese & Rogoff, 1983). On prévoit donc une **fourchette à 30 jours** (mouvement brownien géométrique, volatilité des 250 dernières cotations) plutôt qu'un point. Contrôle sur les cours réels de janvier 2026 : **119 jours-devises sur 126 (94 %)** dans la fourchette à 90 %, conforme à l'attendu. Le RUB est exclu automatiquement (dernière cotation le 01/03/2022).
+
+## 5. Stress tests
+| Scénario | Retraits | Change | Taux | Sorties × | Référence historique |
 |---|---|---|---|---|---|
-| Central | 0 | 0 | 0 | 1,0 | Tendance observée |
+| Central | 0 | 0 | 0 | 1,0 | Tendance des 30 derniers jours |
 | Retraits modérés | 5 % | — | +50 pb | 1,5 | Northern Rock 2007 |
-| Panique sévère | 20 % | — | +150 pb | 2,5 | SVB, mars 2023 |
+| Panique sévère | 20 % | — | +150 pb | 2,5 | SVB, mars 2023 (visible dans les dépôts réels américains) |
 | Dépréciation du dollar | — | USD −10 %, CAD −8 % | — | 1,0 | 2017, S1 2025 |
 | Couronnes nordiques | — | SEK, NOK −12 % | +50 pb | 1,2 | 2020-2023 |
 | Dévaluation du CFA | 3 % | XOF/XAF −50 % | +200 pb | 1,3 | 12 janvier 1994 |
 | Crise combinée | 10 % | tous les chocs | +200 pb | 2,0 | Reverse stress test |
 
-Sortie : position stressée, horizon de survie (jours), besoin et coût de refinancement, statut (Résilient ≥ 30 j / Vigilance 7-30 j / Critique < 7 j).
-Le simulateur Power BI rejoue le même calcul avec des curseurs libres (paramètres What-if).
+Avec 3 ans de données, le scénario central n'a plus de fuite structurelle (horizon de survie illimité). Retraits modérés : 21 à 51 jours en Europe et en Amérique du Nord. Panique sévère : 0 à 7 jours.
 
-## 5. Limites
-- 12 jours d'historique stable : pas de saisonnalité hebdomadaire ou mensuelle exploitable.
-- À la maille journalière, la prévision ne fait pas mieux qu'une moyenne simple (flux stables) : sa valeur est dans l'anticipation de la date de franchissement du seuil et dans la mesure de l'incertitude (voir docs/06 § 5).
-- Encaissements et décaissements sont simulés à partir des mêmes journées tirées : la corrélation est respectée, mais pas d'éventuelles tendances futures.
-- Pistes d'industrialisation : Prophet ou SARIMAX avec calendrier (jours fériés par pays, paie, fins de mois), modèles hiérarchiques (filiale → groupe), réentraînement quotidien et suivi de la dérive (WAPE glissant).
+## 6. Limites
+- Le profil à l'intérieur du mois (paie, prélèvements) est une hypothèse du générateur, et la régression utilise les mêmes variables. Sa précision quotidienne est donc en partie « attendue ». Le contrôle sur janvier 2026 porte, lui, sur des niveaux réels.
+- Il n'y a que 3 Januaries pour estimer l'effet « mois » : c'est un effet moyen, avec une incertitude élevée (d'où le choc mensuel).
+- Pistes d'industrialisation : historique plus long, variables exogènes (taux, inflation), modèles hiérarchiques filiale → groupe, réentraînement mensuel avec suivi du WAPE.

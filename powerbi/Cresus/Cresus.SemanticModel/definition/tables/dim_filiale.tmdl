@@ -50,11 +50,23 @@ table dim_filiale
 		summarizeBy: none
 		sourceColumn: regime_change
 
-	column poids_clientele_pct
+	column part_de_marche_depots_pct
 		dataType: double
-		lineageTag: ad5ef1df7cbb767ef115
+		lineageTag: e102af1ab112e0cb74bf
 		summarizeBy: none
-		sourceColumn: poids_clientele_pct
+		sourceColumn: part_de_marche_depots_pct
+
+	column source_depots
+		dataType: string
+		lineageTag: 76b1293091b3d1906662
+		summarizeBy: none
+		sourceColumn: source_depots
+
+	column profil_paie
+		dataType: string
+		lineageTag: c2fd335c88296cab54cb
+		summarizeBy: none
+		sourceColumn: profil_paie
 
 	column taux_reserve_liquidite_pct
 		dataType: double

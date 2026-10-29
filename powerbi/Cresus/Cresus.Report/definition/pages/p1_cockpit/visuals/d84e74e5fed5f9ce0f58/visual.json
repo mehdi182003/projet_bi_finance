@@ -43,7 +43,7 @@
               },
               "queryRef": "_Mesures.Ratio de couverture liquidité %",
               "nativeQueryRef": "Ratio de couverture liquidité %",
-              "displayName": "Ratio"
+              "displayName": "Ratio (date d'arrêté)"
             },
             {
               "field": {
@@ -53,12 +53,12 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Jours avant passage sous 100 %"
+                  "Property": "Jours sous 100 %"
                 }
               },
-              "queryRef": "_Mesures.Jours avant passage sous 100 %",
-              "nativeQueryRef": "Jours avant passage sous 100 %",
-              "displayName": "Jours avant 100 %"
+              "queryRef": "_Mesures.Jours sous 100 %",
+              "nativeQueryRef": "Jours sous 100 %",
+              "displayName": "Jours < 100 %"
             },
             {
               "field": {
@@ -68,27 +68,27 @@
                       "Entity": "_Mesures"
                     }
                   },
-                  "Property": "Liquidité excédentaire (EUR)"
+                  "Property": "Refinancement levé (EUR)"
                 }
               },
-              "queryRef": "_Mesures.Liquidité excédentaire (EUR)",
-              "nativeQueryRef": "Liquidité excédentaire (EUR)",
-              "displayName": "Excédent"
-            },
-            {
-              "field": {
-                "Measure": {
-                  "Expression": {
-                    "SourceRef": {
-                      "Entity": "_Mesures"
-                    }
-                  },
-                  "Property": "Besoin de refinancement (EUR)"
-                }
-              },
-              "queryRef": "_Mesures.Besoin de refinancement (EUR)",
-              "nativeQueryRef": "Besoin de refinancement (EUR)",
+              "queryRef": "_Mesures.Refinancement levé (EUR)",
+              "nativeQueryRef": "Refinancement levé (EUR)",
               "displayName": "Refinancement"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Mesures"
+                    }
+                  },
+                  "Property": "Excédent placé (EUR)"
+                }
+              },
+              "queryRef": "_Mesures.Excédent placé (EUR)",
+              "nativeQueryRef": "Excédent placé (EUR)",
+              "displayName": "Placé"
             }
           ]
         }
@@ -108,7 +108,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Liquidité par filiale à la date d''arrêté'"
+                  "Value": "'Liquidité par filiale'"
                 }
               }
             }

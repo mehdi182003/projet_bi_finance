@@ -5,7 +5,30 @@
 create schema if not exists raw;
 create schema if not exists ml;
 
--- Logs transactionnels PaySim (proxy des flux de la banque de détail)
+-- Flux de ZF Banque 2023-2025 (etl/generateur_flux.py) : une ligne = `poids` opérations
+create table if not exists raw.transactions_zf (
+    horodatage        timestamp,
+    code_filiale      text,
+    code_type         text,             -- CASH_IN, VIREMENT_RECU, CASH_OUT, PAYMENT, DEBIT, TRANSFER
+    montant_devise    numeric(18, 2),   -- montant unitaire en devise locale
+    poids             integer,          -- nombre d'opérations représentées par la ligne
+    id_client         text,
+    est_fraude        smallint,
+    _date_chargement  timestamp default now()
+);
+
+-- Encours de dépôts réels (banques centrales) à l'échelle de ZF Banque, aux dates publiées
+create table if not exists raw.ancrages_zf (
+    code_filiale       text,
+    date_ancrage       date,
+    encours_zf_devise  numeric(20, 2),
+    est_point_initial  boolean,
+    est_interpole      boolean,
+    source             text,
+    _date_chargement   timestamp default now()
+);
+
+-- Logs transactionnels PaySim : « texture » des opérations et page Qualité des données
 create table if not exists raw.paysim_transactions (
     id_ligne          bigint generated always as identity primary key,
     step              integer,          -- 1 step = 1 heure de simulation (743 steps ~ 31 jours)
@@ -32,4 +55,6 @@ create table if not exists raw.bce_taux_change (
 );
 
 truncate table raw.paysim_transactions restart identity;
+truncate table raw.transactions_zf;
+truncate table raw.ancrages_zf;
 truncate table raw.bce_taux_change;

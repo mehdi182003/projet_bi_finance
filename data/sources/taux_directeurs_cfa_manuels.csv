@@ -1,0 +1,13 @@
+code_devise,banque_centrale,libelle_taux,date_effet,taux_directeur_pct,a_verifier,source
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2020-06-24,2.00,false,bceao.int - communiqué CPM du 8 décembre 2021 (niveau en vigueur depuis le 24 juin 2020)
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2022-06-16,2.25,false,bceao.int - communiqué CPM du 1er juin 2022
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2022-09-16,2.50,false,bceao.int - communiqué CPM du 14 septembre 2022
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2022-12-16,2.75,true,"déduit : 2,50 % au 16/09/2022 puis +25 pb pour atteindre 3,00 % au 16/03/2023 (date d'effet supposée)"
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2023-03-16,3.00,false,bceao.int - communiqué CPM du 1er mars 2023
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2023-09-16,3.25,false,bceao.int - communiqué CPM du 6 septembre 2023
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2023-12-16,3.50,false,bceao.int - communiqué CPM du 6 décembre 2023
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2025-06-16,3.25,false,bceao.int - communiqué CPM du 4 juin 2025
+XOF,BCEAO,Taux minimum de soumission (principal taux directeur),2026-03-16,3.00,false,bceao.int - communiqué CPM du 4 mars 2026
+XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2022-09-26,4.50,false,"beac.int - communiqué CPM du 26 septembre 2022 (relèvement de 4,00 % à 4,50 %)"
+XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2023-03-27,5.00,false,"beac.int - communiqué CPM du 27 mars 2023 (relèvement de 4,50 % à 5,00 %)"
+XAF,BEAC,Taux d'intérêt des appels d'offres (TIAO),2025-03-24,4.50,false,"beac.int - communiqué CPM du 24 mars 2025 (baisse de 5,00 % à 4,50 % ; maintenu le 29 septembre 2025)"

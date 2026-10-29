@@ -18,7 +18,7 @@ select
     (array['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'])[extract(isodow from date_jour)::int] as libelle_jour,
     extract(week from date_jour)::int                                   as semaine_iso,
     extract(isodow from date_jour) in (6, 7)                            as est_week_end,
-    date_jour between cast('{{ var("date_debut_paysim") }}' as date)
-                  and {{ date_fin_analyse() }}                        as est_periode_analyse,
-    date_jour > {{ date_fin_analyse() }}                              as est_futur_prevision
+    date_jour between cast('{{ var("date_debut_analyse") }}' as date)
+                  and cast('{{ var("date_fin_analyse") }}' as date)  as est_periode_analyse,
+    date_jour > cast('{{ var("date_fin_analyse") }}' as date)        as est_futur_prevision
 from jours

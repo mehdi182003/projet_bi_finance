@@ -29,6 +29,23 @@ models:
       - name: id_client_emetteur
         tests: [not_null]
 
+  - name: stg_zf__transactions
+    description: Flux de ZF Banque 2023-2025 (montant total = montant unitaire x nombre d'opérations représentées).
+    columns:
+      - name: date_operation
+        tests:
+          - not_null
+          - entre_bornes:
+              arguments: {min_value: "'2023-01-01'", max_value: "'2025-12-31'"}
+      - name: nb_operations
+        tests: [not_null]
+
+  - name: stg_zf__ancrages
+    description: Encours de dépôts réels à l'échelle de ZF Banque, aux dates publiées par les banques centrales.
+    columns:
+      - name: source_depots
+        tests: [not_null]
+
   - name: stg_bce__taux_change
     description: Cours de référence BCE sur la profondeur d'historique retenue.
     tests:

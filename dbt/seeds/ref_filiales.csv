@@ -1,11 +1,11 @@
-code_filiale,nom_filiale,pays,code_pays_iso,region,code_devise,poids_clientele_pct,taux_reserve_liquidite_pct,ordre_affichage
-FR,ZF Banque France,France,FR,France métropolitaine,EUR,30,15,1
-BNL,ZF Banque Benelux,Belgique,BE,Europe du Nord,EUR,8,15,2
-FI,ZF Banque Finlande,Finlande,FI,Europe du Nord,EUR,4,15,3
-SE,ZF Banque Suède,Suède,SE,Europe du Nord,SEK,6,15,4
-DK,ZF Banque Danemark,Danemark,DK,Europe du Nord,DKK,4,15,5
-NO,ZF Banque Norvège,Norvège,NO,Europe du Nord,NOK,4,15,6
-CI,ZF Banque Côte d'Ivoire,Côte d'Ivoire,CI,Afrique de l'Ouest (UEMOA),XOF,10,20,7
-CM,ZF Banque Cameroun,Cameroun,CM,Afrique centrale (CEMAC),XAF,8,20,8
-CA,ZF Banque Canada,Canada,CA,Amérique du Nord,CAD,10,12,9
-US,ZF Bank USA,États-Unis,US,Amérique du Nord,USD,16,12,10
+code_filiale,nom_filiale,pays,code_pays_iso,region,code_devise,part_de_marche_depots_pct,taux_reserve_liquidite_pct,code_calendrier,profil_paie,source_depots,ordre_affichage
+FR,ZF Banque France,France,FR,France métropolitaine,EUR,1.00,15,FR,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),1
+BNL,ZF Banque Benelux,Belgique,BE,Europe du Nord,EUR,2.00,15,BE,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),2
+FI,ZF Banque Finlande,Finlande,FI,Europe du Nord,EUR,2.00,15,FI,fin_de_mois,BCE BSI (dépôts à vue ménages + SNF),3
+SE,ZF Banque Suède,Suède,SE,Europe du Nord,SEK,1.00,15,SE,fin_de_mois,SCB (M1),4
+DK,ZF Banque Danemark,Danemark,DK,Europe du Nord,DKK,1.00,15,DK,fin_de_mois,Danmarks Nationalbank (dépôts transférables),5
+NO,ZF Banque Norvège,Norvège,NO,Europe du Nord,NOK,1.00,15,NO,fin_de_mois,FMI MFS (dépôts transférables),6
+CI,ZF Banque Côte d'Ivoire,Côte d'Ivoire,CI,Afrique de l'Ouest (UEMOA),XOF,8.00,20,CI,fin_de_mois,FMI MFS (dépôts transférables),7
+CM,ZF Banque Cameroun,Cameroun,CM,Afrique centrale (CEMAC),XAF,8.00,20,CM,fin_de_mois,BEAC (monnaie scripturale des banques),8
+CA,ZF Banque Canada,Canada,CA,Amérique du Nord,CAD,0.20,12,CA,bimensuel,Banque du Canada (M1+ brut),9
+US,ZF Bank USA,États-Unis,US,Amérique du Nord,USD,0.03,12,US,bimensuel,Fed H.8 (dépôts des banques commerciales),10

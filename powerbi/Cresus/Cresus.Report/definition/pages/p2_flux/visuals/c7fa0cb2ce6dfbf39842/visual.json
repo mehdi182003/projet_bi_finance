@@ -23,12 +23,12 @@
                       "Entity": "dim_date"
                     }
                   },
-                  "Property": "date_jour"
+                  "Property": "annee_mois"
                 }
               },
-              "queryRef": "dim_date.date_jour",
-              "nativeQueryRef": "date_jour",
-              "displayName": "Date"
+              "queryRef": "dim_date.annee_mois",
+              "nativeQueryRef": "annee_mois",
+              "displayName": "Mois"
             }
           ]
         },
@@ -80,7 +80,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Encaissements et décaissements par jour (EUR)'"
+                  "Value": "'Encaissements et décaissements par mois (EUR)'"
                 }
               }
             }

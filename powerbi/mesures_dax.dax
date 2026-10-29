@@ -16,14 +16,6 @@ AVERAGEX ( VALUES ( dim_date[date_jour] ), [Solde net (EUR)] )
 
 Nb opérations = SUM ( fct_flux_tresorerie_horaire[nb_mouvements] )
 
-Flux intragroupe sortants (EUR) =
-CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_intragroupe] = TRUE () )
-
-// ATTENTION : valeur fixée par l'hypothèse « 85 % de virements domestiques » (var dbt).
-// C'est un paramètre de simulation, pas un KPI mesuré : ne pas l'afficher sur le cockpit.
-Taux de netting potentiel % =
-DIVIDE ( [Flux intragroupe sortants (EUR)], [Décaissements (EUR)] )
-
 Décaissements frauduleux (EUR) =
 CALCULATE ( [Décaissements (EUR)], fct_flux_tresorerie_horaire[est_fraude] = TRUE () )
 
@@ -37,7 +29,7 @@ DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_signalees] ), SUM ( mart_qualite_
 Rappel de la règle « vide le compte » % =
 DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_detectees_regle] ), SUM ( mart_qualite_donnees[nb_fraudes] ) )
 
-// Concentration : 0,4 % des décaissements (>= 10 k EUR) pèsent ~10 % des montants
+// Concentration : sur 2023-2025, les opérations de 10 k EUR et plus pèsent ~31 % des montants décaissés
 Part des gros décaissements % =
 DIVIDE ( SUM ( fct_position_tresorerie_quotidienne[decaissements_gros_tickets_eur] ), [Décaissements (EUR)] )
 
@@ -112,6 +104,18 @@ RETURN
         CALCULATE ( MIN ( mart_liquidite_placement[jours_avant_seuil_100pct] ), dim_date[date_jour] = DerniereDate )
     )
 
+Jours sous 100 % =
+CALCULATE ( COUNTROWS ( mart_liquidite_placement ), mart_liquidite_placement[ratio_couverture_liquidite_pct] < 100 )
+
+// Opérations de trésorerie de fin de mois (rééquilibrage de la réserve vers sa cible)
+Refinancement levé (EUR) =
+CALCULATE ( SUM ( fct_position_tresorerie_quotidienne[operation_tresorerie_eur] ),
+            fct_position_tresorerie_quotidienne[operation_tresorerie_eur] > 0 )
+
+Excédent placé (EUR) =
+- CALCULATE ( SUM ( fct_position_tresorerie_quotidienne[operation_tresorerie_eur] ),
+              fct_position_tresorerie_quotidienne[operation_tresorerie_eur] < 0 )
+
 Économie annuelle grâce à l'anticipation (EUR) =
 VAR DerniereDate = [Date d'arrêté]
 RETURN
@@ -175,6 +179,22 @@ Taux EUR -> devise = AVERAGE ( fct_taux_change[taux_eur] )
 Volatilité annualisée % = AVERAGE ( fct_taux_change[volatilite_annualisee_pct] ) / 100
 
 // --------------------------------------------------------------- 5. PRÉVISION
+// Réserve requise pour le mois prévu (P99 des trajectoires simulées) vs réserve actuelle
+Réserve requise P99 % = AVERAGE ( mart_reserve_optimale[reserve_requise_p99_pct] ) / 100
+Réserve actuelle % = AVERAGE ( mart_reserve_optimale[taux_reserve_actuel_pct] ) / 100
+Liquidité libérable ou à lever (EUR) = SUM ( mart_reserve_optimale[liquidite_liberable_eur] )
+Gain ou coût annuel de la réserve optimisée (EUR) = SUM ( mart_reserve_optimale[gain_annuel_eur] )
+
+// Contrôle a posteriori sur les dépôts réels publiés après la date d'arrêté
+Couverture de l'intervalle à 90 % % =
+DIVIDE ( CALCULATE ( COUNTROWS ( mart_controle_a_posteriori ), mart_controle_a_posteriori[dans_intervalle_90] = TRUE () ),
+         COUNTROWS ( mart_controle_a_posteriori ) )
+Erreur médiane absolue sur les dépôts % =
+MEDIANX ( mart_controle_a_posteriori, ABS ( mart_controle_a_posteriori[erreur_p50_pct] ) ) / 100
+
+// Fiabilité : encours réel publié (banques centrales) vs encours reconstitué
+Écart max à l'encours réel % = MAXX ( mart_qualite_ancrage, ABS ( mart_qualite_ancrage[ecart_pct] ) ) / 100
+
 Position prévue P50 (EUR) = SUM ( mart_prevision_tresorerie[position_p50_eur] )
 Position prévue P05 (EUR) = SUM ( mart_prevision_tresorerie[position_p05_eur] )
 Position prévue P95 (EUR) = SUM ( mart_prevision_tresorerie[position_p95_eur] )

@@ -1,125 +1,43 @@
--- Cœur des règles de gestion : transforme chaque transaction PaySim en mouvement(s)
--- de trésorerie pour une filiale de ZF Banque, en devise locale et en EUR.
---
---   RG-AFF-01 : chaque client est rattaché à UNE filiale de façon déterministe
---               (hachage de son identifiant, au prorata de ref_filiales.poids_clientele_pct).
---   RG-AFF-02 : pour un virement (TRANSFER), le bénéficiaire est dans la même filiale
---               avec une probabilité var('part_virements_domestiques_pct'), sinon dans une
---               autre filiale (flux intragroupe, potentiellement multidevise).
---   RG-VAL-01 : montant en devise locale = montant PaySim x var('valeur_unite_paysim_eur')
---               x taux EUR->devise du premier jour (calibrage fixe des volumes).
---   RG-VAL-02 : contre-valeur EUR = montant devise / taux BCE DU JOUR de l'opération.
+-- Transforme chaque ligne de flux de ZF Banque en mouvement de trésorerie valorisé en devise
+-- locale et en EUR.
 --   RG-SEN-01 : sens de trésorerie défini par ref_types_transaction (+1 entrée, -1 sortie).
---   RG-SEN-02 : un virement génère 2 jambes (débit émetteur, crédit bénéficiaire).
---   RG-SEN-03 : un virement entre 2 clients de la même filiale est neutre => exclu.
---   RG-QUA-01 : les transactions de montant nul sont exclues.
---   RG-QUA-02 : seules les transactions de la fenêtre d'analyse (régime d'activité stable) sont retenues.
+--   RG-VAL-02 : contre-valeur EUR = montant devise / cours BCE du jour de l'opération.
+--   RG-VOL-01 : une ligne représente `nb_operations` opérations (échantillon pondéré) :
+--               montant total = montant unitaire x nb_operations.
+--   RG-QUA-01 : les lignes de montant nul sont exclues.
+--   (La v1 du POC répartissait les clients PaySim entre filiales par hachage : devenu inutile,
+--    les flux 2023-2025 sont générés directement par filiale à partir des dépôts réels du pays.)
 
-with transactions as (
+with flux as (
     select *
-    from {{ ref('stg_paysim__transactions') }}
-    where montant_paysim > 0
-      and est_periode_analyse
+    from {{ ref('stg_zf__transactions') }}
+    where montant_unitaire_devise > 0
 ),
 
 filiales as (
-    select * from {{ ref('int_filiales_affectation') }}
-),
-
-types as (
-    select * from {{ ref('ref_types_transaction') }}
+    select code_filiale, code_devise from {{ ref('ref_filiales') }}
 ),
 
 taux as (
     select date_cours, code_devise, taux_eur
     from {{ ref('int_taux_change_journalier') }}
-),
-
-taux_reference as (
-    select code_devise, taux_eur as taux_reference
-    from taux
-    where date_cours = cast('{{ var("date_debut_paysim") }}' as date)
-),
-
-seaux as (
-    select
-        t.*,
-        {{ seau_hachage('t.id_client_emetteur', 10000) }}                 as seau_emetteur,
-        {{ seau_hachage('t.id_beneficiaire', 100) }}                      as seau_domestique,
-        {{ seau_hachage("t.id_beneficiaire || '|filiale'", 10000) }}      as seau_beneficiaire
-    from transactions t
-),
-
-affectees as (
-    select
-        s.*,
-        fe.code_filiale as code_filiale_emetteur,
-        fe.code_devise  as code_devise_emetteur,
-        case
-            when s.code_type <> 'TRANSFER' then null
-            when s.seau_domestique < {{ var('part_virements_domestiques_pct') }} then fe.code_filiale
-            else fb.code_filiale
-        end as code_filiale_beneficiaire
-    from seaux s
-    join filiales fe
-        on s.seau_emetteur >= fe.borne_min and s.seau_emetteur < fe.borne_max
-    left join filiales fb
-        on s.seau_beneficiaire >= fb.borne_min and s.seau_beneficiaire < fb.borne_max
-),
-
-valorisees as (
-    select
-        a.*,
-        a.montant_paysim * {{ var('valeur_unite_paysim_eur') }} * tr.taux_reference as montant_devise_emetteur,
-        a.montant_paysim * {{ var('valeur_unite_paysim_eur') }} * tr.taux_reference / tj.taux_eur as montant_eur
-    from affectees a
-    join taux_reference tr on tr.code_devise = a.code_devise_emetteur
-    join taux tj           on tj.code_devise = a.code_devise_emetteur
-                          and tj.date_cours  = a.date_operation
-    -- RG-SEN-03 : virement interne à une filiale => aucun impact de trésorerie
-    where not (a.code_type = 'TRANSFER' and a.code_filiale_beneficiaire = a.code_filiale_emetteur)
-),
-
-jambe_emetteur as (
-    select
-        v.id_transaction,
-        'EMETTEUR'                                          as role_jambe,
-        v.horodatage,
-        v.date_operation,
-        v.code_type,
-        v.est_fraude,
-        v.code_filiale_emetteur                             as code_filiale,
-        v.code_devise_emetteur                              as code_devise,
-        ty.sens_jambe_emetteur                              as sens,
-        v.montant_devise_emetteur                           as montant_devise,
-        v.montant_eur,
-        v.code_filiale_beneficiaire is not null             as est_intragroupe,
-        v.montant_eur >= {{ var('seuil_gros_ticket_eur') }} as est_gros_ticket
-    from valorisees v
-    join types ty on ty.code_type = v.code_type
-),
-
-jambe_beneficiaire as (
-    select
-        v.id_transaction,
-        'BENEFICIAIRE'                                      as role_jambe,
-        v.horodatage,
-        v.date_operation,
-        v.code_type,
-        v.est_fraude,
-        v.code_filiale_beneficiaire                         as code_filiale,
-        fb.code_devise                                      as code_devise,
-        1                                                   as sens,
-        v.montant_eur * tb.taux_eur                         as montant_devise,
-        v.montant_eur,
-        true                                                as est_intragroupe,
-        v.montant_eur >= {{ var('seuil_gros_ticket_eur') }} as est_gros_ticket
-    from valorisees v
-    join types ty     on ty.code_type = v.code_type and ty.genere_jambe_beneficiaire
-    join filiales fb  on fb.code_filiale = v.code_filiale_beneficiaire
-    join taux tb      on tb.code_devise = fb.code_devise and tb.date_cours = v.date_operation
 )
 
-select * from jambe_emetteur
-union all
-select * from jambe_beneficiaire
+select
+    f.horodatage,
+    f.heure_operation,
+    f.date_operation,
+    f.code_filiale,
+    fi.code_devise,
+    f.code_type,
+    f.est_fraude,
+    ty.sens_jambe_emetteur                                          as sens,
+    f.nb_operations,
+    f.montant_devise,
+    f.montant_devise / t.taux_eur                                   as montant_eur,
+    f.montant_unitaire_devise / t.taux_eur >= {{ var('seuil_gros_ticket_eur') }} as est_gros_ticket,
+    f.id_client
+from flux f
+join filiales fi on fi.code_filiale = f.code_filiale
+join {{ ref('ref_types_transaction') }} ty on ty.code_type = f.code_type
+join taux t on t.code_devise = fi.code_devise and t.date_cours = f.date_operation

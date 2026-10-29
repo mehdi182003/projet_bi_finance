@@ -1,52 +1,36 @@
 {{ config(materialized='table') }}
--- Position de départ de chaque filiale (le jour 1 de la période rejouée).
---   RG-POS-01 : encours de dépôts initial = somme des soldes d'ouverture (oldbalanceOrg)
---               des clients lors de leur PREMIÈRE apparition dans les logs.
---   RG-POS-02 : réserve de liquidité initiale = encours x taux de réserve de la filiale
---               (ref_filiales.taux_reserve_liquidite_pct, hypothèse paramétrable).
---   Montants convertis en devise locale au taux du premier jour (voir int_mouvements_tresorerie).
---   LIMITE CONNUE : les soldes PaySim sont peu fiables (le montant dépasse le solde dans 88 % des
---   retraits et 95 % des virements ; le solde est alors ramené à 0). 99,7 % des clients n'apparaissent
---   qu'une fois : l'encours est donc la somme des soldes des clients actifs sur la fenêtre. L'ordre de
---   grandeur est contrôlé par le test alerte_vraisemblance_encours (sorties / dépôts).
+-- Situation de départ de chaque filiale au 31/12/2022.
+--   RG-POS-01 (v2) : encours de dépôts initial = encours RÉEL du pays (banque centrale) x part de
+--                    marché de ZF Banque (ref_filiales.part_de_marche_depots_pct). Remplace la v1
+--                    fondée sur les soldes PaySim, jugés peu fiables lors du profilage.
+--   RG-POS-02      : réserve de liquidité initiale = encours x taux de réserve de la filiale.
 
-with premiere_apparition as (
-    select distinct on (id_client_emetteur)
-        id_client_emetteur,
-        solde_avant_emetteur
-    from {{ ref('stg_paysim__transactions') }}
-    where id_client_emetteur like 'C%'
-      and est_periode_analyse
-    order by id_client_emetteur, step_heure, id_transaction
+with initial as (
+    select code_filiale, encours_zf_devise
+    from {{ ref('stg_zf__ancrages') }}
+    where est_point_initial
 ),
 
-par_filiale as (
-    select
-        f.code_filiale,
-        sum(p.solde_avant_emetteur) as encours_initial_paysim,
-        count(*)                    as nb_clients
-    from premiere_apparition p
-    join {{ ref('int_filiales_affectation') }} f
-        on {{ seau_hachage('p.id_client_emetteur', 10000) }} >= f.borne_min
-       and {{ seau_hachage('p.id_client_emetteur', 10000) }} <  f.borne_max
-    group by f.code_filiale
+clients as (
+    select code_filiale, count(distinct id_client) as nb_clients
+    from {{ ref('stg_zf__transactions') }}
+    group by code_filiale
 ),
 
 taux_reference as (
     select code_devise, taux_eur as taux_reference
     from {{ ref('int_taux_change_journalier') }}
-    where date_cours = cast('{{ var("date_debut_paysim") }}' as date)
+    where date_cours = cast('{{ var("date_debut_analyse") }}' as date)
 )
 
 select
     f.code_filiale,
     f.code_devise,
-    coalesce(p.nb_clients, 0)                                                   as nb_clients,
+    coalesce(c.nb_clients, 0)                                    as nb_clients,
     t.taux_reference,
-    coalesce(p.encours_initial_paysim, 0) * {{ var('valeur_unite_paysim_eur') }} * t.taux_reference
-                                                                                as encours_depots_initial_devise,
-    coalesce(p.encours_initial_paysim, 0) * {{ var('valeur_unite_paysim_eur') }} * t.taux_reference
-        * f.taux_reserve_liquidite_pct / 100                                    as reserve_liquidite_initiale_devise
-from {{ ref('int_filiales_affectation') }} f
-left join par_filiale p on p.code_filiale = f.code_filiale
+    i.encours_zf_devise                                          as encours_depots_initial_devise,
+    i.encours_zf_devise * f.taux_reserve_liquidite_pct / 100     as reserve_liquidite_initiale_devise
+from {{ ref('ref_filiales') }} f
+join initial i on i.code_filiale = f.code_filiale
+left join clients c on c.code_filiale = f.code_filiale
 left join taux_reference t on t.code_devise = f.code_devise
