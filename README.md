@@ -70,10 +70,10 @@ python pipeline.py --etapes dbt prevision dbt_prev   # relancer certaines étape
 ### Gros volume en local (plusieurs Go, non versionné)
 Le jeu versionné regroupe les opérations par **lots de 100** (2,9 M de lignes, 286 Mo). Pour travailler sur un volume réaliste, on génère le même jeu sur son PC avec des lots plus petits. Cela nécessite le CSV PaySim dans `data/raw/`.
 ```powershell
-python pipeline.py --regenerer --taille-lot 10     # ~29 M de lignes, ~3 Go de CSV : génération ~20 min, puis load + dbt
+python pipeline.py --regenerer --taille-lot 10     # 29 M de lignes, 2,8 Go de CSV : génération ~17 min, puis load + dbt ~22 min
 # lancements suivants : ajouter DOSSIER_SOURCES_INTERNES=data/generees/lot_10 dans .env
 ```
-Les fichiers vont dans `data/generees/lot_10/` (ignoré par Git). Les montants, les ancrages et les tests sont identiques quel que soit le lot : seul le nombre de lignes change.
+Les fichiers vont dans `data/generees/lot_10/` (ignoré par Git). Les montants, les ancrages et les tests sont identiques quel que soit le lot : seul le nombre de lignes change. Il faut prévoir **16 Go de RAM** (pic de 5 Go) et **~20 Go de disque libre** (la base PostgreSQL fait 13 Go en lots de 10).
 
 **Reprise du projet** : le contexte complet (décisions, état, reste à faire) est dans [`CLAUDE.md`](CLAUDE.md), chargé automatiquement par Claude Code.
 Puis ouvrir **`powerbi/Cresus/Cresus.pbip`** dans Power BI Desktop → *Actualiser* (identifiants PostgreSQL `postgres` / `postgres`). Détails : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md).

@@ -57,8 +57,13 @@ dbt ne stocke rien : il exécute le SQL **dans** PostgreSQL. Tests, documentatio
    | Taille de lot | Lignes brutes | CSV décompressé | Où | Usage |
    |---|---|---|---|---|
    | 100 (défaut) | 2,9 M | 286 Mo (49 Mo compressé) | `data/sources_internes/` (Git) | dépôt, démo, tests |
-   | 10 | ~29 M | ~2,9 Go (~0,5 Go compressé) | `data/generees/lot_10/` (local) | « gros volume » réaliste sur un PC |
-   | 1 | ~290 M | ~29 Go | local | déconseillé sur un portable (des dizaines de Go dans PostgreSQL) |
+   | 10 | 29,0 M | 2,83 Go (444 Mo compressé) | `data/generees/lot_10/` (local) | « gros volume » réaliste sur un PC |
+   | 1 | ~290 M | ~28 Go | local | déconseillé sur un portable (plus de 100 Go dans PostgreSQL) |
+
+   **Mesuré sur 4 cœurs / 16 Go de RAM, en lots de 10** :
+   - génération : 17 min, pic mémoire de 5 Go ;
+   - pipeline complet (load + dbt + prévision) : 22 min, 150 contrôles réussis ;
+   - base PostgreSQL : **13 Go**. Prévoir **~20 Go libres** (fichiers temporaires pendant `dbt build`).
 
    Les montants totaux et les ancrages sont identiques quelle que soit la taille de lot ; seul le grain change.
 
