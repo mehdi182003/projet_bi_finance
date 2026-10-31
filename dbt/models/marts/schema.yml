@@ -148,6 +148,19 @@ models:
       - name: id_qualite_source
         tests: [unique, not_null]
 
+  - name: mart_qualite_defauts
+    description: >
+      Catalogue des défauts des exports (une ligne par système, filiale, mois et type de défaut), avec le
+      traitement appliqué : ligne écartée (motif de rejet) ou valeur corrigée (ligne conservée).
+    columns:
+      - name: id_defaut
+        tests: [unique, not_null]
+      - name: traitement
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['Ligne écartée', 'Valeur corrigée']
+
   - name: mart_qualite_ancrage
     description: >
       Fiabilité : à chaque date publiée par une banque centrale, encours réel (x part de marché) vs encours

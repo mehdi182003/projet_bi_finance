@@ -1,7 +1,9 @@
 -- Système NORDIC (Suède, Danemark, Norvège) : typage et normalisation du format, AUCUNE suppression.
 --   RG-NET-03 : horodatage ISO 8601 en UTC -> heure locale de la filiale (fuseau de ref_filiales)
 --   RG-NET-04 : montant signé (négatif = sortie) ; amount_unit = MINOR => montant en centimes (öre) / 100
---   Les extournes (REVERSAL) et les écritures qu'elles annulent sont écartées en couche intermediate.
+--   RG-NET-01 : code entité saisi en minuscules ou avec espaces -> majuscules sans espaces de bord
+--   Les extournes (REVERSAL), les écritures qu'elles annulent et les pré-autorisations carte (PENDING)
+--   sont écartées en couche intermediate. La colonne « channel » (exports depuis 2025) n'est pas utilisée.
 with source as (
     select * from {{ source('raw', 'src_nordic') }}
 ),
@@ -18,7 +20,7 @@ typee as (
         nullif(trim(s.amount), '')::numeric
             / case when upper(trim(s.amount_unit)) = 'MINOR' then 100 else 1 end as montant_signe
     from source s
-    left join filiales f on f.code_entite_source = trim(s.entity)
+    left join filiales f on f.code_entite_source = upper(trim(s.entity))
 )
 
 select
@@ -40,5 +42,6 @@ select
     nullif(trim(reversal_of), '')                                          as reference_extournee,
     false                                                                  as est_compte_test,
     true                                                                   as est_heure_convertie_utc,
-    upper(trim(amount_unit)) = 'MINOR'                                     as est_montant_unites_mineures
+    upper(trim(amount_unit)) = 'MINOR'                                     as est_montant_unites_mineures,
+    entity <> upper(trim(entity))                                          as est_format_corrige
 from typee

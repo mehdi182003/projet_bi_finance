@@ -72,6 +72,8 @@ def _lire(chemin: Path, encodage: str, sep: str, titre: bool, total: bool):
         _, nb, montant = lignes[-1].split(sep)[:3]
         meta["nb_lignes_annoncees"], meta["total_annonce"] = int(nb), float(montant)
         lignes = lignes[:-1]
+    if lignes:   # états paginés : l'en-tête est répété à chaque page, ce n'est pas une donnée
+        lignes = lignes[:1] + [l for l in lignes[1:] if l != lignes[0]]
     paquets = pd.read_csv(io.StringIO("\n".join(lignes)), sep=sep, dtype=str, keep_default_na=False,
                           chunksize=TAILLE_PAQUET)
     return paquets, meta
@@ -81,6 +83,8 @@ def _creer_table(cur, table: str, colonnes: list[str]) -> None:
     defs = ", ".join(f'"{c}" text' for c in colonnes)
     cur.execute(f"create table if not exists {table} ({defs}, _fichier text, _ligne integer, "
                 f"_date_chargement timestamp default now())")
+    for c in colonnes:   # dérive de schéma : une colonne apparue dans un export récent est ajoutée (vide avant)
+        cur.execute(f'alter table {table} add column if not exists "{c}" text')
 
 
 def charger_exports_bruts(dossier: Path | None = None) -> dict[str, int]:

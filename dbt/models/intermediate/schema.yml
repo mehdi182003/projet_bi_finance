@@ -13,8 +13,8 @@ models:
           - accepted_values:
               arguments:
                 values: ['Filiale inconnue', 'Doublon', 'Opération annulée', 'Compte de test', 'Extourne',
-                         'Écriture extournée', 'Libellé inconnu', 'Date invalide', 'Montant invalide',
-                         'Devise incohérente', 'Sens incohérent']
+                         'Écriture extournée', 'Autorisation en attente', 'Libellé inconnu', 'Date invalide',
+                         'Opération à montant nul', 'Montant invalide', 'Devise incohérente', 'Sens incohérent']
 
   - name: int_operations_nettoyees
     description: Opérations retenues après nettoyage, au format unique du groupe, avec leur lignage source.

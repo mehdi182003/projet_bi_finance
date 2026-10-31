@@ -49,9 +49,32 @@ BRUIT_JOUR = 0.15               # écart-type log du bruit quotidien
 STEPS_STABLES = (121, 408)      # fenêtre d'activité stable de PaySim (docs/06)
 FICHIER_ANCRAGES = DOSSIER_SOURCES / "ancrages_zf.csv"
 
-TYPES_SORTIE_OUVRE = ["CASH_OUT", "PAYMENT", "DEBIT", "TRANSFER"]
-TYPES_SORTIE_WEEKEND = ["CASH_OUT", "PAYMENT"]          # cartes et retraits seulement le week-end
-PART_VIREMENTS_RECUS = 0.70                            # jours ouvrés : 70 % virements reçus, 30 % dépôts d'espèces
+TYPES_SORTIE = ["TRANSFER", "DEBIT", "PAYMENT", "CASH_OUT"]   # ni virement ni prélèvement le week-end
+
+# --- Réalisme économique (hypothèses documentées, paramétrables) -----------------------------------
+# PaySim fournit la FORME des montants (dispersion, fraude, heures) mais pas leur niveau : ses tickets
+# (retrait médian ~1 500 EUR, mêmes montants dans tous les pays) ne sont pas ceux d'une banque de détail.
+# On garde la forme de chaque type et on recale sa moyenne sur un ticket réaliste (EUR, France = 1,0),
+# puis on le module par un facteur de niveau de vie. Les totaux journaliers, eux, restent ancrés sur les
+# dépôts réels : changer la taille des tickets change le NOMBRE d'opérations, pas les montants totaux.
+TICKET_MOYEN_EUR = {"PAYMENT": 45, "CASH_OUT": 110, "DEBIT": 180, "TRANSFER": 2_500,
+                    "CASH_IN": 450, "VIREMENT_RECU": 1_800}
+FACTEUR_TICKET = {"FR": 1.0, "BNL": 1.1, "FI": 1.05, "SE": 1.1, "DK": 1.3, "NO": 1.5,    # niveau de vie relatif,
+                  "CI": 0.35, "CM": 0.30, "CA": 1.0, "US": 1.4}                           # ordre de grandeur (a_verifier)
+EPARGNE_MOYENNE_PAR_CLIENT_EUR = 20_000   # dépôt à vue moyen par client (France = 1,0) : fixe le nombre de clients
+PROFILS_FLUX = {   # part de la VALEUR décaissée par type, et part des encaissements en virements (sinon espèces)
+    "europe": {"sorties": {"TRANSFER": .50, "DEBIT": .25, "PAYMENT": .17, "CASH_OUT": .08}, "virements": .90},
+    "afrique": {"sorties": {"TRANSFER": .40, "DEBIT": .05, "PAYMENT": .10, "CASH_OUT": .45}, "virements": .55},
+    "amerique": {"sorties": {"TRANSFER": .42, "DEBIT": .28, "PAYMENT": .22, "CASH_OUT": .08}, "virements": .93},
+}
+BRUIT_COMPOSITION = 0.15        # variabilité quotidienne de la composition des flux
+PART_FRAUDE_CONSERVEE = 0.10    # fraudes PaySim gardées (ramène la fraude à ~0,03 % de la valeur décaissée)
+HEURES_BATCH = (5, 9)           # prélèvements et virements reçus sont traités en lot tôt le matin
+
+
+def profil_flux(code_filiale: str) -> dict:
+    zone = "afrique" if code_filiale in ("CI", "CM") else "amerique" if code_filiale in ("CA", "US") else "europe"
+    return PROFILS_FLUX[zone]
 
 
 # ------------------------------------------------------------------ calendrier
@@ -119,7 +142,7 @@ def flux_journaliers(cal: pd.DataFrame, ancrages: pd.DataFrame) -> pd.DataFrame:
         g = g.assign(decaissements=sorties * g.w_out / g.w_out.sum(),
                      encaissements=entrees * g.w_in / g.w_in.sum())
         morceaux.append(g)
-    return pd.concat(morceaux)[["date", "est_ouvre", "encaissements", "decaissements"]]
+    return pd.concat(morceaux)[["date", "est_ouvre", "rang_ouvre", "encaissements", "decaissements"]]
 
 
 # ------------------------------------------------------------------ transactions
@@ -135,13 +158,13 @@ def charger_texture(fichier: Path | None = None) -> pd.DataFrame:
     return p[["type", "montant_eur", "heure", "isFraud"]].reset_index(drop=True)
 
 
-def tirer(pool: pd.DataFrame, cibles_eur: np.ndarray, jours: np.ndarray, rng) -> pd.DataFrame:
-    """Tire des opérations réelles pour chaque jour puis ajuste les montants au total cible du jour."""
-    ticket_moyen = pool.montant_eur.mean()
-    n = np.maximum(np.rint(cibles_eur / (POIDS * ticket_moyen)).astype(int), (cibles_eur > 0).astype(int))
+def tirer(pool: pd.DataFrame, cibles_eur: np.ndarray, jours: np.ndarray, rng, ticket_eur: float) -> pd.DataFrame:
+    """Tire des opérations (forme PaySim, moyenne recalée sur `ticket_eur`), ajustées au total cible du jour."""
+    n = np.maximum(np.rint(cibles_eur / (POIDS * ticket_eur)).astype(int), (cibles_eur > 0).astype(int))
     idx = rng.integers(0, len(pool), n.sum())
     t = pool.iloc[idx].reset_index(drop=True)
     t["jour"] = np.repeat(jours, n)
+    t["montant_eur"] = t.forme.values * ticket_eur
     somme = np.bincount(np.repeat(np.arange(len(jours)), n), weights=t.montant_eur.values * POIDS,
                         minlength=len(jours))
     facteur = np.divide(cibles_eur, somme, out=np.zeros_like(cibles_eur), where=somme > 0)
@@ -149,26 +172,60 @@ def tirer(pool: pd.DataFrame, cibles_eur: np.ndarray, jours: np.ndarray, rng) ->
     return t
 
 
+def formes_par_type(texture: pd.DataFrame) -> dict:
+    """Une forme de montant (moyenne = 1) par type d'opération, tirée de PaySim ; VIREMENT_RECU prend celle de CASH_IN.
+
+    PaySim surreprésente la fraude (~0,3 % des décaissements en valeur une fois recalé, contre ~0,03 % pour
+    les paiements par carte selon la BCE) : on ne conserve qu'une part PART_FRAUDE_CONSERVEE des fraudes.
+    """
+    garder = np.random.default_rng(GRAINE_ALEATOIRE).random(len(texture)) < PART_FRAUDE_CONSERVEE
+    texture = texture[(texture.isFraud == 0) | garder]
+    formes = {}
+    for type_, g in texture.groupby("type"):
+        formes[type_] = (g.assign(forme=g.montant_eur / g.montant_eur.mean())[["forme", "heure", "isFraud"]]
+                         .reset_index(drop=True))
+    formes["VIREMENT_RECU"] = formes["CASH_IN"]
+    return formes
+
+
+def repartition_quotidienne(flux: pd.DataFrame, profil: dict, rng: np.random.Generator) -> dict:
+    """Ventile les décaissements et encaissements de chaque jour par type, selon le profil du pays."""
+    ouvre = flux.est_ouvre.values
+    part = np.tile(np.array([profil["sorties"][t] for t in TYPES_SORTIE]), (len(flux), 1))
+    part[~ouvre, :2] = 0                                              # ni virement ni prélèvement le week-end
+    debut_mois = ouvre & (flux.rang_ouvre.values <= 3)
+    part[:, 1] *= np.where(debut_mois, 2.5, 0.6)                      # loyers, factures : début de mois
+    part = part * rng.lognormal(0, BRUIT_COMPOSITION, part.shape)
+    part = part / part.sum(axis=1, keepdims=True)
+    virement = np.clip(profil["virements"] * np.where(ouvre, 1.0, 0.5)
+                       * rng.lognormal(0, BRUIT_COMPOSITION / 3, len(flux)), 0, 0.99)
+    cibles = {t: flux.decaissements.values * part[:, k] for k, t in enumerate(TYPES_SORTIE)}
+    cibles["VIREMENT_RECU"] = flux.encaissements.values * virement
+    cibles["CASH_IN"] = flux.encaissements.values * (1 - virement)
+    return cibles
+
+
 def transactions_filiale(f: pd.Series, flux: pd.DataFrame, texture: pd.DataFrame, taux: pd.Series,
-                         rng: np.random.Generator) -> pd.DataFrame:
+                         rng: np.random.Generator, encours_moyen_eur: float) -> pd.DataFrame:
     flux = flux.reset_index(drop=True)
     jours = flux.date.values
     taux_jour = taux.reindex(flux.date).ffill().bfill().values         # devise locale pour 1 EUR
+    formes = formes_par_type(texture)
+    facteur = FACTEUR_TICKET[f.code_filiale]
+    cibles = repartition_quotidienne(flux, profil_flux(f.code_filiale), rng)
     morceaux = []
-    for ouvre in (True, False):
-        m = flux.est_ouvre.values == ouvre
-        types_sortie = TYPES_SORTIE_OUVRE if ouvre else TYPES_SORTIE_WEEKEND
-        sorties = tirer(texture[texture.type.isin(types_sortie)], flux.decaissements.values[m] / taux_jour[m],
-                        jours[m], rng)
-        entrees = tirer(texture[texture.type == "CASH_IN"], flux.encaissements.values[m] / taux_jour[m],
-                        jours[m], rng)
-        if ouvre:
-            entrees.loc[rng.random(len(entrees)) < PART_VIREMENTS_RECUS, "type"] = "VIREMENT_RECU"
-        morceaux += [sorties, entrees]
+    for type_, cible in cibles.items():
+        m = cible > 0
+        t = tirer(formes[type_], cible[m] / taux_jour[m], jours[m], rng, TICKET_MOYEN_EUR[type_] * facteur)
+        t["type"] = type_
+        if type_ in ("DEBIT", "VIREMENT_RECU"):                        # traitements en lot, tôt le matin
+            t["heure"] = rng.integers(*HEURES_BATCH, len(t))
+        morceaux.append(t)
     t = pd.concat(morceaux, ignore_index=True)
     t["taux"] = pd.Series(taux_jour, index=jours).reindex(t.jour).values
-    nb_clients = max(int(flux.decaissements.mean() * 120 / 2_000 / taux_jour.mean()), 1_000)
-    rang = np.floor(nb_clients * rng.random(len(t)) ** 2.5).astype(int)   # quelques clients très actifs
+    nb_clients = max(int(encours_moyen_eur / (EPARGNE_MOYENNE_PAR_CLIENT_EUR * facteur)), 1_000)
+    rang = 1 + np.floor(nb_clients * rng.random(len(t)) ** 2.5).astype(int)   # quelques clients très actifs ;
+                                                                               # 0000000 = valeur nulle des exports
     decimales = 0 if f.code_devise in ("XOF", "XAF") else 2                # le franc CFA n'a pas de centimes
     v = pd.DataFrame({
         "horodatage": pd.to_datetime(t.jour) + pd.to_timedelta(t.heure, unit="h")
@@ -184,6 +241,11 @@ def transactions_filiale(f: pd.Series, flux: pd.DataFrame, texture: pd.DataFrame
     jour = v.horodatage.dt.strftime("%Y%m%d")
     v.insert(0, "ref_operation", f.code_filiale + jour + "-" + (v.groupby(jour).cumcount() + 1).astype(str).str.zfill(6))
     return v
+
+
+def encours_moyen_eur(anc: pd.DataFrame, taux: pd.Series) -> float:
+    cours = taux.reindex(pd.date_range(DATE_INITIALE, FIN)).ffill().bfill().reindex(anc.date_ancrage).values
+    return float((anc.encours_zf_devise.values / cours).mean())
 
 
 def dossier_par_defaut(taille_lot: int) -> Path:
@@ -223,7 +285,7 @@ def generer(fichier_paysim: Path | None = None, taille_lot: int = 100, dossier: 
         tous_ancrages.append(anc)
         cal = calendrier(f.code_calendrier, f.profil_paie, rng)
         flux = flux_journaliers(cal, anc)
-        t = transactions_filiale(f, flux, texture, taux, rng)
+        t = transactions_filiale(f, flux, texture, taux, rng, encours_moyen_eur(anc, taux))
         exporter_filiale(rng_exports, t, f, dossier)
         soldes.append(soldes_filiale(t))
         del t

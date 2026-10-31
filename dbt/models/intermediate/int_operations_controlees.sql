@@ -7,11 +7,13 @@
 --   RG-NET-06 : code devise -> code ISO (ref_correspondance_devises) ; « FCFA » -> devise CFA de la filiale ;
 --               contrôle : la devise doit être celle de la filiale
 --   RG-NET-07 : doublons : même référence d'opération dans le même système (renvoi de lignes,
---               fichiers mensuels qui se chevauchent) -> on garde la première occurrence
+--               fichiers mensuels qui se chevauchent, fichiers renvoyés « _v2 ») -> on garde la première occurrence
 --   RG-NET-08 : exclusions métier : opérations annulées (SAB), comptes de test (AMERICORE),
---               extournes et écritures extournées (NORDIC)
---   RG-NET-09 : identifiant client -> <FILIALE>-<7 chiffres> ; absent -> <FILIALE>-INCONNU
---   RG-NET-10 : contrôles de validité : filiale, date dans la période, montant > 0, sens cohérent
+--               extournes, écritures extournées et pré-autorisations carte en attente (NORDIC)
+--   RG-NET-09 : identifiant client -> <FILIALE>-<7 chiffres> ; absent ou codé NULL, N/A, ?, 0000000
+--               -> <FILIALE>-INCONNU
+--   RG-NET-10 : contrôles de validité : filiale, date dans la période, montant > 0 (les vérifications
+--               de carte à 0,00 sont un motif connu), sens cohérent
 
 with sources as (
     select * from {{ ref('stg_sab__operations') }}
@@ -37,7 +39,7 @@ enrichies as (
              else d.code_devise end                                                   as code_devise,
         coalesce(d.est_code_iso and s.devise_source = d.valeur_normalisee, false)     as est_devise_standard,
         {{ normaliser_client('s.code_filiale', 's.client_source') }}                   as id_client,
-        nullif(regexp_replace(s.client_source, '\D', '', 'g'), '') is null           as est_client_manquant,
+        {{ client_manquant('s.client_source') }}                                     as est_client_manquant,
         e.ref_operation is not null                                                   as est_ecriture_extournee,
         row_number() over (partition by s.systeme_source, s.ref_operation
                            order by s.nom_fichier, s.num_ligne)                       as rang_occurrence
@@ -61,12 +63,14 @@ select
         when est_compte_test                                            then 'Compte de test'
         when statut_source = 'REVERSAL'                                 then 'Extourne'
         when est_ecriture_extournee                                     then 'Écriture extournée'
+        when statut_source = 'PENDING'                                  then 'Autorisation en attente'
         when code_type is null                                          then 'Libellé inconnu'
         when horodatage is null
           or cast(horodatage as date) not between cast('{{ var("date_debut_analyse") }}' as date)
                                               and cast('{{ var("date_fin_analyse") }}' as date)
                                                                         then 'Date invalide'
-        when montant_unitaire_devise is null or montant_unitaire_devise <= 0 then 'Montant invalide'
+        when montant_unitaire_devise = 0                                then 'Opération à montant nul'
+        when montant_unitaire_devise is null or montant_unitaire_devise < 0 then 'Montant invalide'
         when code_devise is distinct from devise_filiale                then 'Devise incohérente'
         when sens_source is not null and sens_source <> sens_attendu    then 'Sens incohérent'
     end                                                                               as motif_rejet

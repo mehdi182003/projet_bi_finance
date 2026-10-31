@@ -35,17 +35,18 @@ dbt ne stocke rien : il exécute le SQL **dans** PostgreSQL. Tests, documentatio
 2. **Décision** : construire **3 ans (2023-2025)** de flux ancrés sur des **séries réelles** (docs/07).
    - Les dépôts à vue par pays viennent de la BCE, de la Fed (hebdomadaire), de la Banque du Canada, du SCB, de Danmarks Nationalbank, du FMI et de la BEAC.
    - Les taux directeurs viennent des API officielles et des communiqués BCEAO / BEAC.
-   - PaySim ne sert plus que de « texture » (montants, types, heures, fraude).
-3. **Exports bruts** (`etl/systemes_sources.py`, docs/08) : la « vérité » est exportée au format de 4 systèmes, avec des défauts réalistes injectés volontairement.
+   - PaySim ne sert plus que de « texture » : **forme** des montants, heures, fraude.
+   - **Réalisme économique** (docs/07 § 3.4) : composition des décaissements par type selon la zone, tickets recalés par type (carte 45 €, retrait 110 €, prélèvement 180 €…) et modulés par le niveau de vie du pays (Côte d'Ivoire 0,35, Norvège 1,5…), prélèvements en début de mois, traitements en lot le matin. Les totaux restent exactement ancrés sur les dépôts réels : seuls le nombre et la taille des opérations changent.
+3. **Exports bruts** (`etl/systemes_sources.py`, docs/08) : la « vérité » est exportée au format de 4 systèmes, avec des défauts réalistes injectés volontairement, tels qu'on les rencontre dans les extractions bancaires en entreprise.
 
    | Système | Filiales | Défauts injectés |
    |---|---|---|
-   | SAB | FR, BNL, FI | séparateur `;`, cp1252, virgule décimale, sens D/C, fichiers mensuels qui se chevauchent, annulations |
-   | NORDIC | SE, DK, NO | heures UTC, montants signés, öre en Suède, extournes |
-   | AMERICORE | CA, US | dates MM/JJ/AAAA AM/PM, colonnes débit / crédit, séparateur de milliers, comptes de test |
-   | DELTA | CI, CM | ligne de titre et ligne de total, libellés sans norme, « FCFA » |
+   | SAB | FR, BNL, FI | séparateur `;`, cp1252, virgule décimale, sens D/C, fichiers mensuels qui se chevauchent, annulations, **migration** (dates ISO dès juillet 2024), **fichiers retouchés sous Excel** (espace insécable), références avec espaces, vérifications de carte à 0,00 |
+   | NORDIC | SE, DK, NO | heures UTC, montants signés, öre en Suède, extournes, **pré-autorisations `PENDING`**, **nouvelle colonne `channel`** en 2025, codes entité en casse variable |
+   | AMERICORE | CA, US | dates MM/JJ/AAAA AM/PM, colonnes débit / crédit, séparateur de milliers, comptes de test, **montants comptables `(…)` et `US$`**, **données tardives** (clôture à 18 h), codes entité en casse variable |
+   | DELTA | CI, CM | ligne de titre et ligne de total, libellés sans norme, « FCFA », **encodage cassé** (`DÃ‰PÃ”T`), **en-tête répété** toutes les 5 000 lignes, vérifications de carte à 0 |
 
-   Sur les 4 systèmes s'ajoutent des doublons, des devises et libellés non normalisés, et des clients manquants.
+   Sur les 4 systèmes s'ajoutent des doublons, des **fichiers renvoyés** (`_v2`), des devises et libellés non normalisés, et des clients manquants ou codés `NULL` / `N/A` / `?` / `0000000`. Catalogue des défauts traités : `marts.mart_qualite_defauts`.
 4. **Preuve de fiabilité** (tests dbt) :
    - **rapprochement comptable** jour par jour (10 960 jours-filiales) ;
    - **ancrage** sur les dépôts réels (491 dates, écart maximal de 0,000007 %) ;
@@ -54,16 +55,19 @@ dbt ne stocke rien : il exécute le SQL **dans** PostgreSQL. Tests, documentatio
    Après nettoyage, on retrouve **exactement** le nombre d'opérations réelles de chaque filiale.
 5. **Volumes** : une ligne = un **lot** de `taille_lot` opérations.
 
-   | Taille de lot | Lignes brutes | CSV décompressé | Où | Usage |
-   |---|---|---|---|---|
-   | 100 (défaut) | 2,9 M | 286 Mo (49 Mo compressé) | `data/sources_internes/` (Git) | dépôt, démo, tests |
-   | 10 | 29,0 M | 2,83 Go (444 Mo compressé) | `data/generees/lot_10/` (local) | « gros volume » réaliste sur un PC |
-   | 1 | ~290 M | ~28 Go | local | déconseillé sur un portable (plus de 100 Go dans PostgreSQL) |
+   Avec les tickets réalistes, les 3 ans représentent **~2,03 milliards d'opérations**.
 
-   **Mesuré sur 4 cœurs / 16 Go de RAM, en lots de 10** :
-   - génération : 17 min, pic mémoire de 5 Go ;
-   - pipeline complet (load + dbt + prévision) : 22 min, 150 contrôles réussis ;
-   - base PostgreSQL : **13 Go**. Prévoir **~20 Go libres** (fichiers temporaires pendant `dbt build`).
+   | Taille de lot | Lignes brutes | Fichiers | Où | Usage |
+   |---|---|---|---|---|
+   | 100 (défaut) | 2,9 M (ancien générateur) ; ~21 M une fois régénéré | 49 Mo compressés | `data/sources_internes/` (Git) | dépôt, démo |
+   | 500 | 4,2 M | 63 Mo compressés | local | test rapide de la chaîne (8,5 min, base de 2,7 Go) |
+   | **50** | **42,7 M** | **586 Mo compressés** | `data/generees/lot_50/` (local) | **gros volume local (~20 Go au total)** |
+
+   **Mesuré sur 6 cœurs / 15 Go de RAM, en lots de 50 (31/10/2026)** :
+   - génération : 16 min ;
+   - chargement : 11 min (rechargement incrémental : seuls les fichiers modifiés) ;
+   - `dbt build` : 39 min, 136 contrôles réussis + 18 sur les marts de prévision ; pipeline complet : 57 min ;
+   - base PostgreSQL : **18 Go**. Prévoir **~30 Go libres** (fichiers temporaires pendant `dbt build`).
 
    Les montants totaux et les ancrages sont identiques quelle que soit la taille de lot ; seul le grain change.
 
@@ -77,10 +81,19 @@ python pipeline.py                         # jeu versionné (lots de 100) : ~3,5
 ```
 **Gros volume en local** (nécessite le CSV PaySim dans `data/raw/`, à télécharger depuis Kaggle) :
 ```powershell
-python pipeline.py --regenerer --taille-lot 10    # génère data/generees/lot_10 puis charge et transforme tout
+python pipeline.py --regenerer --taille-lot 50    # génère data/generees/lot_50 puis charge et transforme tout
 # pour les lancements suivants, ajouter dans .env :
-# DOSSIER_SOURCES_INTERNES=data/generees/lot_10
+# DOSSIER_SOURCES_INTERNES=data/generees/lot_50
 ```
+**Relancer chaque étape à la main** (venv activé, depuis la racine) :
+```powershell
+python pipeline.py --regenerer --taille-lot 50 --etapes generer   # Python : exports bruts « sales » (CSV)
+python pipeline.py --etapes extract load                          # Python : CSV -> PostgreSQL, schéma raw (incrémental)
+cd dbt ; dbt build --profiles-dir . --exclude tag:prevision ; cd ..   # dbt : staging -> intermediate -> marts + tests
+python pipeline.py --etapes prevision dbt_prev                    # Python : prévisions -> ml, puis dbt : marts de prévision
+# Power BI : ouvrir powerbi/Cresus/Cresus.pbip -> Actualiser
+```
+Sans Docker, un PostgreSQL 15/16 installé localement convient (base `cresus`, utilisateur et mot de passe `postgres`).
 Autres commandes utiles :
 - `python pipeline.py --etapes dbt prevision dbt_prev` : relancer seulement certaines étapes.
 - `cd dbt ; dbt build --profiles-dir .` : modèles et tests.
@@ -122,9 +135,12 @@ Autres commandes utiles :
 5. Trésorerie **gérée** : réserve ramenée chaque mois à sa cible. Sans cela, la fuite réelle des dépôts à vue en zone euro rendait la position négative.
 6. Contrôle sur les dépôts réels de janvier 2026 : il a révélé la **saisonnalité de janvier**. Effet « mois » ajouté ; couverture de la fourchette passée de 4/9 à 7/9.
 7. Exports bruts multi-systèmes et vrai ETL de nettoyage, versionnés dans Git ; option `--taille-lot` pour les gros volumes en local.
+8. Audit de réalisme économique : les tickets PaySim (retrait médian 1 500 €, identiques dans tous les pays) faussaient la composition des flux (48 % des décaissements en retraits DAB). Composition par zone, tickets par type et niveau de vie ajoutés ; fraude PaySim ramenée à l'ordre de grandeur BCE. Les totaux ancrés et les résultats clés (§ 8) sont inchangés.
+9. Défauts d'entreprise ajoutés aux exports : migration de format, dérive de schéma, fichiers Excel, montants comptables, pré-autorisations, données tardives, fichiers renvoyés, valeurs nulles codées, encodage cassé, en-têtes répétés. Chacun a sa règle RG-NET et le rapprochement comptable reste exact.
 
-## 8. Résultats clés (jeu versionné, à re-vérifier si on régénère)
-- Prévision quotidienne : régression calendaire championne sur 19 séries sur 20. WAPE : 12-16 % sur les décaissements, 12-23 % sur les encaissements.
+## 8. Résultats clés (jeu versionné ; revérifiés le 31/10/2026 sur le gros volume en lots de 50)
+- Prévision quotidienne : régression calendaire championne sur 19 séries sur 20. WAPE : 12-16 % sur les décaissements, 12-23 % sur les encaissements (gros volume : 12-15 % et 12-28 %, États-Unis 27,6 %).
+- Gros volume : refinancements 2023 = 3,98 Md€, placements 2025 = 2,62 Md€ ; effet de change −58 M€ (USD), −46 M€ (NOK) ; 7 filiales sur 9 dans la fourchette ; réserve requise France 18,1 % ; fraude 0,02-0,06 % des décaissements en valeur.
 - Dépôts réels de janvier 2026 dans la fourchette à 90 % pour **7 filiales sur 9** ; change : 94 % des jours dans la fourchette.
 - Janvier = 40 % des jours sous 100 % de liquidité. Réserve requise pour janvier 2026 : ~18 % en France contre 15 % actuellement. Sur-réserve en zone CFA et en Norvège (~90 M€).
 - 2023 : 4,0 Md€ de refinancement net ; 2025 : 2,6 Md€ de placements nets. Effet de change sur 3 ans : −57 M€ (USD), −46 M€ (NOK).
@@ -132,13 +148,15 @@ Autres commandes utiles :
 
 ## 9. Limites connues et points à vérifier
 - Transactions et défauts des exports : **simulés** (aucune banque ne publie ses opérations). Sont réels : dépôts, taux, change, jours fériés.
-- Hypothèses : profil intra-mensuel (paie, prélèvements), parts de marché, taux de réserve par filiale.
+- Hypothèses : profil intra-mensuel (paie, prélèvements), parts de marché, taux de réserve par filiale, composition des flux par zone, tickets moyens par type et facteurs de niveau de vie (`etl/generateur_flux.py`, ordres de grandeur à sourcer pour le rapport).
+- Le jeu versionné `data/sources_internes/` (lots de 100) a été produit **avant** l'audit de réalisme et l'ajout des défauts d'entreprise. Le régénérer (`python pipeline.py --regenerer`) avant de le committer : il passera d'environ 2,9 M à environ 20 M de lignes, car les tickets réalistes multiplient le nombre d'opérations.
 - Taux BCEAO du 16/12/2022 **déduit** (`a_verifier = true`). Cameroun : 10 mois interpolés.
 - Le projet `.pbip` a été validé (bibliothèque Microsoft TOM et schémas JSON officiels) mais **jamais ouvert dans Power BI Desktop** (généré sous Linux). Premier test à faire sous Windows.
 
 ## 10. Reste à faire
 - [ ] Ouvrir `Cresus.pbip` sous Windows, actualiser, corriger d'éventuels visuels.
-- [ ] Générer le gros volume en local (`--regenerer --taille-lot 10`) et vérifier que `dbt build` reste vert.
+- [x] Générer le gros volume en local (`--regenerer --taille-lot 50`) et vérifier que `dbt build` reste vert.
+- [ ] Décider du jeu versionné : régénérer `data/sources_internes/` avec le nouveau générateur, ou monter `taille_lot` par défaut pour garder un dépôt léger.
 - [ ] Rapport « réponse à l'appel d'offres » (~15 pages Word) à partir de docs/01 à 08.
 - [ ] Support de soutenance (PowerPoint) ; modèles du cours : `04_IBI_SUPPORT_SOUTENANCE…pptx`, `05_IBI_MOE_POC…`.
 - [ ] Corriger la fiche d'expertise : Côte d'Ivoire = **XOF** (pas XAF) ; outil de restitution = **Power BI** (la fiche cite Tableau) ; ajouter les filiales d'Europe du Nord.

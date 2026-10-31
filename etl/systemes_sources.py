@@ -16,6 +16,17 @@ de la « vérité » produite par etl/generateur_flux.py :
 Défauts injectés (taux paramétrés ci-dessous, graine fixe => reproductible) : doublons, fichiers
 mensuels qui se chevauchent, opérations annulées, écritures erronées puis extournées, comptes de test,
 libellés et codes devise non normalisés, identifiants clients manquants ou mal formés.
+S'y ajoutent les défauts courants des extractions bancaires réelles :
+  - dérive de format : migration SAB (dates ISO à partir de juillet 2024), nouvelle colonne NORDIC (2025) ;
+  - export retouché sous Excel (SAB) : séparateur de milliers en espace insécable ;
+  - montants au format comptable (AMERICORE) : « (1,234.56) » et « $1,234.56 » ;
+  - pré-autorisations carte en attente (NORDIC, statut PENDING) à côté de l'opération comptabilisée ;
+  - vérifications de carte à 0,00 (SAB, DELTA) ;
+  - données tardives (AMERICORE) : opérations du dernier jour après la clôture dans le fichier suivant ;
+  - fichiers mensuels renvoyés une seconde fois (« _v2 ») ;
+  - valeurs nulles codées de plusieurs façons (NULL, N/A, ?, 0000000) ;
+  - codes entité en casse ou avec espaces variables (NORDIC, AMERICORE) ;
+  - encodage cassé (UTF-8 relu en cp1252) dans les libellés DELTA, en-tête répété en milieu de fichier.
 Tous sont récupérables : après nettoyage, on doit retrouver exactement la vérité (vérifié par le
 rapprochement avec les soldes comptables journaliers, également exportés ici).
 
@@ -45,7 +56,17 @@ TAUX = {   # proportion de lignes touchées par chaque défaut
     "doublon": 0.004, "annulee": 0.002, "extourne": 0.001, "test": 0.0005,
     "libelle_variante": 0.04, "devise_variante": 0.02, "client_manquant": 0.003,
     "client_sans_zeros": 0.01, "suspicion_vide": 0.10,
+    "client_valeur_nulle": 0.004, "montant_nul": 0.0005, "autorisation": 0.02, "montant_comptable": 0.03,
+    "symbole_devise": 0.02, "entite_variante": 0.02, "ref_espaces": 0.01, "libelle_mojibake": 0.03,
 }
+TAUX_FICHIER = {"renvoye": 0.03, "excel": 0.15}   # proportion de fichiers mensuels touchés
+VALEURS_NULLES = ["NULL", "N/A", "?", "0000000"]
+MIGRATION_SAB = pd.Period("2024-07", "M")          # nouveau format de date (AAAA-MM-JJ) après migration
+NOUVELLE_COLONNE_NORDIC = pd.Period("2025-01", "M")  # ajout de la colonne « channel »
+HEURE_CLOTURE_AMERICORE = 18                       # au-delà, le dernier jour part dans le fichier suivant
+LIGNES_PAR_PAGE_DELTA = 5_000                      # l'état DELTA répète son en-tête à chaque « page »
+CANAUX_NORDIC = {"CASH_IN": "BRANCH", "VIREMENT_RECU": "BATCH", "CASH_OUT": "ATM", "PAYMENT": "CARD",
+                 "DEBIT": "BATCH", "TRANSFER": "ONLINE"}
 SENS = {"CASH_IN": 1, "VIREMENT_RECU": 1, "CASH_OUT": -1, "PAYMENT": -1, "DEBIT": -1, "TRANSFER": -1}
 
 LIBELLES = {
@@ -92,6 +113,16 @@ def _client(rng, ids: pd.Series, prefixe: str, sans_zeros: bool = False) -> pd.S
         z = rng.random(len(sortie)) < TAUX["client_sans_zeros"]
         sortie[z] = [prefixe + str(int(n)) for n in num[z]]
     sortie[rng.random(len(sortie)) < TAUX["client_manquant"]] = ""
+    nulle = rng.random(len(sortie)) < TAUX["client_valeur_nulle"]      # NULL, N/A, ?, 0000000 selon l'agence
+    sortie[nulle] = rng.choice(VALEURS_NULLES, nulle.sum())
+    return sortie
+
+
+def _entite(rng, code: str, n: int) -> np.ndarray:
+    """Code entité saisi avec une casse ou des espaces variables sur une partie des lignes."""
+    sortie = np.full(n, code, dtype=object)
+    touche = rng.random(n) < TAUX["entite_variante"]
+    sortie[touche] = rng.choice([code.lower(), f" {code}", f"{code} "], touche.sum())
     return sortie
 
 
@@ -102,20 +133,53 @@ def _ajouter_doublons(rng, df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([df, df.sample(n, random_state=int(rng.integers(1e9)))]).sort_values("_ordre", kind="stable")
 
 
-def _ecrire(df: pd.DataFrame, chemin: Path, sep: str, encodage: str, preambule: str = "", pied: str = "") -> None:
+def _verifications_carte(rng, lot: pd.DataFrame, suffixe: str = "V") -> pd.DataFrame:
+    """Vérifications de carte à 0,00 (contrôle de validité au TPE) : lignes en plus, sans effet comptable."""
+    cartes = lot[lot.code_type == "PAYMENT"]
+    n = int(len(cartes) * TAUX["montant_nul"])
+    if n == 0:
+        return lot
+    zero = cartes.sample(n, random_state=int(rng.integers(1e9))).copy()
+    zero["ref_operation"] = zero.ref_operation + suffixe
+    zero["montant_devise"] = 0.0
+    zero["poids"] = 1
+    zero["horodatage"] = zero.horodatage - pd.Timedelta(seconds=40)
+    return pd.concat([lot, zero]).sort_values("horodatage", kind="stable")
+
+
+def _ecrire(df: pd.DataFrame, chemin: Path, sep: str, encodage: str, preambule: str = "", pied: str = "",
+            rng=None, entete_par_page: int | None = None) -> int:
+    """Écrit un fichier mensuel ; renvoie le nombre de lignes de données écrites (renvoi éventuel compris)."""
     chemin.parent.mkdir(parents=True, exist_ok=True)
     corps = df.drop(columns=[c for c in df.columns if c.startswith("_")]).to_csv(index=False, sep=sep, lineterminator="\r\n")
-    # mtime=0 : compression déterministe => une régénération à l'identique donne exactement les mêmes octets
-    with open(chemin, "wb") as brut, gzip.GzipFile(filename="", mode="wb", fileobj=brut, compresslevel=9, mtime=0) as f:
-        if encodage == "utf-8-sig":
-            f.write(b"\xef\xbb\xbf")
-            encodage = "utf-8"
-        f.write((preambule + corps + pied).encode(encodage, errors="replace"))
+    if entete_par_page:                                   # état « imprimé » : en-tête répété à chaque page
+        lignes = corps.split("\r\n")
+        entete, donnees = lignes[0], lignes[1:]
+        pages = [donnees[i:i + entete_par_page] for i in range(0, len(donnees), entete_par_page)]
+        corps = "\r\n".join([entete] + [l for k, p in enumerate(pages) for l in ([entete] if k else []) + p])
+    contenu = preambule + corps + pied
+    if encodage == "utf-8-sig":
+        octets = b"\xef\xbb\xbf" + contenu.encode("utf-8", errors="replace")
+    else:
+        octets = contenu.encode(encodage, errors="replace")
+    cibles = [chemin]
+    if rng is not None and rng.random() < TAUX_FICHIER["renvoye"]:   # la filiale renvoie le même fichier
+        cibles.append(chemin.with_name(chemin.name.replace(".csv.gz", "_v2.csv.gz")))
+    for cible in cibles:
+        # mtime=0 : compression déterministe => une régénération à l'identique donne exactement les mêmes octets
+        with open(cible, "wb") as brut, gzip.GzipFile(filename="", mode="wb", fileobj=brut, compresslevel=9, mtime=0) as f:
+            f.write(octets)
+    return len(df) * len(cibles)
 
 
-def _fichiers_mensuels(v: pd.DataFrame, chevauchement: bool):
-    """Découpe par mois ; avec chevauchement, chaque fichier reprend le dernier jour du mois précédent."""
-    v = v.assign(_mois=v.horodatage.dt.to_period("M"))
+def _fichiers_mensuels(v: pd.DataFrame, chevauchement: bool, heure_cloture: int | None = None):
+    """Découpe par mois ; avec chevauchement, chaque fichier reprend le dernier jour du mois précédent ;
+    avec heure de clôture, les opérations du dernier jour passées cette heure partent dans le fichier suivant."""
+    mois_fichier = v.horodatage.dt.to_period("M")
+    if heure_cloture is not None:
+        tardive = v.horodatage.dt.is_month_end & (v.horodatage.dt.hour >= heure_cloture)
+        mois_fichier = mois_fichier.where(~tardive, mois_fichier + 1)
+    v = v.assign(_mois=mois_fichier)
     mois = sorted(v._mois.unique())
     for i, m in enumerate(mois):
         lot = v[v._mois == m]
@@ -133,24 +197,33 @@ def export_sab(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
         annulees["ref_operation"] = annulees.ref_operation + "A"
         annulees["_statut"] = "ANNULE"
         lot = pd.concat([lot.assign(_statut="VALIDE"), annulees])
+        lot = _verifications_carte(rng, lot)
         lot = lot.assign(_ordre=np.arange(len(lot)))
         lot = _ajouter_doublons(rng, lot)
+        refs = lot.ref_operation.values.astype(object)
+        espaces = rng.random(len(refs)) < TAUX["ref_espaces"]                   # saisie avec espaces de bord
+        refs[espaces] = [f" {r}  " for r in refs[espaces]]
+        format_date = "%Y-%m-%d" if m >= MIGRATION_SAB else "%d/%m/%Y"        # migration du système
+        if rng.random() < TAUX_FICHIER["excel"]:                              # fichier retouché sous Excel
+            montants = [f"{x:,.2f}".replace(",", "\xa0").replace(".", ",") for x in lot.montant_devise]
+        else:
+            montants = [f"{x:.2f}".replace(".", ",") for x in lot.montant_devise]
         sortie = pd.DataFrame({
-            "REF_OPE": lot.ref_operation.values,
+            "REF_OPE": refs,
             "CODE_ETAB": f.code_entite_source,
-            "DATE_OPE": lot.horodatage.dt.strftime("%d/%m/%Y").values,
+            "DATE_OPE": lot.horodatage.dt.strftime(format_date).values,
             "HEURE_OPE": lot.horodatage.dt.strftime("%H:%M:%S").values,
             "NUM_CLIENT": _client(rng, lot.id_client.reset_index(drop=True), f.code_filiale).values,
             "LIBELLE_OPE": _variante(rng, lot.code_type.reset_index(drop=True), LIBELLES["SAB"], TAUX["libelle_variante"]).values,
             "NB_OPE": lot.poids.values,
-            "MONTANT": [f"{x:.2f}".replace(".", ",") for x in lot.montant_devise],
+            "MONTANT": montants,
             "SENS": np.where(lot.code_type.map(SENS) > 0, "C", "D"),
             "DEVISE": _variante(rng, pd.Series([f.code_devise] * len(lot)), DEVISES, TAUX["devise_variante"]).values,
             "IND_FRAUDE": np.where(lot.est_fraude == 1, "O", "N"),
             "STATUT": lot._statut.values,
         })
-        _ecrire(sortie, racine / f"SAB_{f.code_entite_source}_{m.strftime('%Y%m')}.csv.gz", ";", "cp1252")
-        lignes += len(sortie)
+        lignes += _ecrire(sortie, racine / f"SAB_{f.code_entite_source}_{m.strftime('%Y%m')}.csv.gz", ";", "cp1252",
+                          rng=rng)
     return lignes
 
 
@@ -171,14 +244,24 @@ def export_nordic(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
         extournes["montant_signe"] = -erreurs.montant_signe
         extournes["statut"], extournes["origine"] = "REVERSAL", erreurs.txn_id
         extournes["horodatage"] = extournes.horodatage + pd.Timedelta(minutes=47)
-        lot = pd.concat([lot, erreurs, extournes]).sort_values("horodatage")
+        # pré-autorisations carte : ligne PENDING (montant estimé) avant l'opération comptabilisée
+        cartes = lot[lot.code_type == "PAYMENT"]
+        attente = cartes.sample(int(len(cartes) * TAUX["autorisation"]), random_state=int(rng.integers(1e9))).copy()
+        attente["txn_id"] = attente.ref_operation + "P"
+        attente["montant_signe"] = (attente.montant_signe * rng.uniform(1.0, 1.3, len(attente))).round(2)
+        attente["statut"] = "PENDING"
+        attente["horodatage"] = attente.horodatage - pd.Timedelta(minutes=3)
+        lot = pd.concat([lot, erreurs, extournes, attente]).sort_values("horodatage")
         lot = lot.assign(_ordre=np.arange(len(lot)))
         lot = _ajouter_doublons(rng, lot)
-        utc = lot.horodatage.dt.tz_localize(f.fuseau_horaire, ambiguous="NaT", nonexistent="shift_forward").dt.tz_convert("UTC")
+        # le système stocke en UTC : l'heure en double du passage à l'heure d'hiver est rattachée à l'heure d'été
+        # (avec ambiguous="NaT", les opérations entre 2 h et 3 h ce jour-là sortaient sans horodatage)
+        utc = lot.horodatage.dt.tz_localize(f.fuseau_horaire, ambiguous=np.ones(len(lot), dtype=bool),
+                                            nonexistent="shift_forward").dt.tz_convert("UTC")
         montant = lot.montant_signe * (100 if mineures else 1)
         sortie = pd.DataFrame({
             "txn_id": lot.txn_id.values,
-            "entity": f.code_entite_source,
+            "entity": _entite(rng, f.code_entite_source, len(lot)),
             "booking_ts": utc.dt.strftime("%Y-%m-%dT%H:%M:%SZ").values,
             "customer_ref": _client(rng, lot.id_client.reset_index(drop=True), f.code_filiale + "-").values,
             "txn_type": _variante(rng, lot.code_type.reset_index(drop=True), LIBELLES["NORDIC"], TAUX["libelle_variante"]).values,
@@ -190,14 +273,16 @@ def export_nordic(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
             "record_status": lot.statut.values,
             "reversal_of": lot.origine.values,
         })
-        _ecrire(sortie, racine / f"NCB_{f.code_entite_source}_{m.strftime('%Y-%m')}.csv.gz", ",", "utf-8-sig")
-        lignes += len(sortie)
+        if m >= NOUVELLE_COLONNE_NORDIC:                                      # évolution du format d'export
+            sortie.insert(5, "channel", lot.code_type.map(CANAUX_NORDIC).values)
+        lignes += _ecrire(sortie, racine / f"NCB_{f.code_entite_source}_{m.strftime('%Y-%m')}.csv.gz", ",", "utf-8-sig",
+                          rng=rng)
     return lignes
 
 
 def export_americore(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
     lignes = 0
-    for m, lot in _fichiers_mensuels(v, chevauchement=False):
+    for m, lot in _fichiers_mensuels(v, chevauchement=False, heure_cloture=HEURE_CLOTURE_AMERICORE):
         tests = lot.sample(max(int(len(lot) * TAUX["test"]), 1), random_state=int(rng.integers(1e9))).copy()
         tests["ref_operation"] = "T" + tests.ref_operation
         tests["id_client"] = "TEST-" + tests.id_client.str.split("-").str[1]
@@ -205,14 +290,19 @@ def export_americore(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
         lot = lot.assign(_ordre=np.arange(len(lot)))
         lot = _ajouter_doublons(rng, lot)
         code = lot.code_type.map(CODES_AMERICORE)
-        credit = lot.code_type.map(SENS) > 0
-        montants = [f"{x:,.2f}" for x in lot.montant_devise]           # séparateur de milliers
+        credit = (lot.code_type.map(SENS) > 0).values
+        montants = np.array([f"{x:,.2f}" for x in lot.montant_devise], dtype=object)   # séparateur de milliers
+        comptable = ~credit & (rng.random(len(lot)) < TAUX["montant_comptable"])        # débit noté « (1,234.56) »
+        montants[comptable] = [f"({x})" for x in montants[comptable]]
+        symbole = "US$" if f.code_devise == "USD" else "C$"
+        avec_symbole = ~comptable & (rng.random(len(lot)) < TAUX["symbole_devise"])
+        montants[avec_symbole] = [symbole + x for x in montants[avec_symbole]]
         comptes = _client(rng, lot.id_client.reset_index(drop=True).where(~lot.id_client.str.startswith("TEST").values,
                                                                            "X-0"), f.code_filiale + "-", sans_zeros=True)
         comptes[lot.id_client.str.startswith("TEST").values] = lot.id_client[lot.id_client.str.startswith("TEST")].values
         sortie = pd.DataFrame({
             "TxnRef": lot.ref_operation.values,
-            "Entity": f.code_entite_source,
+            "Entity": _entite(rng, f.code_entite_source, len(lot)),
             "TxnDate": lot.horodatage.dt.strftime("%m/%d/%Y").values,
             "TxnTime": lot.horodatage.dt.strftime("%I:%M:%S %p").values,
             "AccountNo": comptes.values,
@@ -224,24 +314,33 @@ def export_americore(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
             "Currency": _variante(rng, pd.Series([f.code_devise] * len(lot)), DEVISES, TAUX["devise_variante"]).values,
             "FraudFlag": np.where(lot.est_fraude == 1, "Y", "N"),
         })
-        _ecrire(sortie, racine / f"AMC_{f.code_entite_source}_{m.strftime('%Y%m')}.csv.gz", ",", "utf-8")
-        lignes += len(sortie)
+        lignes += _ecrire(sortie, racine / f"AMC_{f.code_entite_source}_{m.strftime('%Y%m')}.csv.gz", ",", "utf-8",
+                          rng=rng)
     return lignes
+
+
+def _mojibake(texte: str) -> str:
+    """Libellé UTF-8 relu en cp1252 par un maillon de la chaîne (« DÉPÔT » -> « DÃ‰PÃ”T »)."""
+    return texte.encode("utf-8").decode("cp1252", errors="replace")
 
 
 def export_delta(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
     lignes = 0
     for m, lot in _fichiers_mensuels(v, chevauchement=False):
+        lot = _verifications_carte(rng, lot)
         lot = lot.assign(_ordre=np.arange(len(lot)))
         lot = _ajouter_doublons(rng, lot)
         suspicion = np.where(lot.est_fraude == 1, "1", "0").astype(object)
         suspicion[rng.random(len(lot)) < TAUX["suspicion_vide"]] = ""
+        nature = np.array(_variante(rng, lot.code_type.reset_index(drop=True), LIBELLES["DELTA"], 0.15), dtype=object)
+        casse = (rng.random(len(nature)) < TAUX["libelle_mojibake"]) & np.array([not x.isascii() for x in nature])
+        nature[casse] = [_mojibake(x) for x in nature[casse]]
         sortie = pd.DataFrame({
             "NUMOPE": lot.ref_operation.values,
             "DATEOPE": lot.horodatage.dt.strftime("%Y%m%d").values,
             "HEUREOPE": lot.horodatage.dt.strftime("%H%M%S").values,
             "CLIENT": _client(rng, lot.id_client.reset_index(drop=True), f.code_filiale).values,
-            "NATURE": _variante(rng, lot.code_type.reset_index(drop=True), LIBELLES["DELTA"], 0.15).values,
+            "NATURE": nature,
             "NBOPE": lot.poids.values,
             "MONTANT": [f"{x:.0f}" for x in lot.montant_devise],
             "DEVISE": _variante(rng, pd.Series([f.code_devise] * len(lot)), DEVISES, 0.05).values,
@@ -250,8 +349,8 @@ def export_delta(rng, v: pd.DataFrame, f: pd.Series, racine: Path) -> int:
         preambule = (f"EXTRACTION DELTA - {f.code_entite_source} - {f.nom_filiale.upper()} - PERIODE {m.strftime('%m/%Y')}"
                      f" - EDITEE LE {(m.to_timestamp(how='end') + pd.Timedelta(days=3)).strftime('%d/%m/%Y')}\r\n")
         pied = f"TOTAL;{len(sortie)};{int(lot.montant_devise.round().sum())}\r\n"
-        _ecrire(sortie, racine / f"DELTA_{f.code_entite_source}_{m.strftime('%Y%m')}.csv.gz", ";", "cp1252", preambule, pied)
-        lignes += len(sortie)
+        lignes += _ecrire(sortie, racine / f"DELTA_{f.code_entite_source}_{m.strftime('%Y%m')}.csv.gz", ";", "cp1252",
+                          preambule, pied, rng=rng, entete_par_page=LIGNES_PAR_PAGE_DELTA)
     return lignes
 
 
@@ -261,7 +360,7 @@ EXPORTS = {"SAB": export_sab, "NORDIC": export_nordic, "AMERICORE": export_ameri
 def exporter_filiale(rng, v: pd.DataFrame, f: pd.Series, dossier: Path) -> int:
     """Écrit les exports mensuels bruts d'une filiale dans le format de son système."""
     racine = dossier / f.systeme_source.lower() / f.code_filiale
-    for ancien in racine.glob("*.csv.gz"):
+    for ancien in racine.glob("*.csv.gz"):          # y compris les anciens renvois « _v2 »
         ancien.unlink()
     n = EXPORTS[f.systeme_source](rng, v, f, racine)
     log.info("  %-3s : %s lignes brutes exportées (%s), %s opérations réelles",

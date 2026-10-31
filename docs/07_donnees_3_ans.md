@@ -11,7 +11,8 @@ Le profilage du vrai PaySim (docs/06) a montré que ses 31 jours ne suffisent pa
 | Taux directeurs (placement, refinancement, coût de couverture) | API BCE, Fed, Banque du Canada, Riksbank, Norges Bank, Danmarks Nationalbank ; communiqués BCEAO et BEAC | **Oui** |
 | Taux de change quotidiens | BCE via Banque de France Webstat | **Oui** |
 | Jours fériés de chaque pays | Bibliothèque `holidays` (calendriers officiels) | **Oui** |
-| Montants, types d'opérations, heures, fraude | Tirés parmi les 4,9 M de transactions **réelles** de PaySim (fenêtre stable) | Oui (proxy) |
+| Forme des montants (dispersion), heures, fraude | Tirées parmi les 4,9 M de transactions **réelles** de PaySim (fenêtre stable) | Oui (proxy) |
+| Niveau des tickets par type et par pays, composition des flux par type | Hypothèses documentées (§ 3, point 4) | Non : hypothèse |
 | Répartition des flux à l'intérieur du mois (paie, prélèvements) | Hypothèses documentées (§ 3) | Non : hypothèse |
 | Part de marché de ZF Banque par pays | Paramètre (`dbt/seeds/ref_filiales.csv`) | Non : hypothèse |
 
@@ -38,8 +39,22 @@ La baisse des dépôts à vue en zone euro est un phénomène réel : avec la ha
    - prélèvements renforcés les 3 premiers jours ouvrés ;
    - salaires sur les 2 derniers jours ouvrés (Europe, Afrique) ou le 15 et en fin de mois (Amérique du Nord) ;
    - bruit quotidien log-normal.
-4. **Texture** : chaque opération est tirée au hasard parmi les vraies transactions PaySim (type, montant, heure, fraude). Les montants d'une journée sont ajustés pour respecter le total du jour. Les virements reçus (salaires), absents de PaySim, reprennent la distribution des dépôts d'espèces.
-5. **Échantillon pondéré** : une ligne = un lot de 100 opérations. On obtient 2,8 M de lignes pour 279 M d'opérations, exécutables sur un portable.
+4. **Composition et tickets réalistes** : PaySim n'est pas une banque de détail (retrait médian ~1 500 €, mêmes montants dans tous les pays, 0,6 % de prélèvements). On en garde la **forme** des montants de chaque type (dispersion, queue des gros montants, fraude, heure), mais :
+   - chaque jour, les décaissements sont ventilés par type selon la part de la **valeur** observée dans une banque de détail de la zone :
+
+     | Zone | Virements émis | Prélèvements | Cartes | Retraits | Encaissements en virements (sinon espèces) |
+     |---|---|---|---|---|---|
+     | Europe | 50 % | 25 % | 17 % | 8 % | 90 % |
+     | Afrique (CI, CM) | 40 % | 5 % | 10 % | 45 % | 55 % |
+     | Amérique du Nord | 42 % | 28 % | 22 % | 8 % | 93 % |
+
+     Ni virement ni prélèvement le week-end ; prélèvements concentrés sur les 3 premiers jours ouvrés (loyers, factures) ; composition légèrement variable d'un jour à l'autre ;
+   - le ticket moyen de chaque type est recalé (France : carte 45 €, retrait 110 €, prélèvement 180 €, virement émis 2 500 €, dépôt d'espèces 450 €, virement reçu 1 800 €), puis modulé par un **facteur de niveau de vie** (Norvège 1,5, États-Unis 1,4, Côte d'Ivoire 0,35, Cameroun 0,30…, ordre de grandeur à vérifier) ;
+   - prélèvements et virements reçus sont traités en lot entre 5 h et 9 h ;
+   - le nombre de clients découle de l'encours (dépôt à vue moyen de 20 000 € par client en France, modulé par le niveau de vie).
+
+   Les montants d'une journée sont ensuite ajustés pour respecter exactement le total du jour : **ces hypothèses changent le nombre et la taille des opérations, jamais les totaux ancrés sur les dépôts réels.** Résultat (France) : carte médiane 33 €, retrait 92 €, prélèvement 101 €, salaire 1 527 € ; ~390 opérations par client et par an ; 64 % des opérations sont des paiements par carte. En Côte d'Ivoire, retrait médian 32 € (≈ 21 000 FCFA).
+5. **Échantillon pondéré** : une ligne = un lot de `taille_lot` opérations de même montant. Les 3 ans représentent ~2,03 milliards d'opérations : 41 M de lignes en lots de 50 (gros volume local), 4 M en lots de 500.
 6. **Exports bruts** (`etl/systemes_sources.py`) : cette « vérité » n'est jamais chargée directement. Elle est exportée au format de chaque système bancaire (SAB, NORDIC, AMERICORE, DELTA), avec des défauts réalistes. Ce sont **ces fichiers sales** qui sont versionnés dans `data/sources_internes/` et que l'ETL nettoie (docs/08). Le rapprochement comptable prouve que le nettoyage restitue exactement la vérité.
 
 ## 4. Gestion de trésorerie modélisée (RG-POS-06/07)

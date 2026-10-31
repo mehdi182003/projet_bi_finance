@@ -4,6 +4,8 @@
 --   RG-NET-04 : montants entiers (le franc CFA n'a pas de centimes), toujours positifs ; le sens est
 --               déduit de la nature d'opération (couche intermediate)
 --   RG-NET-11 : indicateur de suspicion vide => non suspect (et compté comme valeur manquante)
+--   RG-NET-05 : libellés à l'encodage cassé (UTF-8 relu en cp1252 : « DÃ‰PÃ”T ») reconnus par la table
+--               de correspondance ; l'en-tête répété à chaque page de l'état est écarté au chargement
 with source as (
     select * from {{ source('raw', 'src_delta') }}
 ),
@@ -32,6 +34,7 @@ select
     cast(null as text)                                                     as reference_extournee,
     false                                                                  as est_compte_test,
     false                                                                  as est_heure_convertie_utc,
-    false                                                                  as est_montant_unites_mineures
+    false                                                                  as est_montant_unites_mineures,
+    s.nature like '%Ã%'                                                    as est_format_corrige
 from source s
 left join filiales f on f.code_entite_source = substring(s._fichier from 'DELTA_([A-Z0-9]+)_')
