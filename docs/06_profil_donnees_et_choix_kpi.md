@@ -120,15 +120,15 @@ L'analyse ci-dessus porte sur les 12 jours stables de PaySim. Elle a conduit à 
 | KPI | Sur 12 jours (PaySim) | Sur 3 ans (dépôts réels) | Décision |
 |---|---|---|---|
 | Position de trésorerie | Baisse continue (−2 %/jour) : artefact (pas d'entrées interbancaires) | Trésorerie **gérée** : réserve ramenée chaque mois à sa cible ; creux en début de mois, remontée avec les salaires | ✅ Gardé |
-| Ratio de liquidité (Bâle III simplifié) | 88 à 197 % | Moyenne de 112 à 186 % ; creux sous 100 % 0 à 45 jours en 3 ans selon la filiale | ✅ Gardé |
+| Ratio de liquidité (Bâle III simplifié) | 88 à 197 % | Moyenne de 113 à 187 % ; creux sous 100 % 0 à 57 jours en 3 ans selon la filiale | ✅ Gardé |
 | Jours avant passage sous 100 % | 6 à 8 jours (artefact de la fuite structurelle) | Peu informatif : la réserve est rééquilibrée chaque mois | ⚠️ Remplacé par **Jours sous 100 %** et **réserve requise P99** |
-| **Jours sous 100 %** (nouveau) | — | 151 jours-filiales, dont **61 en janvier** (40 %) | ✅ Phare : révèle la saisonnalité réelle |
+| **Jours sous 100 %** (nouveau) | — | 175 jours-filiales, dont **60 en janvier** (34 %) | ✅ Phare : révèle la saisonnalité réelle |
 | **Opérations de trésorerie** (nouveau) | — | 4,0 Md€ de refinancement net en 2023, 2,6 Md€ de placements nets en 2025 | ✅ Raconte le cycle de taux réel |
 | **Réserve requise P99** (nouveau, prédictif) | — | Janvier 2026 : 18 % requis en France contre 15 % ; sur-réserve en zone CFA | ✅ Valeur concrète de la prévision |
-| Effet de change | ≤ 1,3 % de la position (secondaire) | −57 M€ (USD), −46 M€ (NOK), −29 M€ (CAD) sur 3 ans | ⬆️ **Promu** au cockpit |
+| Effet de change | ≤ 1,3 % de la position (secondaire) | −58 M€ (USD), −46 M€ (NOK), −29 M€ (CAD) sur 3 ans | ⬆️ **Promu** au cockpit |
 | VaR 95 % 10 j, rapport coût / risque | Informatifs | Informatifs ; recommandations : CAD prioritaire, SEK rapporte, DKK inutile | ✅ Gardés |
-| Horizon de survie (stress) | Faussé par la fuite structurelle | Retraits modérés : 21-51 j ; panique : 0-7 j | ✅ Gardé |
-| Part des gros décaissements | 10 % des montants | 31 % des montants (opérations ≥ 10 k€) | ✅ Gardé (secondaire) |
-| Taux de fraude | Artefact (fraude constante) | Proportionnelle au volume : 0,6 % des montants décaissés | Page Qualité / Risques uniquement |
+| Horizon de survie (stress) | Faussé par la fuite structurelle | Retraits modérés : 22-51 j ; panique : 0 j | ✅ Gardé |
+| Part des gros décaissements | 10 % des montants | 14 % des montants (opérations ≥ 10 k€) | ✅ Gardé (secondaire) |
+| Taux de fraude | Artefact (fraude constante) | Proportionnelle au volume : 0,03 % des montants décaissés | Page Qualité / Risques uniquement |
 
 La précision de la prévision a aussi été vérifiée **hors échantillon sur du réel** : les dépôts de janvier 2026, publiés après la date d'arrêté, tombent dans la fourchette à 90 % pour 7 filiales sur 9 (docs/03 § 3).

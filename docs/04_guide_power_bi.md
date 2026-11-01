@@ -64,7 +64,7 @@ Ensuite :
 ### Page 2 — Flux de trésorerie
 - Encaissements / décaissements **par mois** (`dim_date[annee_mois]`).
 - **Opérations de trésorerie de fin de mois** : *Refinancement levé* vs *Excédent placé* par mois. On y voit 2023 (refinancement pendant la fuite des dépôts) et 2025 (placements).
-- Décaissements par type d'opération ; profil horaire du solde net ; carte *Part des gros décaissements %* (~31 %).
+- Décaissements par type d'opération ; profil horaire du solde net ; carte *Part des gros décaissements %* (~14 %).
 
 ### Page 3 — Prévisions (analyse prédictive)
 - Cartes : *Probabilité de passer sous 100 %* (mois prévu), *WAPE du champion*, et le **contrôle sur données réelles de janvier 2026** (*Couverture de l'intervalle à 90 %*, *Erreur médiane*).
@@ -76,7 +76,7 @@ Ensuite :
 ### Page 4 — Change & couverture
 - Courbe `mart_prevision_change` : *Taux de change prévu P50* + barres d'erreur P05/P95, avec *Taux de change réalisé* en superposition (contrôle a posteriori), segment = devise.
 - Cartes : *Exposition au change*, *Part de la position en devises*, *VaR 95 % 10 j*, *Coût annuel de couverture*.
-- Barres : *Effet de change cumulé* par devise. Sur 2023-2025, la remontée de l'euro coûte −57 M€ sur l'USD et −46 M€ sur la NOK.
+- Barres : *Effet de change cumulé* par devise. Sur 2023-2025, la remontée de l'euro coûte −58 M€ sur l'USD et −46 M€ sur la NOK.
 - Tableau de décision : devise, exposition, volatilité, *Rapport coût / risque de la couverture*, *Recommandation de couverture*.
 - Tableau `fct_taux_change` : volatilité annualisée par devise ; mettre en évidence le RUB (`est_rupture_serie`).
 

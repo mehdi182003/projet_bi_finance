@@ -54,6 +54,8 @@ models:
     marts:
       +schema: marts
       +materialized: table
+      # Compatibilité Power BI : voir macros/compatibilite_power_bi.sql.
+      +post-hook: "{{ convertir_numeric_en_double() }}"
 
 seeds:
   cresus:

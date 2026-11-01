@@ -69,7 +69,7 @@ Résultat : 4,0 Md€ de refinancement net en 2023 (fuite des dépôts pendant l
 ## 5. Vérifications de fiabilité
 | Contrôle | Résultat |
 |---|---|
-| Encours reconstitué = encours réel publié, à chaque date (test dbt `assert_ancrage_depots_reels`, 491 points) | ✅ Écart maximal de 0,000007 % |
+| Encours reconstitué = encours réel publié, à chaque date (test dbt `assert_ancrage_depots_reels`, 481 dates contrôlées) | ✅ Écart maximal de 0,00001 % |
 | Complétude du chargement (test `assert_conservation_volumes`) | ✅ |
 | Taux de change disponibles chaque jour de la période | ✅ |
 | Vraisemblance : décaissements / dépôts entre 0,05 % et 5 % par jour | ✅ |

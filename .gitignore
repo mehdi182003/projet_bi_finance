@@ -8,6 +8,7 @@ data/demo/*
 !dbt/seeds/*.csv
 !data/sources/*.csv
 !data/sources_internes/**/*.csv
+*.log
 
 # Secrets
 .env

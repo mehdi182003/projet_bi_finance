@@ -49,7 +49,7 @@ dbt ne stocke rien : il exécute le SQL **dans** PostgreSQL. Tests, documentatio
    Sur les 4 systèmes s'ajoutent des doublons, des **fichiers renvoyés** (`_v2`), des devises et libellés non normalisés, et des clients manquants ou codés `NULL` / `N/A` / `?` / `0000000`. Catalogue des défauts traités : `marts.mart_qualite_defauts`.
 4. **Preuve de fiabilité** (tests dbt) :
    - **rapprochement comptable** jour par jour (10 960 jours-filiales) ;
-   - **ancrage** sur les dépôts réels (491 dates, écart maximal de 0,000007 %) ;
+   - **ancrage** sur les dépôts réels (481 dates contrôlées, écart maximal de 0,00001 %) ;
    - **complétude** des fichiers.
 
    Après nettoyage, on retrouve **exactement** le nombre d'opérations réelles de chaque filiale.
@@ -123,6 +123,7 @@ Autres commandes utiles :
 ## 6. Conventions
 - Toute règle métier ou de nettoyage porte un code (`RG-POS-06`, `RG-NET-07`, etc.) en commentaire SQL et dans la documentation.
 - Tout changement doit garder `dbt build` vert. Seule alerte attendue : la rupture du rouble.
+- Les colonnes des marts sont en `double precision` (post-hook `convertir_numeric_en_double`) : Power BI ne sait pas lire un `numeric` de plus de 28 chiffres.
 - Ne jamais versionner `data/raw/` (PaySim, 494 Mo), `data/generees/` (gros volumes) ni `.env`.
 - Les chiffres cités dans la documentation proviennent de requêtes sur les marts : les vérifier après toute régénération.
 - PostgreSQL : une chaîne vide chargée par `COPY CSV` devient `NULL` (penser à `coalesce(trim(x), '')`).

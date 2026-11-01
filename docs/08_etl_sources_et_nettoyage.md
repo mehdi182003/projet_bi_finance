@@ -95,7 +95,7 @@ CSV séparé par `;`, cp1252.
 |---|---|---|
 | `assert_completude_fichiers` | Lignes en base = lignes lues ; pour DELTA, lignes et total = pied de fichier | ✅ |
 | `assert_rapprochement_comptable` | Pour chaque filiale et chaque jour, crédits, débits et nombre d'opérations nettoyés = grand livre (10 960 jours-filiales) | ✅ |
-| `assert_ancrage_depots_reels` | Encours reconstitué = encours réel publié par les banques centrales (491 dates) | ✅ |
+| `assert_ancrage_depots_reels` | Encours reconstitué = encours réel publié par les banques centrales (481 dates contrôlées, plus les 10 points initiaux) | ✅ |
 | `unique` sur `ref_operation` nettoyée | Plus aucun doublon | ✅ |
 | `alerte_rejets_inattendus` (alerte) | Signale tout libellé inconnu, devise ou sens incohérent (changement de format chez une filiale) | 0 cas |
 
@@ -140,6 +140,8 @@ Choix de modélisation :
 ## 7. Exploitation
 - `python pipeline.py` : chargement incrémental (seuls les fichiers nouveaux ou modifiés sont rechargés), puis transformations, tests et prévisions.
 - **Nouveau mois** : déposer les exports des filiales dans `data/sources_internes/` et relancer.
-- **Fichier corrigé renvoyé par une filiale** : il est rechargé automatiquement (son empreinte MD5 a changé). S'il porte sur un mois ancien : `dbt build --full-refresh --select fct_flux_tresorerie_horaire`.
-- **Reconstruire les exports** à partir des séries réelles : `python pipeline.py --regenerer` (nécessite PaySim). À graine égale, le contenu est identique au jeu versionné (vérifié sur les 360 fichiers et les soldes comptables).
-- **Gros volume** : `python pipeline.py --regenerer --taille-lot 10` → `data/generees/lot_10/` (~29 M de lignes, non versionné). Le chargeur lit les fichiers par paquets de 500 000 lignes et le générateur traite une filiale à la fois, pour borner la mémoire.
+- **Fichier corrigé renvoyé par une filiale** : il est rechargé automatiquement (son empreinte MD5 a changé). S'il porte sur un mois ancien : `python pipeline.py --etapes dbt --full-refresh`, car `fct_flux_tresorerie_horaire` ne recalcule que ses 35 derniers jours. Le test `assert_fct_flux_a_jour` échoue tant que ce n'est pas fait.
+- **Changer de jeu de données** : modifier `DOSSIER_SOURCES_INTERNES` dans `.env`, puis `python pipeline.py --full-refresh`. Les fichiers absents du nouveau dossier sont retirés de `raw`.
+- **Reconstruire les exports** à partir des séries réelles : `python pipeline.py --regenerer` (nécessite PaySim). Le fait incrémental est alors reconstruit automatiquement. À graine égale, le contenu est identique au jeu versionné.
+- **Gros volume** : `python pipeline.py --regenerer --taille-lot 50` → `data/generees/lot_50/` (~43 M de lignes, non versionné). Le chargeur lit les fichiers par paquets de 500 000 lignes et le générateur traite une filiale à la fois, pour borner la mémoire.
+- **Procédure complète, étape par étape** : [docs/09](09_procedure_pas_a_pas.md).

@@ -34,12 +34,12 @@
 
 | Levier | Ce que montrent les 3 ans de données (2023-2025) | Mesure Power BI |
 |---|---|---|
-| **Moduler la réserve selon le mois** | Janvier concentre 40 % des jours sous 100 % (décollecte réelle de début d'année). La prévision demande ~18 % de réserve en France pour janvier 2026, contre 15 % aujourd'hui : il faut **pré-financer en décembre** plutôt que subir un ratio sous 100 % | *Réserve requise P99 %*, *Jours sous 100 %* |
+| **Moduler la réserve selon le mois** | Janvier concentre 34 % des jours sous 100 % (décollecte réelle de début d'année). La prévision demande ~18 % de réserve en France pour janvier 2026, contre 15 % aujourd'hui : il faut **pré-financer en décembre** plutôt que subir un ratio sous 100 % | *Réserve requise P99 %*, *Jours sous 100 %* |
 | **Placer les excédents structurels** | Côte d'Ivoire, Cameroun et Norvège sont sur-dotés (~90 M€ libérables), placés aux taux réels BCEAO / BEAC / Norges Bank (~3,5 M€ par an). En zone CFA, le placement reste local (contrôle des changes) | *Liquidité libérable*, *Gain annuel* |
 | **Anticiper le refinancement** | 4,0 Md€ de refinancement net en 2023 (fuite des dépôts à vue pendant la hausse des taux BCE) : un besoin prévisible qui se finance de façon programmée (MRO) plutôt qu'en urgence (facilité marginale, +25 pb) | *Refinancement levé*, *Économie annuelle grâce à l'anticipation* |
-| **Couvrir le change avec discernement** | −57 M€ d'effet de change sur l'USD et −46 M€ sur la NOK en 3 ans. À fin 2025 : couvrir en priorité le CAD (coût faible) et la SEK (la couverture rapporte), arbitrer USD et NOK (coût élevé), ne pas couvrir la DKK (ancrée à l'euro), piloter le CFA par stress test | *Rapport coût / risque*, *Recommandation*, *VaR 95 % 10 j*, *Effet de change cumulé* |
-| **Mesurer la résilience** | Retraits modérés (type Northern Rock) : 21 à 51 jours de survie en Europe et en Amérique du Nord ; panique type SVB : 0 à 7 jours, ce qui justifie des lignes de liquidité de secours | *Horizon de survie*, statut |
-| **Fiabiliser la donnée** | Les dépôts reconstitués égalent les dépôts publiés par les banques centrales (491 points) ; la prévision a été confrontée aux dépôts réels de janvier 2026 (7 filiales sur 9 dans la fourchette) | Page *Qualité des données* |
+| **Couvrir le change avec discernement** | −58 M€ d'effet de change sur l'USD et −46 M€ sur la NOK en 3 ans. À fin 2025 : couvrir en priorité le CAD (coût faible) et la SEK (la couverture rapporte), arbitrer USD et NOK (coût élevé), ne pas couvrir la DKK (ancrée à l'euro), piloter le CFA par stress test | *Rapport coût / risque*, *Recommandation*, *VaR 95 % 10 j*, *Effet de change cumulé* |
+| **Mesurer la résilience** | Retraits modérés (type Northern Rock) : 22 à 51 jours de survie en Europe et en Amérique du Nord ; panique type SVB : 0 jour, ce qui justifie des lignes de liquidité de secours | *Horizon de survie*, statut |
+| **Fiabiliser la donnée** | Les dépôts reconstitués égalent les dépôts publiés par les banques centrales (481 dates contrôlées) ; la prévision a été confrontée aux dépôts réels de janvier 2026 (7 filiales sur 9 dans la fourchette) | Page *Qualité des données* |
 
 Les montants dépendent des parts de marché supposées : il faut **présenter les mécanismes et les ordres de grandeur**. Les dynamiques (saisonnalité, cycle de taux, effet de change), elles, sont réelles.
 

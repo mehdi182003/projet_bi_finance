@@ -33,7 +33,7 @@ rapprochement avec les soldes comptables journaliers, également exportés ici).
 Sorties (compressées) :
   <dossier>/<systeme>/<filiale>/<fichier mensuel>.csv.gz
   <dossier>/comptabilite/soldes_comptables_journaliers.csv
-  avec <dossier> = data/sources_internes (lots de 100, versionné dans Git) ou data/generees/lot_<n>
+  avec <dossier> = data/sources_internes (lots de 500, versionné dans Git) ou data/generees/lot_<n>
   (autres tailles de lot, générées en local et ignorées par Git : plusieurs Go).
 """
 from __future__ import annotations

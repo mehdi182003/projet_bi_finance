@@ -33,9 +33,13 @@ NOM_FICHIER_BCE = "eurofxref-hist.csv"
 # XAF / XOF ne sont pas cotés : parité fixe 655,957 pour 1 EUR (gérée dans dbt).
 DEVISES_BCE = ["USD", "CAD", "SEK", "DKK", "NOK", "JPY", "RUB"]
 
-# Dossier des exports bruts des filiales lu par le pipeline. Par défaut le jeu versionné (lots de
-# 100 opérations) ; après `python pipeline.py --regenerer --taille-lot 10`, le jeu local data/generees/lot_10.
-DOSSIER_SOURCES_INTERNES_ACTIF = Path(os.getenv("DOSSIER_SOURCES_INTERNES", str(DOSSIER_DATA / "sources_internes")))
+# Taille de lot du jeu versionné dans Git (data/sources_internes) : dépôt léger, utilisable sans PaySim.
+TAILLE_LOT_VERSIONNEE = 500
+
+# Dossier des exports bruts des filiales lu par le pipeline. Par défaut le jeu versionné ; après
+# `python pipeline.py --regenerer --taille-lot 50`, le jeu local data/generees/lot_50.
+# Un chemin relatif part de la racine du projet, quel que soit le dossier de lancement.
+DOSSIER_SOURCES_INTERNES_ACTIF = RACINE / os.getenv("DOSSIER_SOURCES_INTERNES", str(DOSSIER_DATA / "sources_internes"))
 
 PG = {
     "host": os.getenv("POSTGRES_HOST", "localhost"),

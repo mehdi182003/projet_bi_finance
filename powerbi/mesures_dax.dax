@@ -29,7 +29,7 @@ DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_signalees] ), SUM ( mart_qualite_
 Rappel de la règle « vide le compte » % =
 DIVIDE ( SUM ( mart_qualite_donnees[nb_fraudes_detectees_regle] ), SUM ( mart_qualite_donnees[nb_fraudes] ) )
 
-// Concentration : sur 2023-2025, les opérations de 10 k EUR et plus pèsent ~31 % des montants décaissés
+// Concentration : sur 2023-2025, les opérations de 10 k EUR et plus pèsent ~14 % des montants décaissés
 Part des gros décaissements % =
 DIVIDE ( SUM ( fct_position_tresorerie_quotidienne[decaissements_gros_tickets_eur] ), [Décaissements (EUR)] )
 

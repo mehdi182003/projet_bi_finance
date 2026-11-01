@@ -73,7 +73,7 @@ Flux du jour, `cible_reserve_mois_devise`, `position_ouverture_devise`, `positio
 
 Le dictionnaire complet et le graphe de lignage s'obtiennent avec `dbt docs generate && dbt docs serve`.
 
-## 4. Plan de tests (111 tests dbt)
+## 4. Plan de tests (116 tests dbt)
 
 | Famille | Exemples |
 |---|---|
@@ -81,5 +81,6 @@ Le dictionnaire complet et le graphe de lignage s'obtiennent avec `dbt docs gene
 | Intégrité référentielle | faits → `dim_date`, `dim_filiale`, `dim_type_transaction` |
 | Domaines de valeurs | types PaySim, sens ±1, statuts de résilience, bornes du step et des montants |
 | ETL | complétude des fichiers (lignes et totaux de contrôle) ; **rapprochement comptable jour par jour** (10 960 jours-filiales) ; unicité des opérations nettoyées ; alerte sur rejets inattendus |
-| Métier | **ancrage : encours reconstitué = encours réel publié à chaque date (491 points)** ; conservation des volumes (aucune ligne perdue) ; taux disponibles sur toute la période |
+| Métier | **ancrage : encours reconstitué = encours réel publié à chaque date (481 dates contrôlées)** ; conservation des volumes (aucune ligne perdue) ; taux disponibles sur toute la période |
+| Restitution | faits incrémentaux à jour par rapport à leur source (`assert_fct_flux_a_jour`) ; aucune colonne `numeric` dans les marts, que Power BI ne saurait pas lire (`assert_marts_sans_numeric`) |
 | Alertes (non bloquantes) | rupture de série de change (RUB) ; jour atypique dans la fenêtre d'analyse ; vraisemblance de l'encours (décaissements / dépôts entre 0,05 % et 5 % par jour) ; fraîcheur des cours BCE (> 10 jours) |

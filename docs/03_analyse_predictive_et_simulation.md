@@ -15,8 +15,10 @@
 
 | Série | Naïf | Holt-Winters | Régression calendaire | Champion |
 |---|---|---|---|---|
-| Décaissements | 18,3 % | 16,5 % | **13,7 %** | régression (9 filiales sur 10) |
-| Encaissements | 45,5 % | 69,3 % | **16,7 %** | régression (10 sur 10) |
+| Décaissements | 17,6 % | 16,4 % | **13,3 %** | régression (10 filiales sur 10) |
+| Encaissements | 45,9 % | 78,5 % | **16,7 %** | régression (10 sur 10) |
+
+*Moyenne des 10 filiales, mesurée sur le gros volume (lots de 50) le 31/10/2026.*
 
 Holt-Winters échoue sur les encaissements : les salaires arrivent en fin de mois, ce qui n'est pas une saisonnalité hebdomadaire.
 
@@ -35,9 +37,9 @@ On en tire :
 
 | Filiales | Réserve requise vs actuelle | Lecture |
 |---|---|---|
-| France, Benelux, Finlande | 18 à 19,5 % vs 15 % | Janvier est un mois de **décollecte réelle** (−3,4 % en moyenne en France) : il faut **pré-financer** en décembre |
-| Suède, Danemark | 16 à 17 % vs 15 % | Idem, dans une moindre mesure |
-| États-Unis, Canada | 13,6 % vs 12 % | Réserve insuffisante tout au long de l'année (sous 100 % 42 à 45 jours en 3 ans) |
+| France, Benelux, Finlande | 18 à 20,6 % vs 15 % | Janvier est un mois de **décollecte réelle** (−3,4 % en moyenne en France) : il faut **pré-financer** en décembre |
+| Suède, Danemark | 15,6 à 16,3 % vs 15 % | Idem, dans une moindre mesure |
+| États-Unis, Canada | 13,3 à 13,7 % vs 12 % | Réserve insuffisante tout au long de l'année (sous 100 % 44 à 57 jours en 3 ans) |
 | Côte d'Ivoire, Cameroun, Norvège | 14 à 18 % vs 15-20 % | **Sur-réserve** : liquidité à placer localement (~90 M€) |
 
 La valeur de la prévision n'est donc pas une « économie » uniforme : elle **module la réserve selon le mois et la filiale**. On relève la réserve avant les mois de décollecte (pour éviter un ratio sous 100 %, sanctionnable), et on place les excédents structurels (zone CFA).
@@ -48,7 +50,7 @@ Les banques centrales ont publié depuis les encours de **janvier 2026**. On les
 | Version du modèle | Erreur médiane sur l'encours fin janvier | Réel dans la fourchette à 90 % |
 |---|---|---|
 | v1 (sans effet « mois », bruit quotidien seul) | +0,7 à +9,6 %, biais à la hausse | 4 filiales sur 9 |
-| **v2 (effet « mois » + choc mensuel)** | **−3,7 à +2,0 %** (France −0,3 %, États-Unis +0,3 %) | **7 sur 9** |
+| **v2 (effet « mois » + choc mensuel)** | **−3,9 à +1,2 %** (France −0,3 %, États-Unis +0,5 %) | **7 sur 9** |
 
 C'est ce contrôle qui a révélé la saisonnalité de janvier. Le Cameroun est exclu du contrôle : aucun point mensuel BEAC pour janvier 2026 n'est disponible par API.
 
@@ -66,7 +68,7 @@ Les cours de change sont proches d'une **marche aléatoire** (Meese & Rogoff, 19
 | Dévaluation du CFA | 3 % | XOF/XAF −50 % | +200 pb | 1,3 | 12 janvier 1994 |
 | Crise combinée | 10 % | tous les chocs | +200 pb | 2,0 | Reverse stress test |
 
-Avec 3 ans de données, le scénario central n'a plus de fuite structurelle (horizon de survie illimité). Retraits modérés : 21 à 51 jours en Europe et en Amérique du Nord. Panique sévère : 0 à 7 jours.
+Avec 3 ans de données, le scénario central n'a plus de fuite structurelle (horizon de survie illimité ou supérieur à 6 ans). Retraits modérés : 22 à 51 jours en Europe et en Amérique du Nord. Panique sévère : 0 jour.
 
 ## 6. Limites
 - Le profil à l'intérieur du mois (paie, prélèvements) est une hypothèse du générateur, et la régression utilise les mêmes variables. Sa précision quotidienne est donc en partie « attendue ». Le contrôle sur janvier 2026 porte, lui, sur des niveaux réels.

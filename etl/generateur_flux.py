@@ -32,7 +32,7 @@ import holidays
 import numpy as np
 import pandas as pd
 
-from .config import DOSSIER_DATA, DOSSIER_DBT, DOSSIER_SOURCES, FICHIER_WEBSTAT, GRAINE_ALEATOIRE
+from .config import DOSSIER_DATA, DOSSIER_DBT, DOSSIER_SOURCES, FICHIER_WEBSTAT, GRAINE_ALEATOIRE, TAILLE_LOT_VERSIONNEE
 from .extraction_bce import lire_webstat
 from .extraction_paysim import trouver_fichier_paysim
 from .sources_reelles import FICHIER_DEPOTS
@@ -41,7 +41,7 @@ log = logging.getLogger(__name__)
 
 DEBUT, FIN = pd.Timestamp("2023-01-01"), pd.Timestamp("2025-12-31")
 DATE_INITIALE = pd.Timestamp("2022-12-31")
-POIDS = 100                     # opérations représentées par une ligne (--taille-lot ; 100 = jeu versionné)
+POIDS = TAILLE_LOT_VERSIONNEE   # opérations représentées par une ligne (--taille-lot)
 TAUX_ROTATION = 0.008           # décaissements bruts d'un jour ouvré / encours de dépôts (PaySim réel : 0,78 %)
 PART_MIN_ENTREES = 0.30         # les encaissements d'une période valent au moins 30 % des décaissements
 VALEUR_UNITE_PAYSIM_EUR = 0.01  # 1 unité PaySim = 0,01 EUR (transaction médiane ~750 EUR)
@@ -250,10 +250,10 @@ def encours_moyen_eur(anc: pd.DataFrame, taux: pd.Series) -> float:
 
 def dossier_par_defaut(taille_lot: int) -> Path:
     from .systemes_sources import DOSSIER_SOURCES_INTERNES
-    return DOSSIER_SOURCES_INTERNES if taille_lot == 100 else DOSSIER_DATA / "generees" / f"lot_{taille_lot}"
+    return DOSSIER_SOURCES_INTERNES if taille_lot == TAILLE_LOT_VERSIONNEE else DOSSIER_DATA / "generees" / f"lot_{taille_lot}"
 
 
-def generer(fichier_paysim: Path | None = None, taille_lot: int = 100, dossier: Path | None = None) -> Path:
+def generer(fichier_paysim: Path | None = None, taille_lot: int = TAILLE_LOT_VERSIONNEE, dossier: Path | None = None) -> Path:
     """Construit la vérité 2023-2025, filiale par filiale, et écrit aussitôt ses exports bruts.
 
     Traiter une filiale à la fois borne la mémoire (utile pour les petites tailles de lot, donc les

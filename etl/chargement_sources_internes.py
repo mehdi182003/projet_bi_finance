@@ -6,8 +6,8 @@ Principes appliqués :
     telles qu'elles sont dans le fichier. Le nettoyage est fait ensuite par dbt (couche staging).
   - Traçabilité : chaque ligne garde le nom du fichier source, son numéro de ligne et la date de chargement.
   - Idempotence + chargement incrémental : un fichier déjà chargé avec la même empreinte MD5 est ignoré ;
-    un fichier modifié est rechargé (ses anciennes lignes sont d'abord supprimées) => aucune duplication
-    si le pipeline est relancé.
+    un fichier modifié est rechargé (ses anciennes lignes sont d'abord supprimées) et un fichier absent du
+    dossier actif est retiré => aucune duplication si le pipeline est relancé ou si on change de jeu de données.
   - Contrôle de complétude : le journal raw.journal_chargement garde, par fichier, le nombre de lignes
     lues et, quand le système le fournit (DELTA), le nombre de lignes et le total annoncés en pied de fichier.
 """
@@ -98,6 +98,16 @@ def charger_exports_bruts(dossier: Path | None = None) -> dict[str, int]:
         for systeme, (sous_dossier, encodage, sep, titre, total) in FORMATS.items():
             table = f"raw.src_{systeme.lower()}"
             fichiers = sorted((dossier / sous_dossier).rglob("*.csv.gz"))
+            if not fichiers:
+                raise SystemExit(f"Aucun export {systeme} dans {dossier / sous_dossier} : vérifier DOSSIER_SOURCES_INTERNES.")
+            # changement de jeu de données : un fichier absent du dossier actif ne doit pas rester dans raw
+            presents = {chemin.name for chemin in fichiers}
+            cur.execute("select nom_fichier from raw.journal_chargement where systeme_source = %s", (systeme,))
+            obsoletes = [nom for (nom,) in cur.fetchall() if nom not in presents]
+            if obsoletes:
+                cur.execute(f"delete from {table} where _fichier = any(%s)", (obsoletes,))
+                cur.execute("delete from raw.journal_chargement where nom_fichier = any(%s)", (obsoletes,))
+                log.warning("  %-9s : %d fichiers absents du dossier retirés de %s", systeme, len(obsoletes), table)
             charges = ignores = 0
             for chemin in fichiers:
                 empreinte = hashlib.md5(chemin.read_bytes()).hexdigest()
