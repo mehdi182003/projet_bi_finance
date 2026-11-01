@@ -65,7 +65,7 @@ Ouvrir ensuite **`powerbi/Cresus/Cresus.pbip`** → *Actualiser maintenant*, ong
 | Commande | `python pipeline.py` | `python pipeline.py --regenerer --taille-lot 50` (~1 h 10) |
 | Base PostgreSQL | 1,9 Go | 18 Go |
 
-Les défauts, les totaux et les ancrages sont les mêmes : seul le nombre de lignes change. PaySim n'est pas nécessaire au jeu versionné, mais le visuel PaySim de la page « Qualité » reste alors vide.
+Les défauts, les totaux et les ancrages sont les mêmes ; seul le niveau de détail change (la part des gros décaissements et le taux de fraude ne font référence qu'en gros volume). PaySim n'est pas nécessaire au jeu versionné, mais le visuel PaySim de la page « Qualité » reste alors vide.
 
 **Reprise du projet** : le contexte complet (décisions, état, reste à faire) est dans [`CLAUDE.md`](CLAUDE.md), chargé automatiquement par Claude Code.
 

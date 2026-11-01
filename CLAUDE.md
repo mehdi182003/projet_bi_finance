@@ -68,7 +68,7 @@ dbt ne stocke rien : il exécute le SQL **dans** PostgreSQL. Tests, documentatio
    - `dbt build` : 39 min, 138 contrôles réussis + 18 sur les marts de prévision ; pipeline complet depuis zéro : ~1 h 10 ;
    - base PostgreSQL : **18 Go**. Prévoir **~30 Go libres** (fichiers temporaires pendant `dbt build`).
 
-   Les montants totaux et les ancrages sont identiques quelle que soit la taille de lot ; seul le grain change.
+   Les montants totaux et les ancrages sont identiques quelle que soit la taille de lot. Les indicateurs portés par les opérations rares en dépendent : part des gros décaissements de 2,6 % (lots de 2000) à 9,6 % (500) et 13,8 % (50) ; fraude de 0,015 % à 0,034 %. Seul le gros volume fait référence pour ces deux chiffres.
 
 ## 4. Lancer le projet (Windows, PowerShell)
 Procédure complète, valeurs attendues et dépannage : **docs/09**.

@@ -17,7 +17,7 @@ Python (données sales) → PostgreSQL (raw) → dbt (nettoyage, étoile, tests)
 | Disque libre à prévoir | 3 Go | **30 Go** (base de 18 Go + fichiers temporaires) |
 | Durée, une fois installé | **~8 min** | **~1 h 10** |
 
-Durées mesurées sur un PC de 6 cœurs et 15 Go de RAM. Dans les deux cas, les données sont les mêmes (mêmes défauts, mêmes totaux ancrés sur les dépôts réels) : seul le nombre de lignes change.
+Durées mesurées sur un PC de 6 cœurs et 15 Go de RAM. Dans les deux cas, les données ont les mêmes défauts et les mêmes totaux, ancrés sur les dépôts réels ; seul le niveau de détail change (voir § 11).
 
 ## 2. Installer les prérequis
 
@@ -207,6 +207,8 @@ Comparer sans aucun filtre (tous les segments sur « Tout »). La colonne B a é
 | Qualité des données | Lignes brutes reçues | 4,26 M | 42,67 M |
 | | Taux de rejet | 4,4 % | 4,5 % |
 | | Rejets inattendus | 0 | 0 |
+
+Les écarts entre les deux colonnes sont normaux : les totaux sont ancrés sur les mêmes dépôts réels, mais un jeu plus léger représente moins bien les opérations rares. La **part des gros décaissements** et le **taux de fraude** y sont donc les plus sensibles : pour ces deux indicateurs, seul le gros volume fait référence.
 
 **Ce que les graphiques doivent raconter :**
 - **Flux** : le refinancement domine en 2023 (fuite des dépôts pendant la hausse des taux), les placements en 2025.
