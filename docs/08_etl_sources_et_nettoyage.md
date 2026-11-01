@@ -4,7 +4,7 @@
 
 | Couche | Où | Outil | Contenu | Principe |
 |---|---|---|---|---|
-| Sources | `data/sources_internes/` (Git, 360 fichiers mensuels compressés, 49 Mo) | — | Exports bruts des 4 systèmes bancaires des filiales | Données « sales », hétérogènes |
+| Sources | `data/sources_internes/` (Git, 371 fichiers mensuels compressés, 64 Mo) | — | Exports bruts des 4 systèmes bancaires des filiales | Données « sales », hétérogènes |
 | **Bronze** | PostgreSQL, schéma `raw` | Python (`etl/chargement_sources_internes.py`) | Lignes brutes **en texte**, telles que reçues + fichier, ligne, date de chargement | Zone immuable, traçabilité, chargement incrémental idempotent (empreinte MD5) |
 | **Argent** | PostgreSQL, schémas `staging` puis `intermediate` | dbt (SQL) | `staging` : un modèle par système (typage, formats, fuseaux, unités, sens). `intermediate` : union, normalisation, dédoublonnage, exclusions, rejets tracés | Une règle = un commentaire `RG-NET-xx` + un test |
 | **Or** | PostgreSQL, schéma `marts` | dbt (SQL) | **Schéma en étoile** : dimensions conformes + faits au grain défini, marts d'analyse | Modèle dimensionnel (Kimball) |

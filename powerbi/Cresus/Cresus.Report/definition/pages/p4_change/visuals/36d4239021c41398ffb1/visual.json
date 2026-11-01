@@ -112,7 +112,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Taux de change : historique, fourchette prévue et réalisé'"
+                  "Value": "'1 EUR en devise : historique, fourchette prévue et réalisé (USD si aucune devise choisie)'"
                 }
               }
             }

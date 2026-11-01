@@ -36,42 +36,32 @@
           "projections": [
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_qualite_ancrage"
-                        }
-                      },
-                      "Property": "encours_reel_devise"
+                    "SourceRef": {
+                      "Entity": "_Mesures"
                     }
                   },
-                  "Function": 0
+                  "Property": "Encours réel publié (devise)"
                 }
               },
-              "queryRef": "Sum(mart_qualite_ancrage.encours_reel_devise)",
-              "nativeQueryRef": "Somme de encours_reel_devise",
+              "queryRef": "_Mesures.Encours réel publié (devise)",
+              "nativeQueryRef": "Encours réel publié (devise)",
               "displayName": "Réel (banque centrale)"
             },
             {
               "field": {
-                "Aggregation": {
+                "Measure": {
                   "Expression": {
-                    "Column": {
-                      "Expression": {
-                        "SourceRef": {
-                          "Entity": "mart_qualite_ancrage"
-                        }
-                      },
-                      "Property": "encours_reconstitue_devise"
+                    "SourceRef": {
+                      "Entity": "_Mesures"
                     }
                   },
-                  "Function": 0
+                  "Property": "Encours reconstitué (devise)"
                 }
               },
-              "queryRef": "Sum(mart_qualite_ancrage.encours_reconstitue_devise)",
-              "nativeQueryRef": "Somme de encours_reconstitue_devise",
+              "queryRef": "_Mesures.Encours reconstitué (devise)",
+              "nativeQueryRef": "Encours reconstitué (devise)",
               "displayName": "Reconstitué"
             }
           ]
@@ -92,7 +82,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Encours de dépôts : réel publié par la banque centrale vs reconstitué par les flux (devise)'"
+                  "Value": "'Encours de dépôts en devise locale : réel publié vs reconstitué (France si aucune filiale choisie)'"
                 }
               }
             }

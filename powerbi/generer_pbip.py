@@ -151,6 +151,8 @@ def format_mesure(nom: str) -> str | None:
         return None
     if nom == "Date d'arrêté":
         return "dd/mm/yyyy"
+    if nom == "Jours sous 100 %":     # un nombre de jours-filiales, sans décimale
+        return "0"
     if "jours" in nom.lower() and "(EUR" not in nom:     # avant le test « % » : « Jours avant passage sous 100 % »
         return "0.0"
     if nom.endswith("%"):
@@ -280,12 +282,17 @@ def construire_modele(colonnes: dict) -> dict:
             "relationships": relations,
             "expressions": [
                 {"name": "ServeurPostgres", "kind": "m", "lineageTag": gid("param", "serveur"),
-                 "expression": '"localhost:5432" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]'},
+                 "expression": '"localhost:5432" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]',
+                 "annotations": [{"name": "PBI_ResultType", "value": "Text"}]},
                 {"name": "BasePostgres", "kind": "m", "lineageTag": gid("param", "base"),
-                 "expression": '"cresus" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]'},
+                 "expression": '"cresus" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]',
+                 "annotations": [{"name": "PBI_ResultType", "value": "Text"}]},
             ],
+            # sans PBI_QueryOrder ni PBI_ResultType, Power BI signale à tort des requêtes « en attente »
             "annotations": [{"name": "__PBI_TimeIntelligenceEnabled", "value": "0"},
-                            {"name": "PBI_ProTooling", "value": "[\"DevMode\"]"}],
+                            {"name": "PBI_ProTooling", "value": "[\"DevMode\"]"},
+                            {"name": "PBI_QueryOrder",
+                             "value": json.dumps(TABLES + ["ServeurPostgres", "BasePostgres"], separators=(",", ":"))}],
         },
     }
 
@@ -345,13 +352,17 @@ def visuel(page: str, idx: int, type_: str, x, y, l, h, titre: str, roles: dict,
 
 
 def carte(page, idx, x, y, nom, titre):
+    etiquettes = {"fontSize": lit(20)}
+    if "(EUR" in nom or nom in ("Nb opérations", "Lignes brutes reçues"):   # « 5,53Md » plutôt que « 6Md »
+        etiquettes["labelPrecision"] = {"expr": {"Literal": {"Value": "2L"}}}
     return visuel(page, idx, "card", x, y, 200, 110, titre, {"Values": [mesure(nom)]},
-                  {"labels": [{"properties": {"fontSize": lit(20)}}],
+                  {"labels": [{"properties": etiquettes}],
                    "categoryLabels": [{"properties": {"show": lit(False)}}]})
 
 
 def segment(page, idx, x, y, l, h, champ, titre, unique=False):
-    objets = {"data": [{"properties": {"mode": lit("Dropdown")}}]}
+    # sans cet en-tête, qui répète le titre, la liste déroulante tient dans la hauteur du segment
+    objets = {"data": [{"properties": {"mode": lit("Dropdown")}}], "header": [{"properties": {"show": lit(False)}}]}
     if unique:
         objets["selection"] = [{"properties": {"singleSelect": lit(True)}}]
     return visuel(page, idx, "slicer", x, y, l, h, titre, {"Values": [champ]}, objets)
@@ -447,7 +458,8 @@ def pages_rapport() -> list[tuple[str, str, list[dict]]]:
           carte(n, 3, 560, 10, "Part de la position en devises %", "Part de la position en devises"),
           carte(n, 4, 780, 10, "VaR change 95 % 10 j (EUR)", "VaR 95 % 10 j"),
           carte(n, 5, 1000, 10, "Coût annuel de couverture de change (EUR)", "Coût annuel si tout est couvert"),
-          visuel(n, 10, "lineChart", 20, 140, 620, 560, "Taux de change : historique, fourchette prévue et réalisé",
+          visuel(n, 10, "lineChart", 20, 140, 620, 560,
+                 "1 EUR en devise : historique, fourchette prévue et réalisé (USD si aucune devise choisie)",
                  {"Category": [colonne("mart_prevision_change", "date_jour", "Date")],
                   "Y": [mesure("Taux de change prévu P05", libelle="P5"),
                         mesure("Taux de change prévu P50", libelle="P50"),
@@ -483,7 +495,9 @@ def pages_rapport() -> list[tuple[str, str, list[dict]]]:
           visuel(n, 11, "pivotTable", 600, 200, 660, 500, "Scénarios historiques : horizon de survie (jours)",
                  {"Rows": [colonne("dim_scenario_stress", "libelle_scenario", "Scénario")],
                   "Columns": [colonne("dim_filiale", "code_filiale", "Filiale")],
-                  "Values": [somme("mart_stress_test", "horizon_survie_jours", "Jours")]})]
+                  "Values": [somme("mart_stress_test", "horizon_survie_jours", "Jours")]},
+                 # additionner des jours de survie entre scénarios ou filiales n'a pas de sens
+                 {"subTotals": [{"properties": {"rowSubtotals": lit(False), "columnSubtotals": lit(False)}}]})]
     p.append((n, "Simulateur de stress", vs))
 
     # 6. Qualité et fiabilité des données
@@ -499,10 +513,10 @@ def pages_rapport() -> list[tuple[str, str, list[dict]]]:
                   "Y": [mesure("Doublons supprimés"), mesure("Libellés corrigés"), mesure("Devises corrigées"),
                         mesure("Opérations annulées, tests et extournes écartés")]}),
           visuel(n, 11, "lineChart", 20, 420, 620, 280,
-                 "Encours de dépôts : réel publié par la banque centrale vs reconstitué par les flux (devise)",
+                 "Encours de dépôts en devise locale : réel publié vs reconstitué (France si aucune filiale choisie)",
                  {"Category": [colonne("mart_qualite_ancrage", "date_ancrage", "Date de publication")],
-                  "Y": [somme("mart_qualite_ancrage", "encours_reel_devise", "Réel (banque centrale)"),
-                        somme("mart_qualite_ancrage", "encours_reconstitue_devise", "Reconstitué")]}),
+                  "Y": [mesure("Encours réel publié (devise)", libelle="Réel (banque centrale)"),
+                        mesure("Encours reconstitué (devise)", libelle="Reconstitué")]}),
           visuel(n, 12, "tableEx", 660, 130, 600, 280, "Qualité des exports par filiale",
                  {"Values": [colonne("dim_filiale", "nom_filiale", "Filiale"),
                              mesure("Lignes brutes reçues", libelle="Lignes brutes"),

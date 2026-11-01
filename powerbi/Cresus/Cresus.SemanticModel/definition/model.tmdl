@@ -10,6 +10,8 @@ annotation __PBI_TimeIntelligenceEnabled = 0
 
 annotation PBI_ProTooling = ["DevMode"]
 
+annotation PBI_QueryOrder = ["dim_date","dim_filiale","dim_devise","dim_type_transaction","dim_scenario_stress","fct_flux_tresorerie_horaire","fct_position_tresorerie_quotidienne","fct_taux_change","mart_exposition_change","mart_liquidite_placement","mart_stress_test","mart_prevision_tresorerie","mart_prevision_change","mart_qualite_prevision","mart_backtest_journalier","mart_qualite_donnees","mart_qualite_ancrage","mart_reserve_optimale","mart_controle_a_posteriori","mart_qualite_sources","ServeurPostgres","BasePostgres"]
+
 ref table dim_date
 ref table dim_filiale
 ref table dim_devise

@@ -68,7 +68,7 @@ Les cours de change sont proches d'une **marche aléatoire** (Meese & Rogoff, 19
 | Dévaluation du CFA | 3 % | XOF/XAF −50 % | +200 pb | 1,3 | 12 janvier 1994 |
 | Crise combinée | 10 % | tous les chocs | +200 pb | 2,0 | Reverse stress test |
 
-Avec 3 ans de données, le scénario central n'a plus de fuite structurelle (horizon de survie illimité ou supérieur à 6 ans). Retraits modérés : 22 à 51 jours en Europe et en Amérique du Nord. Panique sévère : 0 jour.
+Avec 3 ans de données, le scénario central n'a plus de fuite structurelle (horizon de survie illimité ou supérieur à 6 ans). Retraits modérés : 22 à 51 jours en Europe et en Amérique du Nord. Panique sévère : 0 jour, sauf en zone CFA (2 à 8 jours).
 
 ## 6. Limites
 - Le profil à l'intérieur du mois (paie, prélèvements) est une hypothèse du générateur, et la régression utilise les mêmes variables. Sa précision quotidienne est donc en partie « attendue ». Le contrôle sur janvier 2026 porte, lui, sur des niveaux réels.

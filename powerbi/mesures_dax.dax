@@ -88,7 +88,7 @@ RETURN
 Ratio de couverture liquidité % =
 DIVIDE ( [Position de trésorerie (EUR)], [Besoin de liquidité 30 j (EUR)] )
 
-// Vitesse à laquelle la réserve se consomme (moyenne glissante 7 j)
+// Vitesse à laquelle la réserve se consomme (moyenne glissante 30 j)
 Consommation quotidienne de la position % =
 VAR DerniereDate = [Date d'arrêté]
 VAR FluxMoyen = CALCULATE ( SUM ( mart_liquidite_placement[flux_net_moyen_eur] ), dim_date[date_jour] = DerniereDate )
@@ -168,7 +168,11 @@ RETURN
 // À afficher PAR DEVISE uniquement (une moyenne de ratios entre devises n'a pas de sens)
 Rapport coût / risque de la couverture =
 VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
-RETURN CALCULATE ( AVERAGE ( mart_exposition_change[rapport_cout_risque] ), dim_date[date_jour] = DerniereDate )
+RETURN
+    IF (
+        HASONEVALUE ( mart_exposition_change[code_devise] ),
+        CALCULATE ( AVERAGE ( mart_exposition_change[rapport_cout_risque] ), dim_date[date_jour] = DerniereDate )
+    )
 
 Recommandation de couverture =
 VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
@@ -195,6 +199,15 @@ MEDIANX ( mart_controle_a_posteriori, ABS ( mart_controle_a_posteriori[erreur_p5
 // Fiabilité : encours réel publié (banques centrales) vs encours reconstitué
 Écart max à l'encours réel % = MAXX ( mart_qualite_ancrage, ABS ( mart_qualite_ancrage[ecart_pct] ) ) / 100
 
+// Encours en devise locale : une somme entre filiales mélangerait les devises. Sans filiale choisie : la France.
+Encours réel publié (devise) =
+VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
+RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reel_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+
+Encours reconstitué (devise) =
+VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
+RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reconstitue_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+
 Position prévue P50 (EUR) = SUM ( mart_prevision_tresorerie[position_p50_eur] )
 Position prévue P05 (EUR) = SUM ( mart_prevision_tresorerie[position_p05_eur] )
 Position prévue P95 (EUR) = SUM ( mart_prevision_tresorerie[position_p95_eur] )
@@ -218,10 +231,22 @@ CALCULATE (
     mart_backtest_journalier[est_champion] = TRUE ()
 )
 
-Taux de change prévu P50 = AVERAGE ( mart_prevision_change[taux_p50] )
-Taux de change prévu P05 = AVERAGE ( mart_prevision_change[taux_p05] )
-Taux de change prévu P95 = AVERAGE ( mart_prevision_change[taux_p95] )
-Taux de change réalisé = AVERAGE ( mart_prevision_change[taux_realise] )
+// Une moyenne de taux entre devises n'a pas de sens. Sans devise choisie : l'USD.
+Taux de change prévu P50 =
+VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_p50] ), dim_devise[code_devise] = Devise )
+
+Taux de change prévu P05 =
+VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_p05] ), dim_devise[code_devise] = Devise )
+
+Taux de change prévu P95 =
+VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_p95] ), dim_devise[code_devise] = Devise )
+
+Taux de change réalisé =
+VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_realise] ), dim_devise[code_devise] = Devise )
 
 // ------------------------------------------- 6. SIMULATEUR DE STRESS (What-if)
 // Créer d'abord 4 paramètres : Modélisation > Nouveau paramètre > Plage numérique
@@ -257,9 +282,11 @@ SUMX (
         * [Facteur choc change]
 )
 
+// Moyenne sur 30 jours (variable dbt fenetre_moyenne_flux_jours), comme mart_stress_test : un mois complet
+// lisse le cycle des salaires et des prélèvements.
 Flux net quotidien stressé (EUR) =
 VAR DerniereDate = [Date d'arrêté]
-VAR Fenetre = DATESINPERIOD ( dim_date[date_jour], DerniereDate, -7, DAY )
+VAR Fenetre = DATESINPERIOD ( dim_date[date_jour], DerniereDate, -30, DAY )
 RETURN
     SUMX (
         VALUES ( dim_filiale[code_filiale] ),
@@ -274,8 +301,12 @@ VAR Net = [Flux net quotidien stressé (EUR)]
 RETURN
     SWITCH ( TRUE (), Pos <= 0, 0, Net >= 0, BLANK (), DIVIDE ( Pos, -Net ) )
 
+// Calculé filiale par filiale : l'excédent de l'une ne couvre pas le besoin d'une autre.
 Besoin de refinancement stressé (EUR) =
-MAX ( 0, - [Flux net quotidien stressé (EUR)] * 30 - [Position stressée (EUR)] )
+SUMX (
+    VALUES ( dim_filiale[code_filiale] ),
+    MAX ( 0, - [Flux net quotidien stressé (EUR)] * 30 - [Position stressée (EUR)] )
+)
 
 // 0,5 = marge de refinancement (même valeur que la variable dbt marge_refinancement_pct)
 Coût du refinancement stressé (EUR/an) =

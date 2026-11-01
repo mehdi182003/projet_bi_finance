@@ -142,7 +142,7 @@ table _Mesures
 		lineageTag: 3bfd565f7787cc754baf
 
 	measure 'Jours sous 100 %' = CALCULATE ( COUNTROWS ( mart_liquidite_placement ), mart_liquidite_placement[ratio_couverture_liquidite_pct] < 100 )
-		formatString: 0.0
+		formatString: 0
 		displayFolder: 3. liquidité, placement, refinancement
 		lineageTag: 9e761d4601db37c7b47e
 
@@ -236,7 +236,11 @@ table _Mesures
 
 	measure 'Rapport coût / risque de la couverture' =
 			VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
-			RETURN CALCULATE ( AVERAGE ( mart_exposition_change[rapport_cout_risque] ), dim_date[date_jour] = DerniereDate )
+			RETURN
+			    IF (
+			        HASONEVALUE ( mart_exposition_change[code_devise] ),
+			        CALCULATE ( AVERAGE ( mart_exposition_change[rapport_cout_risque] ), dim_date[date_jour] = DerniereDate )
+			    )
 		formatString: 0.00
 		displayFolder: 4. risque de change
 		lineageTag: fce942d99e2bc1be30b0
@@ -294,6 +298,20 @@ table _Mesures
 		displayFolder: 5. prévision
 		lineageTag: 0d3e5e21450fe88e6485
 
+	measure 'Encours réel publié (devise)' =
+			VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
+			RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reel_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: 450982820203e722d3f0
+
+	measure 'Encours reconstitué (devise)' =
+			VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
+			RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reconstitue_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+		formatString: #,0
+		displayFolder: 5. prévision
+		lineageTag: 0e299c28fb605d9121e0
+
 	measure 'Position prévue P50 (EUR)' = SUM ( mart_prevision_tresorerie[position_p50_eur] )
 		formatString: #,0
 		displayFolder: 5. prévision
@@ -330,22 +348,30 @@ table _Mesures
 		displayFolder: 5. prévision
 		lineageTag: 88ed0c8ad2f55e056ce8
 
-	measure 'Taux de change prévu P50' = AVERAGE ( mart_prevision_change[taux_p50] )
+	measure 'Taux de change prévu P50' =
+			VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+			RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_p50] ), dim_devise[code_devise] = Devise )
 		formatString: 0.0000
 		displayFolder: 5. prévision
 		lineageTag: b0e4d54ad3f07e64c671
 
-	measure 'Taux de change prévu P05' = AVERAGE ( mart_prevision_change[taux_p05] )
+	measure 'Taux de change prévu P05' =
+			VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+			RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_p05] ), dim_devise[code_devise] = Devise )
 		formatString: 0.0000
 		displayFolder: 5. prévision
 		lineageTag: cc9aca89b00688c3e7ff
 
-	measure 'Taux de change prévu P95' = AVERAGE ( mart_prevision_change[taux_p95] )
+	measure 'Taux de change prévu P95' =
+			VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+			RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_p95] ), dim_devise[code_devise] = Devise )
 		formatString: 0.0000
 		displayFolder: 5. prévision
 		lineageTag: a89014190e8fe295f27c
 
-	measure 'Taux de change réalisé' = AVERAGE ( mart_prevision_change[taux_realise] )
+	measure 'Taux de change réalisé' =
+			VAR Devise = SELECTEDVALUE ( dim_devise[code_devise], "USD" )
+			RETURN CALCULATE ( AVERAGE ( mart_prevision_change[taux_realise] ), dim_devise[code_devise] = Devise )
 		formatString: 0.0000
 		displayFolder: 5. prévision
 		lineageTag: d6c44db9c917df59e825
@@ -380,7 +406,7 @@ table _Mesures
 
 	measure 'Flux net quotidien stressé (EUR)' =
 			VAR DerniereDate = [Date d'arrêté]
-			VAR Fenetre = DATESINPERIOD ( dim_date[date_jour], DerniereDate, -7, DAY )
+			VAR Fenetre = DATESINPERIOD ( dim_date[date_jour], DerniereDate, -30, DAY )
 			RETURN
 			    SUMX (
 			        VALUES ( dim_filiale[code_filiale] ),
@@ -401,7 +427,11 @@ table _Mesures
 		displayFolder: 6. simulateur de stress (what-if)
 		lineageTag: ce3e26f6d9c0ee74ebc2
 
-	measure 'Besoin de refinancement stressé (EUR)' = MAX ( 0, - [Flux net quotidien stressé (EUR)] * 30 - [Position stressée (EUR)] )
+	measure 'Besoin de refinancement stressé (EUR)' =
+			SUMX (
+			    VALUES ( dim_filiale[code_filiale] ),
+			    MAX ( 0, - [Flux net quotidien stressé (EUR)] * 30 - [Position stressée (EUR)] )
+			)
 		formatString: #,0
 		displayFolder: 6. simulateur de stress (what-if)
 		lineageTag: be6eb707d77b40847351

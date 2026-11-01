@@ -7,12 +7,12 @@ Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout
 
 | Brique | Outil | Rôle |
 |---|---|---|
-| Sources | Fichiers versionnés | **Exports bruts (« sales ») des 4 systèmes bancaires des filiales** sur 2023-2025 (`data/sources_internes/`, 360 fichiers, 2,9 M de lignes) + séries réelles des banques centrales et cours BCE (`data/sources/`) |
+| Sources | Fichiers versionnés | **Exports bruts (« sales ») des 4 systèmes bancaires des filiales** sur 2023-2025 (`data/sources_internes/`, 371 fichiers, 4,3 M de lignes) + séries réelles des banques centrales et cours BCE (`data/sources/`) |
 | Extract + Load | **Python** (pandas, psycopg) | Chargement tel quel dans la zone brute de PostgreSQL : incrémental, idempotent, tracé (fichier, ligne, MD5) |
-| Entrepôt de données | **PostgreSQL 16** | Architecture en couches : `raw` (bronze) → `staging` / `intermediate` (argent) → `marts` (or, schéma en étoile) + `ml` |
-| Transform + qualité | **dbt** | Nettoyage (11 règles RG-NET), dédoublonnage, rejets tracés, schéma en étoile, 111 tests (rapprochement comptable, complétude, ancrage sur les dépôts réels), lignage |
+| Entrepôt de données | **PostgreSQL 15 ou 16** | Architecture en couches : `raw` (bronze) → `staging` / `intermediate` (argent) → `marts` (or, schéma en étoile) + `ml` |
+| Transform + qualité | **dbt** | Nettoyage (11 règles RG-NET), dédoublonnage, rejets tracés, schéma en étoile, 116 tests (rapprochement comptable, complétude, ancrage sur les dépôts réels), lignage |
 | Analyse prédictive | **Python** (statsmodels, numpy) | Champion/challenger au pas quotidien, simulation Monte-Carlo, réserve optimale, contrôle sur des données réelles postérieures |
-| Restitution | **Power BI** | Projet `.pbip` prêt à ouvrir : 6 pages, 73 mesures DAX, simulateur What-if |
+| Restitution | **Power BI** | Projet `.pbip` prêt à ouvrir : 6 pages, 75 mesures DAX, simulateur What-if |
 
 ---
 
@@ -21,7 +21,7 @@ Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout
 ```mermaid
 flowchart LR
     subgraph Sources
-        F[Exports bruts des filiales<br/>SAB · NORDIC · AMERICORE · DELTA<br/>360 fichiers 2023-2025]
+        F[Exports bruts des filiales<br/>SAB · NORDIC · AMERICORE · DELTA<br/>371 fichiers 2023-2025]
         GL[Soldes comptables<br/>journaliers]
         BC[Banques centrales<br/>dépôts + taux réels]
         W[Webstat<br/>cours BCE]
@@ -43,40 +43,31 @@ flowchart LR
 
 ## 2. Démarrage rapide
 
-### Prérequis
-- Python 3.10+ ; Docker Desktop (ou PostgreSQL 15/16) ; Power BI Desktop (Windows).
-- Un compte Kaggle (gratuit) **ou** le CSV PaySim téléchargé à la main.
+> **Pour lancer le projet, suivre [docs/09 : procédure pas à pas](docs/09_procedure_pas_a_pas.md)** : installation, chaque étape de Python à Power BI, valeurs attendues et dépannage.
 
-### Installation (PowerShell, Windows)
+### En résumé (PowerShell, Windows)
+Prérequis : Git, Python 3.10 à 3.13, PostgreSQL 15/16 avec une base `cresus` (ou Docker Desktop : `docker compose up -d`), Power BI Desktop.
 ```powershell
-git clone <url-du-depot> ; cd claude-cloud
+git clone https://github.com/mehdi182003/projet_bi_finance.git cresus ; cd cresus
 python -m venv .venv ; .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env          # puis éditer si besoin (identifiants Kaggle, PostgreSQL)
-docker compose up -d            # lance PostgreSQL sur localhost:5432 (base "cresus")
+copy .env.example .env          # adapter POSTGRES_PASSWORD si besoin
+python pipeline.py              # chaîne complète (~8 min) : load → dbt (nettoyage, étoile, tests) → prévision
 ```
-*(macOS / Linux : `source .venv/bin/activate` et `cp .env.example .env`.)*
+Ouvrir ensuite **`powerbi/Cresus/Cresus.pbip`** → *Actualiser maintenant*, onglet **Base de données** (`postgres` / votre mot de passe).
 
-### Données
-- **Tout est déjà dans le dépôt** : exports bruts des filiales (`data/sources_internes/`), séries des banques centrales et cours BCE (`data/sources/`). Rien à télécharger.
-- **PaySim est facultatif** : il ne sert qu'à la page « Qualité » (et à `--regenerer`). Pour l'avoir : `KAGGLE_USERNAME` / `KAGGLE_KEY` dans `.env`, ou déposer `PS_20174392719_1491204439457_log.csv` dans `data/raw/`.
+### Deux jeux de données
+| | Jeu versionné | Gros volume |
+|---|---|---|
+| Lignes brutes | 4,3 M (lots de 500) | 42,7 M (lots de 50) |
+| Où | `data/sources_internes/` (Git) | `data/generees/lot_50/` (local, ignoré par Git) |
+| Prérequis | Aucun téléchargement | CSV PaySim dans `data/raw/` et **30 Go** libres |
+| Commande | `python pipeline.py` | `python pipeline.py --regenerer --taille-lot 50` (~1 h 10) |
+| Base PostgreSQL | 1,9 Go | 18 Go |
 
-### Lancement
-```powershell
-python pipeline.py              # chaîne complète (~3,5 min) : load → dbt (nettoyage, étoile, tests) → prévision
-python pipeline.py --etapes dbt prevision dbt_prev   # relancer certaines étapes
-```
-
-### Gros volume en local (plusieurs Go, non versionné)
-Le jeu versionné regroupe les opérations par **lots de 100** (2,9 M de lignes, 286 Mo). Pour travailler sur un volume réaliste, on génère le même jeu sur son PC avec des lots plus petits. Cela nécessite le CSV PaySim dans `data/raw/`.
-```powershell
-python pipeline.py --regenerer --taille-lot 10     # 29 M de lignes, 2,8 Go de CSV : génération ~17 min, puis load + dbt ~22 min
-# lancements suivants : ajouter DOSSIER_SOURCES_INTERNES=data/generees/lot_10 dans .env
-```
-Les fichiers vont dans `data/generees/lot_10/` (ignoré par Git). Les montants, les ancrages et les tests sont identiques quel que soit le lot : seul le nombre de lignes change. Il faut prévoir **16 Go de RAM** (pic de 5 Go) et **~20 Go de disque libre** (la base PostgreSQL fait 13 Go en lots de 10).
+Les défauts, les totaux et les ancrages sont les mêmes : seul le nombre de lignes change. PaySim n'est pas nécessaire au jeu versionné, mais le visuel PaySim de la page « Qualité » reste alors vide.
 
 **Reprise du projet** : le contexte complet (décisions, état, reste à faire) est dans [`CLAUDE.md`](CLAUDE.md), chargé automatiquement par Claude Code.
-Puis ouvrir **`powerbi/Cresus/Cresus.pbip`** dans Power BI Desktop → *Actualiser* (identifiants PostgreSQL `postgres` / `postgres`). Détails : [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md).
 
 Lignage et dictionnaire de données (idéal en soutenance) : `cd dbt ; dbt docs generate --profiles-dir . ; dbt docs serve --profiles-dir .`
 
@@ -109,7 +100,7 @@ Points d'attention métier relevés au passage :
 | Côte d'Ivoire / Cameroun | XOF / XAF | FMI / BEAC | 8 % chacune |
 | Canada / États-Unis | CAD / USD | Banque du Canada / Fed (hebdo) | 0,2 % / 0,03 % |
 
-Les opérations de chaque filiale, une fois nettoyées, retombent **exactement** sur les dépôts réels à chaque date publiée : 491 points de contrôle, écart maximal de 0,000007 %, vérifié par un test dbt.
+Les opérations de chaque filiale, une fois nettoyées, retombent **exactement** sur les dépôts réels à chaque date publiée : 481 dates contrôlées, écart maximal de 0,00001 %, vérifié par un test dbt.
 
 ### Étape 4 — ETL et data warehouse (Python → PostgreSQL → dbt)
 Les filiales n'ont pas le même système bancaire. On reçoit donc **4 formats d'exports bruts, avec leurs défauts** :
@@ -125,7 +116,7 @@ Les filiales n'ont pas le même système bancaire. On reçoit donc **4 formats d
 2. **Staging (dbt)** : un modèle par système (typage, formats, fuseaux, unités, sens).
 3. **Intermediate (dbt)** : union des 4 systèmes, correspondances de libellés et de devises, dédoublonnage, exclusions, identifiants clients, et **table des rejets avec motif** (rien n'est supprimé en silence).
 4. **Marts (dbt)** : **schéma en étoile** (dimensions conformes, faits au grain documenté, fait principal incrémental), puis marts d'analyse.
-5. **Contrôles** : complétude des fichiers, **rapprochement comptable jour par jour**, ancrage sur les dépôts réels. Résultat : 2 896 020 lignes brutes → 2 788 404 opérations retenues (3,7 % écartées), **exactement** le nombre d'opérations réelles de chaque filiale.
+5. **Contrôles** : complétude des fichiers, **rapprochement comptable jour par jour**, ancrage sur les dépôts réels. Résultat sur le gros volume : 42 669 356 lignes brutes → 40 749 329 opérations retenues (4,5 % écartées), **exactement** le nombre d'opérations réelles de chaque filiale.
 
 → [docs/08_etl_sources_et_nettoyage.md](docs/08_etl_sources_et_nettoyage.md) (dictionnaire des sources, règles RG-NET, modèle dimensionnel) · [docs/02_specifications_moe.md](docs/02_specifications_moe.md)
 
@@ -135,11 +126,11 @@ Chaque KPI a été **testé statistiquement**. On n'a gardé que ceux qui varien
 | KPI retenu | Décision éclairée |
 |---|---|
 | Position de trésorerie, solde net, encaissements et décaissements | Pilotage quotidien |
-| **Ratio de liquidité** (Bâle III simplifié : position / 10 % des dépôts) et **jours sous 100 %** | Conformité ; janvier concentre 40 % des jours sous 100 % |
+| **Ratio de liquidité** (Bâle III simplifié : position / 10 % des dépôts) et **jours sous 100 %** | Conformité ; janvier concentre 34 % des jours sous 100 % |
 | **Opérations de trésorerie** : refinancement levé / excédent placé | Combien emprunter ou placer chaque mois |
 | **Réserve requise à 99 %** (prévision) vs réserve actuelle | Où libérer de la liquidité, où en lever |
 | Prévision P5 / P50 / P95 et probabilité de passer sous 100 % | Anticipation |
-| Exposition, **VaR 95 % 10 j**, **effet de change** (−57 M€ sur l'USD en 3 ans) | Risque de change |
+| Exposition, **VaR 95 % 10 j**, **effet de change** (−58 M€ sur l'USD en 3 ans) | Risque de change |
 | **Rapport coût / risque de la couverture** et recommandation par devise | Quelles devises couvrir |
 | Horizon de survie sous stress | Résilience (7 scénarios historiques + simulateur) |
 | Part des gros décaissements | Pré-notification des gros retraits |
@@ -151,17 +142,17 @@ KPI **écartés après analyse** :
 - le pic intrajournalier (redondant).
 
 ### Étape 6 — Analyse prédictive et simulation
-- **Trois modèles en concurrence** au pas quotidien : naïf hebdomadaire, Holt-Winters, régression calendaire. Cette dernière utilise les jours ouvrés et fériés, le début et la fin de mois, et le **mois de l'année** ; elle gagne sur 19 séries sur 20. Erreur journalière (WAPE) : 12 à 16 % sur les décaissements, 12 à 23 % sur les encaissements, contre 46 % pour le naïf sur les encaissements.
+- **Trois modèles en concurrence** au pas quotidien : naïf hebdomadaire, Holt-Winters, régression calendaire. Cette dernière utilise les jours ouvrés et fériés, le début et la fin de mois, et le **mois de l'année** ; elle gagne sur 20 séries sur 20. Erreur journalière (WAPE) : 12 à 15 % sur les décaissements, 12 à 28 % sur les encaissements, contre 46 % pour le naïf sur les encaissements.
 - **Monte-Carlo** : 1 000 trajectoires pour janvier 2026 (erreurs du backtest rééchantillonnées par blocs, plus un choc mensuel).
-- **Contrôle sur données réelles postérieures** : les dépôts de janvier 2026, publiés après la date d'arrêté, tombent dans la fourchette à 90 % pour 7 filiales sur 9 (erreur médiane de −3,7 % à +2,0 %). La fourchette de change contient le cours réel 94 % des jours.
+- **Contrôle sur données réelles postérieures** : les dépôts de janvier 2026, publiés après la date d'arrêté, tombent dans la fourchette à 90 % pour 7 filiales sur 9 (erreur médiane de −3,9 % à +1,2 %). La fourchette de change contient le cours réel 94 % des jours.
 - **Ce que le contrôle a appris** : la première version ignorait la **baisse saisonnière des dépôts en janvier** (−3,4 % en France en moyenne), d'où une fourchette trop étroite (4 filiales sur 9). Ajouter l'effet « mois » et un choc mensuel l'a corrigée.
 
 → [docs/03_analyse_predictive_et_simulation.md](docs/03_analyse_predictive_et_simulation.md)
 
 ### Étape 7 — Restitution Power BI
 `powerbi/Cresus/Cresus.pbip`, prêt à ouvrir, compte 6 pages : Cockpit DAF · Flux · Prévisions · Change & couverture · Simulateur de stress · Qualité des données.
-- Le modèle (26 tables, 73 mesures) est validé et converti par la bibliothèque officielle Microsoft (TOM).
-- Les 69 fichiers du rapport respectent les schémas JSON Microsoft.
+- Le rapport a été ouvert dans Power BI Desktop et contrôlé page par page : valeurs comparées à la base, filtres et simulateur testés.
+- Le modèle compte 26 tables et 75 mesures.
 
 → [docs/04_guide_power_bi.md](docs/04_guide_power_bi.md)
 
@@ -209,7 +200,7 @@ erDiagram
 ├── dbt/                        seeds (référentiels), staging, intermediate, marts, tests, macros
 ├── powerbi/Cresus/             projet Power BI prêt à ouvrir (Cresus.pbip)
 ├── powerbi/                    générateur du projet, mesures DAX, thème, outil .NET TomTool
-└── docs/                       livrables AMOA / MOE (01 à 08)
+└── docs/                       livrables AMOA / MOE (01 à 08) et procédure de lancement (09)
 ```
 
 ## 6. Hypothèses et limites (à assumer en soutenance)

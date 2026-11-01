@@ -127,7 +127,7 @@ L'analyse ci-dessus porte sur les 12 jours stables de PaySim. Elle a conduit à 
 | **Réserve requise P99** (nouveau, prédictif) | — | Janvier 2026 : 18 % requis en France contre 15 % ; sur-réserve en zone CFA | ✅ Valeur concrète de la prévision |
 | Effet de change | ≤ 1,3 % de la position (secondaire) | −58 M€ (USD), −46 M€ (NOK), −29 M€ (CAD) sur 3 ans | ⬆️ **Promu** au cockpit |
 | VaR 95 % 10 j, rapport coût / risque | Informatifs | Informatifs ; recommandations : CAD prioritaire, SEK rapporte, DKK inutile | ✅ Gardés |
-| Horizon de survie (stress) | Faussé par la fuite structurelle | Retraits modérés : 22-51 j ; panique : 0 j | ✅ Gardé |
+| Horizon de survie (stress) | Faussé par la fuite structurelle | Retraits modérés : 22-51 j ; panique : 0-8 j | ✅ Gardé |
 | Part des gros décaissements | 10 % des montants | 14 % des montants (opérations ≥ 10 k€) | ✅ Gardé (secondaire) |
 | Taux de fraude | Artefact (fraude constante) | Proportionnelle au volume : 0,03 % des montants décaissés | Page Qualité / Risques uniquement |
 
