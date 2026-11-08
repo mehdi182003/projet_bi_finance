@@ -21,18 +21,6 @@ table mart_stress_test
 		summarizeBy: none
 		sourceColumn: code_scenario
 
-	column libelle_scenario
-		dataType: string
-		lineageTag: cf7078e41f6318bdce67
-		summarizeBy: none
-		sourceColumn: libelle_scenario
-
-	column ordre_affichage
-		dataType: int64
-		lineageTag: 67adb4308b4aa9c6d217
-		summarizeBy: none
-		sourceColumn: ordre_affichage
-
 	column code_filiale
 		dataType: string
 		lineageTag: fc95f9d575ba3ea86296

@@ -7,7 +7,7 @@
 | Sources | `data/sources_internes/` (Git, 371 fichiers mensuels compressés, 64 Mo) | — | Exports bruts des 4 systèmes bancaires des filiales | Données « sales », hétérogènes |
 | **Bronze** | PostgreSQL, schéma `raw` | Python (`etl/chargement_sources_internes.py`) | Lignes brutes **en texte**, telles que reçues + fichier, ligne, date de chargement | Zone immuable, traçabilité, chargement incrémental idempotent (empreinte MD5) |
 | **Argent** | PostgreSQL, schémas `staging` puis `intermediate` | dbt (SQL) | `staging` : un modèle par système (typage, formats, fuseaux, unités, sens). `intermediate` : union, normalisation, dédoublonnage, exclusions, rejets tracés | Une règle = un commentaire `RG-NET-xx` + un test |
-| **Or** | PostgreSQL, schéma `marts` | dbt (SQL) | **Schéma en étoile** : dimensions conformes + faits au grain défini, marts d'analyse | Modèle dimensionnel (Kimball) |
+| **Or** | PostgreSQL, schéma `marts` | dbt (SQL) | **Schéma en étoile** : 5 dimensions (contexte, sans mesure) + 15 tables de faits (`fct_` de base, `mart_` dérivés) au grain défini | Modèle dimensionnel (Kimball) |
 | Prédictif | PostgreSQL, schéma `ml` | Python | Prévisions, réserve optimale, contrôle a posteriori | Résultats réinjectés dans des marts dbt |
 | Restitution | `powerbi/Cresus/Cresus.pbip` | Power BI | Import du schéma `marts` | Mesures DAX centralisées |
 
@@ -119,17 +119,35 @@ Cas réel rencontré pendant la mise au point : le passage à l'heure d'hiver su
 
 ## 6. Modèle dimensionnel (schéma en étoile, couche or)
 
+**Règle RG-MOD-01** : une **dimension** décrit le contexte (*qui, quoi, quand, où ?*) et ne contient **aucune mesure** ; une **table de faits** contient les mesures (*combien ?*) et les clés vers les dimensions. Le test `assert_dimensions_sans_mesure` échoue si une colonne numérique apparaît dans une dimension (hors clés de tri et codes, listés dans le test).
+
+**Dimensions (contexte)**
+
+| Table | Répond à | Grain | Attributs |
+|---|---|---|---|
+| `dim_date` | Quand ? | 1 jour | jour, mois, trimestre, année, jour de semaine, période d'analyse ou de prévision |
+| `dim_filiale` | Qui ? Où ? | 1 filiale (SCD type 1, clé métier stable) | nom, pays, région, devise, système source, fuseau horaire, source des dépôts réels, profil de paie |
+| `dim_devise` | Quoi ? (monnaie) | 1 devise (code ISO 4217) | libellé, régime de change, parité fixe (constante de définition), banque centrale, zone |
+| `dim_type_transaction` | Quoi ? (opération) | 1 type normalisé | libellé, catégorie, sens (+1 / −1) |
+| `dim_scenario_stress` | Quoi ? (crise) | 1 scénario | nom, ordre d'affichage, crise historique de référence |
+
+**Faits (mesures)** : `fct_` = fait de base, `mart_` = fait dérivé (analyse, prévision, qualité).
+
 | Table | Type | Grain | Additivité |
 |---|---|---|---|
-| `dim_date` | dimension conforme | 1 jour | — |
-| `dim_filiale` | dimension conforme (SCD type 1, clé métier stable) | 1 filiale | — |
-| `dim_devise` | dimension conforme (code ISO 4217) | 1 devise | — |
-| `dim_type_transaction` | dimension conforme | 1 type normalisé | — |
-| `dim_scenario_stress` | dimension de référence | 1 scénario | — |
 | `fct_flux_tresorerie_horaire` | fait transactionnel agrégé, **incrémental** | heure × filiale × type × fraude × gros ticket | additif |
 | `fct_position_tresorerie_quotidienne` | fait instantané périodique | jour × filiale | **semi-additif** (on ne somme pas une position dans le temps : DAX « dernier jour ») |
+| `fct_situation_initiale_filiale` | fait instantané (situation de départ) | 1 filiale au 31/12/2022 | EUR et clients additifs entre filiales ; % non additifs |
 | `fct_taux_change` | fait instantané périodique | jour × devise | non additif |
-| `mart_*` | marts d'analyse (agrégats, prévisions, qualité) | défini dans `models/marts/schema.yml` | — |
+| `mart_liquidite_placement` | fait instantané périodique (analyse) | jour × filiale | semi-additif ; ratios non additifs |
+| `mart_exposition_change` | fait agrégé (analyse) | jour × devise | semi-additif ; VaR non additive (somme = borne prudente) |
+| `mart_stress_test` | fait de simulation | scénario × filiale | montants additifs entre filiales ; jours non additifs |
+| `mart_prevision_tresorerie`, `mart_prevision_change`, `mart_backtest_journalier`, `mart_reserve_optimale`, `mart_controle_a_posteriori` | faits de prévision et de contrôle | voir `meta.grain` dans `models/marts/schema.yml` | voir le dictionnaire Excel |
+| `mart_qualite_sources`, `mart_qualite_defauts`, `mart_qualite_ancrage` | faits de qualité | système × filiale × mois (× défaut) ; filiale × date publiée | comptages additifs ; taux et écarts % non additifs |
+
+Revue du 05/11/2026 (retour du professeur : « quand il y a des sommes qui traînent dans les dimensions, c'est jamais bon ») : le nombre de clients, l'encours et la réserve de départ, la part de marché et le taux de réserve sont sortis de `dim_filiale` vers `fct_situation_initiale_filiale` ; les chocs chiffrés sont sortis de `dim_scenario_stress` (ils restent dans `mart_stress_test`, tels qu'appliqués à chaque filiale, et dans le référentiel `ref_scenarios_stress`) ; à l'inverse, le libellé du scénario et le régime de change ne sont plus recopiés dans les faits.
+
+**Dictionnaire de données complet** (52 tables, 627 colonnes, une ligne par colonne : rôle, additivité, unité, description, exemple réel) : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_BI-predictive-Finance_G5.xlsx`, régénéré par `python docs/dictionnaire/generer_dictionnaire.py` à partir de la base et de `docs/dictionnaire/descriptions.py`.
 
 Choix de modélisation :
 - **Clés métier stables comme clés de dimension** (codes ISO, codes filiale) : elles ne changent pas et n'ont pas besoin d'historisation sur la période. Une clé de substitution s'imposerait avec un historique de type 2.

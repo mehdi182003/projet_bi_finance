@@ -43,7 +43,7 @@ select
     md5(concat_ws('|', p.date_position, p.code_devise))                       as id_exposition,
     p.date_position,
     p.code_devise,
-    t.regime_change,
+    dv.regime_change,
     p.position_devise,
     p.exposition_eur,
     p.effet_change_eur,
@@ -52,18 +52,22 @@ select
     t.volatilite_annualisee_pct,
     {{ var('quantile_var_95') }} * t.volatilite_quotidienne * abs(p.exposition_eur)            as var_95_1j_eur,
     {{ var('quantile_var_95') }} * t.volatilite_quotidienne * abs(p.exposition_eur) * sqrt(10) as var_95_10j_eur,
-    case when t.regime_change = 'flottant' then td.taux_local_pct - td.taux_eur_pct else 0 end as cout_couverture_annuel_pct
+    case when dv.regime_change = 'flottant' then td.taux_local_pct - td.taux_eur_pct else 0 end as cout_couverture_annuel_pct
 from positions p
 join total_groupe g using (date_position)
 join {{ ref('fct_taux_change') }} t
     on t.code_devise = p.code_devise and t.date_cours = p.date_position
 join taux_directeurs td
     on td.code_devise = p.code_devise and td.date_position = p.date_position
+join {{ ref('dim_devise') }} dv
+    on dv.code_devise = p.code_devise
 where p.code_devise <> 'EUR'
 )
 
 select
-    base.*,
+    id_exposition, date_position, code_devise, position_devise, exposition_eur, effet_change_eur,
+    part_position_groupe_pct, taux_eur, volatilite_annualisee_pct, var_95_1j_eur, var_95_10j_eur,
+    cout_couverture_annuel_pct,
     cout_couverture_annuel_pct * exposition_eur / 100                          as cout_couverture_annuel_eur,
     case when volatilite_annualisee_pct > 0
          then cout_couverture_annuel_pct / volatilite_annualisee_pct end       as rapport_cout_risque,

@@ -150,7 +150,7 @@ cd ..
 Si les données ont changé depuis le dernier lancement (étape 1 relancée, changement de jeu), ajouter **`--full-refresh`** : le fait `fct_flux_tresorerie_horaire` ne recalcule sinon que ses 35 derniers jours.
 
 - **Ce que ça fait** : `staging` (un modèle par système : formats, fuseaux, unités, sens), `intermediate` (union, dédoublonnage, rejets tracés avec leur motif), `marts` (étoile et analyses), puis tous les contrôles.
-- **À vérifier** : la dernière ligne doit afficher **`ERROR=0`** (par exemple `PASS=119 WARN=1 ERROR=0`).
+- **À vérifier** : la dernière ligne doit afficher **`ERROR=0`** (par exemple `PASS=127 WARN=1 ERROR=0`).
 - **Seule alerte attendue** : `alerte_rupture_serie_change`, car le rouble n'est plus coté par la BCE depuis 2022.
 
 ### Étape 4 — Python : calculer les prévisions *(1 min)*

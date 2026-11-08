@@ -27,12 +27,6 @@ table mart_liquidite_placement
 		summarizeBy: none
 		sourceColumn: code_devise
 
-	column regime_change
-		dataType: string
-		lineageTag: 6455a85c564b907896ef
-		summarizeBy: none
-		sourceColumn: regime_change
-
 	column position_cloture_eur
 		dataType: double
 		formatString: #,0

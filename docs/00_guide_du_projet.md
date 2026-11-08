@@ -89,6 +89,7 @@ Il existe deux jeux de données, avec les mêmes défauts et les mêmes totaux :
 | `03_IBI_AMOA_FICHE_EXPERTISE_…` | Fiche d'expertise corrigée |
 | `04_IBI_SUPPORT_SOUTENANCE_…` | Diapos de soutenance, avec notes orateur |
 | `05_IBI_MOE_POC_…` | Rendu MOE du POC |
+| `05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx` | Dictionnaire de données : une ligne par colonne, pour les 52 tables |
 | `IBI_AMOA_REPONSE_APPEL_OFFRES_…` | Réponse à l'appel d'offres |
 | `IBI_AMOA_WEBOGRAPHIE_…` | Liste des sources |
 
@@ -208,7 +209,7 @@ En panique, trouver cet argent coûterait 481 M€ par an, dont 162 M€ dus à 
 - **Nettoyage** : 42,7 M de lignes reçues, 40,7 M retenues. Les 1,9 M de lignes rejetées (4,5 %) gardent leur motif, et la plupart sont des doublons.
 - **Rapprochement** : chaque jour et pour chaque filiale, les crédits, les débits et le nombre d'opérations égalent le grand livre.
 - **Ancrage** : l'encours reconstitué égale les dépôts publiés sur 481 dates.
-- **Tests** : 97 tests automatiques, 0 erreur, une alerte attendue sur le rouble.
+- **Tests** : 104 tests automatiques, 0 erreur, une alerte attendue sur le rouble.
 
 ## 8. Les modèles de prévision
 
@@ -232,6 +233,8 @@ Deux simulations complètent ces modèles :
 |---|---|
 | **Bronze, Silver, Gold** | Données brutes, nettoyées, prêtes pour l'analyse |
 | **ELT** | On charge d'abord, on transforme ensuite dans l'entrepôt |
+| **Dimension** | Table de contexte : qui, quoi, quand, où (filiale, devise, date, scénario). Elle ne contient aucun montant |
+| **Fait** | Table de mesures : combien (flux, position, VaR…), reliée aux dimensions par des clés. Préfixe `fct_` (fait de base) ou `mart_` (fait dérivé) |
 | **Grain** | Ce que représente une ligne d'une table, par exemple un jour et une filiale |
 | **Semi-additif** | Un stock : on lit le dernier jour, on n'additionne pas les jours entre eux |
 | **Periodic snapshot** | Une photo prise à intervalle régulier, ici chaque jour |
@@ -252,6 +255,9 @@ Deux simulations complètent ces modèles :
 | **Backtest** | Tester un modèle sur une période passée qu'il n'a pas vue |
 
 ## 10. Les questions probables du prof
+
+**Quelle différence entre vos dimensions et vos faits ?**
+Les dimensions décrivent le contexte : qui (la filiale), quoi (la devise, le type d'opération, le scénario), quand (la date), où (le pays). Les faits contiennent les chiffres : combien. Aucune dimension ne contient de montant : le nombre de clients et l'encours de départ, d'abord rangés dans `dim_filiale`, sont dans le fait `fct_situation_initiale_filiale`, et un test dbt les empêche d'y revenir.
 
 **Vos données sont-elles réelles ?**
 En partie. Les dépôts, les taux, le change et les jours fériés sont réels. Les opérations sont simulées, car aucune banque ne les publie, mais leur cumul retombe sur les vrais dépôts.

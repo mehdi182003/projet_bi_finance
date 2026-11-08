@@ -46,11 +46,17 @@ Les règles de **nettoyage des exports bruts** (RG-NET-01 à 11), le dictionnair
 | RG-COU-02 | Rapport coût / risque de la couverture = (taux local − taux BCE) / volatilité ; recommandation par devise | `mart_exposition_change` |
 | RG-COU-01 | Coût de couverture ≈ exposition × (taux local − taux BCE) (parité des taux d'intérêt) | idem |
 | RG-STR-01..05 | Chocs de change, de retraits, de sorties et de taux → horizon de survie | `mart_stress_test` |
+| RG-MOD-01 | Une dimension décrit le contexte (qui, quoi, quand, où) et ne porte aucune mesure ; les nombres sont dans les tables de faits | `dim_*`, test `assert_dimensions_sans_mesure` |
 | RG-PRV-01 | Projection convertie en EUR au cours d'arrêté (change constant) | `mart_prevision_tresorerie` |
 
 Toutes les hypothèses numériques sont des **variables dbt** (`dbt_project.yml`) ou des **seeds CSV** : on les modifie sans toucher au code.
 
 ## 3. Dictionnaire des principales tables (`marts`)
+
+Dictionnaire complet, une ligne par colonne (52 tables, 627 colonnes) : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_BI-predictive-Finance_G5.xlsx` (`python docs/dictionnaire/generer_dictionnaire.py`).
+
+### Dimensions : le contexte (qui, quoi, quand, où), sans aucune mesure (RG-MOD-01)
+`dim_date` (quand), `dim_filiale` (qui, où : identité, pays, région, devise, système source, fuseau horaire, source des dépôts), `dim_devise` (quelle monnaie), `dim_type_transaction` (quelle opération), `dim_scenario_stress` (quelle crise : nom, crise de référence).
 
 ### fct_flux_tresorerie_horaire — grain : heure × filiale × type × fraude × gros ticket
 | Colonne | Description |
@@ -68,12 +74,15 @@ Flux du jour, `cible_reserve_mois_devise`, `position_ouverture_devise`, `positio
 ### fct_taux_change — grain : jour × devise
 `taux_eur` (unités pour 1 €), `valeur_eur_par_unite`, `est_taux_publie`, `jours_depuis_publication`, `variation_jour_pct`, `volatilite_annualisee_pct`, `est_rupture_serie`.
 
-### Tables d'analyse
-`mart_exposition_change` (jour × devise), `mart_liquidite_placement` (jour × filiale), `mart_stress_test` (scénario × filiale), `mart_qualite_ancrage` (réel publié vs reconstitué), `mart_prevision_tresorerie`, `mart_prevision_change`, `mart_backtest_journalier`, `mart_reserve_optimale` (réserve requise P99), `mart_controle_a_posteriori` (prévision vs dépôts réels de janvier 2026).
+### fct_situation_initiale_filiale — grain : filiale au 31/12/2022
+`part_de_marche_depots_pct`, `taux_reserve_liquidite_pct`, `nb_clients`, `taux_eur_reference`, `encours_depots_initial_devise/_eur`, `reserve_liquidite_initiale_devise/_eur`. Ces nombres étaient dans `dim_filiale` avant la revue du 05/11/2026.
 
-Le dictionnaire complet et le graphe de lineage s'obtiennent avec `dbt docs generate && dbt docs serve`.
+### Faits dérivés (`mart_`)
+Ce sont aussi des tables de faits : `mart_exposition_change` (jour × devise), `mart_liquidite_placement` (jour × filiale), `mart_stress_test` (scénario × filiale), `mart_qualite_ancrage` (réel publié vs reconstitué), `mart_prevision_tresorerie`, `mart_prevision_change`, `mart_backtest_journalier`, `mart_reserve_optimale` (réserve requise P99), `mart_controle_a_posteriori` (prévision vs dépôts réels de janvier 2026).
 
-## 4. Plan de tests (97 tests dbt)
+Le graphe de lineage s'obtient avec `dbt docs generate && dbt docs serve`.
+
+## 4. Plan de tests (104 tests dbt)
 
 | Famille | Exemples |
 |---|---|

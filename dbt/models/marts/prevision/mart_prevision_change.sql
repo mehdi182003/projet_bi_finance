@@ -7,7 +7,7 @@ with historique as (
            taux_eur as taux_p50, taux_eur as taux_p05, taux_eur as taux_p95,
            taux_eur as taux_realise
     from {{ ref('fct_taux_change') }}
-    where regime_change = 'flottant'
+    where code_devise in (select code_devise from {{ ref('dim_devise') }} where regime_change = 'flottant')
       and taux_eur is not null
       and date_cours <= (select max(date_arrete) from {{ source('ml', 'prevision_change') }})
       and date_cours >  (select max(date_arrete) from {{ source('ml', 'prevision_change') }}) - 180

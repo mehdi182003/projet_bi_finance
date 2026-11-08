@@ -66,7 +66,6 @@ select
     date_position,
     code_filiale,
     code_devise,
-    regime_change,
     position_cloture_eur,
     encours_depots_eur,
     flux_net_moyen_eur,
