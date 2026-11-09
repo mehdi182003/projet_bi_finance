@@ -53,7 +53,7 @@ Toutes les hypothèses numériques sont des **variables dbt** (`dbt_project.yml`
 
 ## 3. Dictionnaire des principales tables (`marts`)
 
-Dictionnaire complet, une ligne par colonne (52 tables, 627 colonnes) : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_BI-predictive-Finance_G5.xlsx` (`python docs/dictionnaire/generer_dictionnaire.py`).
+Dictionnaire complet, une ligne par colonne (20 tables du schéma en étoile, 255 colonnes) : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_BI-predictive-Finance_G5.xlsx` (`python docs/dictionnaire/generer_dictionnaire.py`).
 
 ### Dimensions : le contexte (qui, quoi, quand, où), sans aucune mesure (RG-MOD-01)
 `dim_date` (quand), `dim_filiale` (qui, où : identité, pays, région, devise, système source, fuseau horaire, source des dépôts), `dim_devise` (quelle monnaie), `dim_type_transaction` (quelle opération), `dim_scenario_stress` (quelle crise : nom, crise de référence).
@@ -75,7 +75,7 @@ Flux du jour, `cible_reserve_mois_devise`, `position_ouverture_devise`, `positio
 `taux_eur` (unités pour 1 €), `valeur_eur_par_unite`, `est_taux_publie`, `jours_depuis_publication`, `variation_jour_pct`, `volatilite_annualisee_pct`, `est_rupture_serie`.
 
 ### fct_situation_initiale_filiale — grain : filiale au 31/12/2022
-`part_de_marche_depots_pct`, `taux_reserve_liquidite_pct`, `nb_clients`, `taux_eur_reference`, `encours_depots_initial_devise/_eur`, `reserve_liquidite_initiale_devise/_eur`. Ces nombres étaient dans `dim_filiale` avant la revue du 05/11/2026.
+`part_de_marche_depots_pct`, `taux_reserve_liquidite_pct`, `taux_eur_reference`, `encours_depots_initial_devise/_eur`, `reserve_liquidite_initiale_devise/_eur`. Ces nombres étaient dans `dim_filiale` avant la revue du 05/11/2026. Le nombre de clients, qui ne servait à aucun indicateur, a été retiré.
 
 ### Faits dérivés (`mart_`)
 Ce sont aussi des tables de faits : `mart_exposition_change` (jour × devise), `mart_liquidite_placement` (jour × filiale), `mart_stress_test` (scénario × filiale), `mart_qualite_ancrage` (réel publié vs reconstitué), `mart_prevision_tresorerie`, `mart_prevision_change`, `mart_backtest_journalier`, `mart_reserve_optimale` (réserve requise P99), `mart_controle_a_posteriori` (prévision vs dépôts réels de janvier 2026).

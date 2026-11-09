@@ -89,7 +89,7 @@ Il existe deux jeux de données, avec les mêmes défauts et les mêmes totaux :
 | `03_IBI_AMOA_FICHE_EXPERTISE_…` | Fiche d'expertise corrigée |
 | `04_IBI_SUPPORT_SOUTENANCE_…` | Diapos de soutenance, avec notes orateur |
 | `05_IBI_MOE_POC_…` | Rendu MOE du POC |
-| `05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx` | Dictionnaire de données : une ligne par colonne, pour les 52 tables |
+| `05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx` | Dictionnaire de données : une ligne par colonne, pour les 20 tables du schéma en étoile |
 | `IBI_AMOA_REPONSE_APPEL_OFFRES_…` | Réponse à l'appel d'offres |
 | `IBI_AMOA_WEBOGRAPHIE_…` | Liste des sources |
 
@@ -257,7 +257,10 @@ Deux simulations complètent ces modèles :
 ## 10. Les questions probables du prof
 
 **Quelle différence entre vos dimensions et vos faits ?**
-Les dimensions décrivent le contexte : qui (la filiale), quoi (la devise, le type d'opération, le scénario), quand (la date), où (le pays). Les faits contiennent les chiffres : combien. Aucune dimension ne contient de montant : le nombre de clients et l'encours de départ, d'abord rangés dans `dim_filiale`, sont dans le fait `fct_situation_initiale_filiale`, et un test dbt les empêche d'y revenir.
+Les dimensions décrivent le contexte : qui (la filiale), quoi (la devise, le type d'opération, le scénario), quand (la date), où (le pays). Les faits contiennent les chiffres : combien. Aucune dimension ne contient de montant : l'encours et la réserve de départ, d'abord rangés dans `dim_filiale`, sont dans le fait `fct_situation_initiale_filiale`, et un test dbt les empêche d'y revenir. Le nombre de clients, qui ne servait à aucun indicateur, a été retiré.
+
+**Il reste pourtant des nombres dans vos dimensions ?**
+Oui, trois, mais ce ne sont pas des quantités à additionner : la parité fixe du franc CFA (655,957 pour 1 euro, une constante), le sens d'un type d'opération (+1 pour une entrée, −1 pour une sortie) et l'ordre d'affichage des filiales et des scénarios.
 
 **Vos données sont-elles réelles ?**
 En partie. Les dépôts, les taux, le change et les jours fériés sont réels. Les opérations sont simulées, car aucune banque ne les publie, mais leur cumul retombe sur les vrais dépôts.

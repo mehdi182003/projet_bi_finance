@@ -10,11 +10,11 @@ PostgreSQL et y associe ces descriptions. Une colonne présente en base sans des
 """
 
 # --------------------------------------------------------------------------------------- tables
-# type : Dimension / Fait (…) / Référentiel / Table brute / Vue de nettoyage / Table intermédiaire /
-#        Sortie de modèle. « question » reprend la distinction du cours : les dimensions répondent à
-#        qui / quoi / quand / où, les faits à « combien ».
+# type : Dimension ou type de fait (instantané, agrégé, prévision…).
+# « question » reprend la distinction du cours : les dimensions répondent à
+# qui / quoi / quand / où, les faits à « combien ».
 TABLES = {
-    # ===== Couche or : schéma en étoile (marts)
+    # ===== Schéma en étoile (marts, couche Gold) : 5 dimensions et 15 tables de faits
     "marts.dim_date": dict(
         type="Dimension", question="Quand ?", grain="1 ligne = 1 jour calendaire",
         description="Calendrier en français, partagé par tous les faits (dimension conforme). Couvre "
@@ -52,7 +52,7 @@ TABLES = {
         type="Fait instantané (situation de départ)", question="Combien ? (point de départ)",
         grain="1 ligne = 1 filiale au 31/12/2022",
         description="Chiffres de départ et paramètres de pilotage de chaque filiale : part de marché, "
-                    "taux de réserve cible, nombre de clients, encours de dépôts et réserve initiaux. "
+                    "taux de réserve cible, encours de dépôts et réserve initiaux. "
                     "Ces nombres étaient auparavant dans dim_filiale (règle RG-MOD-01)."),
     "marts.fct_taux_change": dict(
         type="Fait instantané périodique", question="Combien ? (cours, volatilité)",
@@ -105,113 +105,6 @@ TABLES = {
         grain="1 ligne = 1 origine x 1 filiale x 1 série x 1 modèle x 1 jour",
         description="Valeurs réelles et prévues jour par jour sur les 3 mois de backtest, pour les 3 "
                     "modèles comparés. Sert au calcul de l'erreur de prévision (WAPE)."),
-    # ===== Prédictif (ml) : sorties Python, reprises par les marts de prévision
-    "ml.backtest_prevision": dict(
-        type="Sortie de modèle", question="Combien ? (réel / prévu)", grain="1 ligne = 1 origine x 1 filiale x 1 série x 1 modèle x 1 jour",
-        description="Résultats bruts du backtest des 3 modèles (etl/prevision.py), en devise locale."),
-    "ml.controle_depots_reels": dict(
-        type="Sortie de modèle", question="Combien ? (écart prévision / réel)", grain="1 ligne = 1 filiale x 1 date de contrôle",
-        description="Résultat du contrôle a posteriori (etl/controle_a_posteriori.py)."),
-    "ml.prevision_change": dict(
-        type="Sortie de modèle", question="Combien ? (cours prévu)", grain="1 ligne = 1 jour prévu x 1 devise",
-        description="Fourchette de prévision des cours de change (mouvement brownien géométrique)."),
-    "ml.prevision_tresorerie_quotidienne": dict(
-        type="Sortie de modèle", question="Combien ? (position prévue)", grain="1 ligne = 1 jour prévu x 1 filiale",
-        description="Quantiles de la simulation Monte-Carlo (1 000 trajectoires) des flux, de la position "
-                    "et des dépôts pour janvier 2026."),
-    "ml.reserve_optimale": dict(
-        type="Sortie de modèle", question="Combien ? (réserve requise)", grain="1 ligne = 1 filiale",
-        description="Réserve requise à 99 % issue de la simulation, liquidité libérable et gain annuel."),
-    # ===== Référentiels (seeds dbt)
-    "referentiel.ref_filiales": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 filiale",
-        description="Paramétrage des filiales (fichier dbt/seeds/ref_filiales.csv) : identité, devise, "
-                    "hypothèses (part de marché, taux de réserve), système source, fuseau horaire."),
-    "referentiel.ref_devises": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 devise",
-        description="Paramétrage des devises (régime de change, parité fixe, banque centrale)."),
-    "referentiel.ref_types_transaction": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 type d'opération",
-        description="Types d'opérations normalisés et leur sens de trésorerie."),
-    "referentiel.ref_scenarios_stress": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 scénario",
-        description="Paramétrage des 7 scénarios de stress : chocs par devise, choc de retraits, choc de "
-                    "taux, multiplicateur de sorties, crise de référence."),
-    "referentiel.ref_taux_directeurs": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 devise x 1 date de changement de taux",
-        description="Historique des taux directeurs réels des banques centrales (sources officielles)."),
-    "referentiel.ref_correspondance_libelles": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 libellé normalisé d'un système",
-        description="Table de correspondance libellé source vers type d'opération (RG-NET-05), y compris "
-                    "les libellés à l'encodage cassé."),
-    "referentiel.ref_correspondance_devises": dict(
-        type="Référentiel", question="Paramétrage", grain="1 ligne = 1 écriture de devise rencontrée",
-        description="Table de correspondance des écritures de devise vers le code ISO (RG-NET-06)."),
-    # ===== Couche bronze (raw) : données telles que reçues
-    "raw.src_sab": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 ligne d'export SAB",
-        description="Exports bruts du système SAB (France, Benelux, Finlande), chargés tels quels en texte."),
-    "raw.src_nordic": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 ligne d'export NORDIC",
-        description="Exports bruts du système NORDIC (Suède, Danemark, Norvège), chargés tels quels en texte."),
-    "raw.src_americore": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 ligne d'export AMERICORE",
-        description="Exports bruts du système AMERICORE (Canada, États-Unis), chargés tels quels en texte."),
-    "raw.src_delta": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 ligne d'export DELTA",
-        description="Exports bruts du système DELTA (Côte d'Ivoire, Cameroun), chargés tels quels en texte."),
-    "raw.soldes_comptables": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 filiale x 1 jour",
-        description="Totaux journaliers du grand livre (source indépendante) servant au rapprochement comptable."),
-    "raw.ancrages_zf": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 filiale x 1 date publiée",
-        description="Dépôts à vue réels publiés par les banques centrales, ramenés à l'échelle de ZF Banque."),
-    "raw.bce_taux_change": dict(
-        type="Table brute", question="Données reçues", grain="1 ligne = 1 jour x 1 devise",
-        description="Cours de référence de la BCE (export Webstat de la Banque de France)."),
-    "raw.journal_chargement": dict(
-        type="Table technique", question="Traçabilité", grain="1 ligne = 1 fichier chargé",
-        description="Journal du chargement incrémental : empreinte MD5, lignes lues et annoncées par fichier."),
-    # ===== Couche argent : staging (vues) et intermediate
-    "staging.stg_sab__operations": dict(
-        type="Vue de nettoyage", question="Données typées", grain="1 ligne = 1 ligne brute SAB",
-        description="Opérations SAB typées : dates multi-formats, montants à virgule, sens C/D, codes entité."),
-    "staging.stg_nordic__operations": dict(
-        type="Vue de nettoyage", question="Données typées", grain="1 ligne = 1 ligne brute NORDIC",
-        description="Opérations NORDIC typées : heures UTC converties, montants signés, öre divisés par 100."),
-    "staging.stg_americore__operations": dict(
-        type="Vue de nettoyage", question="Données typées", grain="1 ligne = 1 ligne brute AMERICORE",
-        description="Opérations AMERICORE typées : dates MM/JJ/AAAA AM/PM, colonnes débit / crédit, "
-                    "format comptable et symboles de devise retirés."),
-    "staging.stg_delta__operations": dict(
-        type="Vue de nettoyage", question="Données typées", grain="1 ligne = 1 ligne brute DELTA",
-        description="Opérations DELTA typées : dates aaaammjj, sens déduit de la nature, filiale lue dans "
-                    "le nom du fichier."),
-    "staging.stg_bce__taux_change": dict(
-        type="Vue de nettoyage", question="Données typées", grain="1 ligne = 1 jour x 1 devise",
-        description="Cours de référence BCE typés."),
-    "staging.stg_zf__ancrages": dict(
-        type="Vue de nettoyage", question="Données typées", grain="1 ligne = 1 filiale x 1 date publiée",
-        description="Dépôts réels ramenés à l'échelle de ZF Banque, typés."),
-    "intermediate.int_operations_controlees": dict(
-        type="Table intermédiaire", question="Contrôle", grain="1 ligne = 1 ligne brute (des 4 systèmes)",
-        description="Union des 4 systèmes avec toutes les règles de nettoyage appliquées et le motif de "
-                    "rejet éventuel : aucune ligne n'est supprimée en silence."),
-    "intermediate.int_operations_nettoyees": dict(
-        type="Table intermédiaire", question="Données propres", grain="1 ligne = 1 lot d'opérations retenu",
-        description="Opérations retenues après nettoyage (sans motif de rejet)."),
-    "intermediate.int_operations_rejetees": dict(
-        type="Table intermédiaire", question="Contrôle", grain="1 ligne = 1 ligne brute écartée",
-        description="Lignes écartées par le nettoyage, avec leur motif."),
-    "intermediate.int_mouvements_tresorerie": dict(
-        type="Table intermédiaire", question="Données propres", grain="1 ligne = 1 mouvement de trésorerie (lot)",
-        description="Opérations retenues converties en mouvements de trésorerie signés, en devise et en euros."),
-    "intermediate.int_taux_change_journalier": dict(
-        type="Table intermédiaire", question="Données propres", grain="1 ligne = 1 jour calendaire x 1 devise",
-        description="Cours quotidiens complétés : week-ends et jours fériés reportés, parités fixes et euro ajoutés."),
-    "intermediate.int_encours_initial": dict(
-        type="Table intermédiaire", question="Données propres", grain="1 ligne = 1 filiale",
-        description="Situation de départ de chaque filiale au 31/12/2022 (encours, réserve, clients)."),
 }
 
 # ------------------------------------------------------------------------------ colonnes communes
@@ -232,8 +125,6 @@ COMMUNES = {
     "source_depots": "Source officielle des dépôts réels de la filiale (banque centrale et série).",
     "profil_paie": "Profil du calendrier de paie et de prélèvements utilisé par la génération des flux.",
     "fuseau_horaire": "Fuseau horaire de la filiale (heure locale des opérations).",
-    "code_calendrier": "Code pays du calendrier des jours fériés.",
-    "code_entite_source": "Code de l'entité dans le système source (ex. ZF-FR, SE01).",
     "banque_centrale": "Banque centrale de la devise.",
     "zone_monetaire": "Zone monétaire de la devise.",
     "remarque": "Commentaire sur la devise.",
@@ -249,60 +140,24 @@ COMMUNES = {
     "date_operation": "Jour local de l'opération (clé vers dim_date).",
     "date_cours": "Jour de cotation du cours de change (clé vers dim_date).",
     "date_arrete": "Date d'arrêté des données utilisées pour le calcul (31/12/2025).",
-    "date_calcul": "Date et heure d'exécution du calcul Python (traçabilité).",
     "date_controle": "Date à laquelle la prévision est comparée au réel (31/01/2026).",
-    "date_prevision": "Jour prévu.",
-    "date_ancrage": "Date de publication des dépôts réels par la banque centrale.",
     "origine": "Date d'origine du backtest : dernier jour connu avant la période prévue.",
-    "horodatage": "Date et heure locales de l'opération (fuseau de la filiale).",
-    "heure_operation": "Date et heure de l'opération tronquées à l'heure pleine.",
     "mois": "Mois concerné (premier jour du mois).",
-    # traçabilité
-    "nom_fichier": "Nom du fichier d'export dont provient la ligne (traçabilité).",
-    "num_ligne": "Numéro de la ligne dans le fichier d'export (traçabilité).",
-    "_fichier": "Nom du fichier d'export chargé (traçabilité).",
-    "_ligne": "Numéro de la ligne dans le fichier d'export (traçabilité).",
-    "_date_chargement": "Date et heure du chargement dans la zone brute.",
-    "id_ligne_source": "Identifiant technique de la ligne brute (système, fichier, ligne).",
-    "source": "Source de la donnée (organisme et série).",
     # opérations (staging / intermediate)
-    "ref_operation": "Référence de l'opération dans le système source, sans espaces de bord.",
-    "libelle_source": "Libellé de l'opération tel que reçu (texte libre du système source).",
-    "libelle_normalise": "Libellé en majuscules, sans accents ni espaces superflus, prêt pour la correspondance (RG-NET-05).",
-    "nb_operations": "Nombre d'opérations réelles représentées par la ligne (1 ligne = 1 lot d'opérations).",
-    "montant_unitaire_devise": "Montant d'une opération du lot, positif, en devise locale, après correction du format (RG-NET-04).",
-    "montant_devise": "Montant total du lot (montant unitaire x nombre d'opérations), en devise locale.",
-    "montant_eur": "Montant total du lot converti en euros au cours du jour.",
-    "sens_source": "Sens lu dans la source : +1 entrée d'argent, -1 sortie.",
-    "devise_source": "Devise telle que reçue, non normalisée (ex. €, eur, FCFA).",
-    "client_source": "Identifiant client tel que reçu (peut être vide ou codé NULL, N/A, ?, 0000000).",
-    "statut_source": "Statut de l'opération dans la source (VALIDE, ANNULE, BOOKED, REVERSAL, PENDING…).",
-    "reference_extournee": "Référence de l'opération annulée par cette extourne (NORDIC).",
     "est_fraude": "Vrai si l'opération est signalée comme suspecte de fraude (indicateur vide = non suspect, RG-NET-11).",
-    "est_compte_test": "Vrai si le compte est un compte de test (exclu, RG-NET-08).",
-    "est_heure_convertie_utc": "Vrai si l'heure a été convertie d'UTC vers l'heure locale (RG-NET-03).",
-    "est_montant_unites_mineures": "Vrai si le montant était en unités mineures (öre) et a été divisé par 100.",
-    "est_format_corrige": "Vrai si un format a dû être corrigé (espace insécable, format comptable, symbole de devise, code entité…).",
     "est_gros_ticket": "Vrai si le montant unitaire de l'opération dépasse 10 000 EUR.",
-    "id_client": "Identifiant client normalisé <FILIALE>-<7 chiffres> ; <FILIALE>-INCONNU si absent ou codé nul (RG-NET-09).",
-    "motif_rejet": "Motif d'écartement de la ligne (Doublon, Opération annulée, Compte de test, Extourne…) ; vide si la ligne est retenue.",
     # change
     "taux_eur": "Cours de change : unités de la devise pour 1 euro (cours de référence BCE ; parité fixe pour les francs CFA).",
     "volatilite_annualisee_pct": "Volatilité annuelle du cours (écart-type des variations quotidiennes x racine de 252).",
     # paramètres de filiale
     "part_de_marche_depots_pct": "Part de marché supposée de ZF Banque dans les dépôts à vue du pays (hypothèse).",
     "taux_reserve_liquidite_pct": "Taux de réserve de liquidité cible de la filiale, en % des dépôts (politique actuelle).",
-    "nb_clients": "Nombre de clients distincts observés dans les opérations retenues (2023-2025).",
     "encours_depots_initial_devise": "Encours de dépôts au 31/12/2022 = dépôts réels du pays x part de marché (RG-POS-01).",
     "reserve_liquidite_initiale_devise": "Réserve de liquidité au 31/12/2022 = encours initial x taux de réserve cible (RG-POS-02).",
     # stress
     "choc_retraits_pct": "Part des dépôts retirés immédiatement dans le scénario.",
     "choc_taux_bp": "Hausse du coût de refinancement dans le scénario, en points de base (100 pb = 1 point de %).",
     "multiplicateur_sorties": "Coefficient appliqué aux décaissements quotidiens dans le scénario (1 = normal).",
-    "choc_change_usd_pct": "Variation du dollar US face à l'euro dans le scénario.",
-    "choc_change_cad_pct": "Variation du dollar canadien face à l'euro dans le scénario.",
-    "choc_change_cfa_pct": "Variation des francs CFA face à l'euro dans le scénario (dévaluation).",
-    "choc_change_nordiques_pct": "Variation des couronnes suédoise et norvégienne face à l'euro dans le scénario.",
     # prévision
     "serie": "Série prévue : encaissements ou décaissements.",
     "modele": "Modèle de prévision : naïf hebdomadaire, Holt-Winters ou régression calendaire.",
@@ -315,7 +170,6 @@ COMMUNES = {
     "liquidite_liberable_eur": "Liquidité libérable (> 0, sur-réserve) ou à lever (< 0), en euros.",
     "gain_annuel_eur": "Gain annuel si la liquidité libérable est placée au taux directeur (négatif : coût du complément).",
     "proba_sous_100_politique_actuelle": "Probabilité de passer sous 100 % de liquidité le mois suivant avec la réserve actuelle.",
-    "encours_depots_devise": "Encours de dépôts à vue de la filiale, en devise locale.",
     "depots_reels_devise": "Dépôts réels publiés par la banque centrale, ramenés à la part de marché, en devise locale.",
     "depots_p05_devise": "Dépôts prévus, bas de la fourchette (P5), en devise locale.",
     "depots_p50_devise": "Dépôts prévus, milieu de la fourchette (P50), en devise locale.",
@@ -323,7 +177,6 @@ COMMUNES = {
     "erreur_p50_pct": "Écart entre la prévision centrale (P50) et les dépôts réels, en % du réel.",
     "dans_intervalle_90": "Vrai si les dépôts réels tombent dans la fourchette P5-P95.",
     "taux_p05": "Cours prévu, bas de la fourchette (P5), en unités de devise pour 1 euro.",
-    "taux_p50": "Cours prévu, milieu de la fourchette (P50), en unités de devise pour 1 euro.",
     "taux_p95": "Cours prévu, haut de la fourchette (P95), en unités de devise pour 1 euro.",
     "proba_sous_besoin_liquidite": "Probabilité que la position passe sous le besoin de liquidité (10 % des dépôts) ce jour-là.",
 }
@@ -519,120 +372,4 @@ COLONNES = {
         "reel_eur": "Montant réel du jour, en euros (sert au WAPE du groupe).",
         "prevu_eur": "Montant prévu, en euros.",
     },
-    # ---- ml
-    "backtest_prevision": {"reel": "Montant réel du jour, en devise locale.", "prevu": "Montant prévu, en devise locale."},
-    "controle_depots_reels": {"source": "Source des dépôts réels publiés."},
-    "prevision_change": {
-        "taux_depart": "Cours à la date d'arrêté, point de départ de la simulation.",
-        "volatilite_annuelle_pct": "Volatilité annuelle utilisée pour la simulation (250 dernières cotations).",
-        "methode": "Méthode de simulation utilisée.",
-    },
-    "prevision_tresorerie_quotidienne": {
-        "flux_net_p05_devise": "Flux net prévu, bas de la fourchette (P5), en devise.",
-        "flux_net_p50_devise": "Flux net prévu, milieu (P50), en devise.",
-        "flux_net_p95_devise": "Flux net prévu, haut de la fourchette (P95), en devise.",
-        "position_p05_devise": "Position prévue, bas de la fourchette (P5), en devise.",
-        "position_p50_devise": "Position prévue, milieu (P50), en devise.",
-        "position_p95_devise": "Position prévue, haut de la fourchette (P95), en devise.",
-        "modele_encaissements": "Modèle champion retenu pour les encaissements.",
-        "modele_decaissements": "Modèle champion retenu pour les décaissements.",
-        "methode_simulation": "Méthode de simulation (Monte-Carlo par blocs d'erreurs + choc mensuel).",
-    },
-    "reserve_optimale": {"encours_depots_devise": "Encours de dépôts à la date d'arrêté, en devise locale."},
-    # ---- référentiels
-    "ref_correspondance_devises": {
-        "valeur_normalisee": "Écriture de devise rencontrée dans les exports, normalisée (ex. €, FCFA, F CFA).",
-        "est_code_iso": "Vrai si l'écriture est déjà le code ISO.",
-    },
-    "ref_correspondance_libelles": {
-        "est_libelle_officiel": "Vrai si le libellé est la forme officielle du système (sinon variante corrigée).",
-    },
-    "ref_taux_directeurs": {
-        "libelle_taux": "Nom du taux directeur (ex. taux de la facilité de dépôt de la BCE).",
-        "date_effet": "Date d'entrée en vigueur du taux.",
-        "a_verifier": "Vrai si la valeur est déduite et reste à confirmer (BCEAO, décembre 2022).",
-    },
-    "ref_types_transaction": {
-        "sens_jambe_emetteur": "Sens pour le compte de la filiale : +1 entrée d'argent, -1 sortie.",
-        "genere_jambe_beneficiaire": "Vrai si l'opération crée aussi une écriture chez le bénéficiaire.",
-    },
-    # ---- raw
-    "src_sab": {
-        "ref_ope": "Référence d'opération, parfois avec espaces de bord.", "code_etab": "Code de l'entité (ZF-FR, ZF-BE, ZF-FI).",
-        "date_ope": "Date jj/mm/aaaa, puis aaaa-mm-jj après la migration de juillet 2024.", "heure_ope": "Heure hh:mm:ss.",
-        "num_client": "Identifiant client, parfois vide ou codé NULL, N/A, ?, 0000000.",
-        "libelle_ope": "Libellé libre en français, avec variantes.", "nb_ope": "Nombre d'opérations du lot.",
-        "montant": "Montant positif, virgule décimale, parfois espace insécable (fichiers retouchés sous Excel).",
-        "sens": "C crédit (entrée) ou D débit (sortie).", "devise": "Devise non normalisée (EUR, €, eur…).",
-        "ind_fraude": "O ou N.", "statut": "VALIDE ou ANNULE.",
-    },
-    "src_nordic": {
-        "txn_id": "Référence d'opération.", "entity": "Code entité, casse variable (SE01, se01…).",
-        "booking_ts": "Horodatage ISO 8601 en UTC.", "customer_ref": "Identifiant client.",
-        "txn_type": "Code anglais du type d'opération, casse variable.", "txn_count": "Nombre d'opérations du lot.",
-        "amount": "Montant signé.", "amount_unit": "MINOR si le montant est en öre (Suède), sinon vide.",
-        "currency_code": "Devise non normalisée.", "fraud_flag": "Indicateur de fraude.",
-        "record_status": "BOOKED, REVERSAL ou PENDING (pré-autorisation carte).",
-        "reversal_of": "Référence de l'écriture extournée.",
-        "channel": "Canal (CARD, ATM, BATCH, ONLINE, BRANCH), colonne apparue en janvier 2025 (dérive de schéma).",
-    },
-    "src_americore": {
-        "txnref": "Référence d'opération.", "entity": "Code entité, casse variable.",
-        "txndate": "Date MM/JJ/AAAA.", "txntime": "Heure hh:mm:ss AM/PM.",
-        "accountno": "Numéro de compte (zéros de tête parfois perdus, comptes TEST-…).",
-        "txncode": "Code numérique du type (100 dépôt, 200 retrait, 210 carte…).", "description": "Libellé.",
-        "itemcount": "Nombre d'opérations du lot.",
-        "debitamount": "Montant au débit (séparateur de milliers, format comptable (…), symbole US$ / C$).",
-        "creditamount": "Montant au crédit (mêmes formats).", "currency": "Devise non normalisée.",
-        "fraudflag": "Indicateur de fraude.",
-    },
-    "src_delta": {
-        "numope": "Référence d'opération.", "dateope": "Date aaaammjj.", "heureope": "Heure hhmmss.",
-        "client": "Identifiant client.", "nature": "Libellé sans norme (accents, abréviations, encodage cassé).",
-        "nbope": "Nombre d'opérations du lot.", "montant": "Montant entier positif (sens déduit de la nature).",
-        "devise": "XOF, XAF, FCFA, F CFA, F.CFA.", "suspicion": "1, 0 ou vide.",
-    },
-    "soldes_comptables": {
-        "date_comptable": "Jour comptable.", "total_credits": "Total des crédits du jour au grand livre, en devise.",
-        "total_debits": "Total des débits du jour au grand livre, en devise.",
-        "nb_operations": "Nombre d'opérations du jour au grand livre.",
-    },
-    "ancrages_zf": {
-        "encours_zf_devise": "Dépôts réels du pays x part de marché de ZF Banque, en devise.",
-        "est_point_initial": "Vrai pour le point de départ du 31/12/2022.",
-        "est_interpole": "Vrai si la valeur a été interpolée (mois non publié).",
-    },
-    "bce_taux_change": {"taux": "Cours de référence BCE (unités de devise pour 1 euro)."},
-    "journal_chargement": {
-        "empreinte_md5": "Empreinte MD5 du fichier : un fichier inchangé n'est pas rechargé.",
-        "nb_lignes_lues": "Lignes de données lues dans le fichier.",
-        "nb_lignes_annoncees": "Lignes annoncées par le pied de fichier (DELTA).",
-        "total_annonce": "Total des montants annoncé par le pied de fichier (DELTA).",
-        "ligne_titre": "Ligne de titre du fichier (DELTA).",
-        "date_chargement": "Date et heure du chargement.",
-    },
-    # ---- staging / intermediate
-    "stg_bce__taux_change": {"source_taux": "Source du cours (Webstat ou fichier historique BCE)."},
-    "stg_zf__ancrages": {
-        "encours_zf_devise": "Dépôts réels du pays x part de marché de ZF Banque, en devise.",
-        "est_point_initial": "Vrai pour le point de départ du 31/12/2022.",
-        "est_interpole": "Vrai si la valeur a été interpolée.",
-    },
-    "int_operations_controlees": {
-        "est_libelle_standard": "Vrai si le libellé reçu était déjà la forme officielle.",
-        "sens_attendu": "Sens attendu pour le type d'opération (+1 / -1), pour contrôler la cohérence.",
-        "devise_filiale": "Devise de la filiale, pour contrôler la devise reçue.",
-        "est_devise_standard": "Vrai si la devise reçue était déjà le code ISO.",
-        "est_client_manquant": "Vrai si l'identifiant client était absent ou codé nul.",
-        "est_ecriture_extournee": "Vrai si l'écriture a été annulée par une extourne.",
-        "rang_occurrence": "Rang de la ligne parmi celles de même référence (1 = gardée, > 1 = doublon).",
-        "est_doublon": "Vrai si la ligne est un doublon (RG-NET-07).",
-    },
-    "int_mouvements_tresorerie": {"sens": "Sens de trésorerie : +1 entrée, -1 sortie (RG-SEN-01)."},
-    "int_taux_change_journalier": {
-        "id_groupe_publication": "Numéro du dernier cours publié (sert au report des week-ends et jours fériés).",
-        "est_taux_publie": "Vrai si la BCE a publié un cours ce jour-là.",
-        "jours_depuis_publication": "Nombre de jours depuis le dernier cours publié.",
-    },
-    "int_encours_initial": {"taux_reference": "Cours au 01/01/2023 (unités de devise pour 1 euro)."},
 }

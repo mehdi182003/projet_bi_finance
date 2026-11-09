@@ -114,10 +114,10 @@ models:
     meta:
       type_table: "fait instantané (situation de départ)"
       grain: "1 ligne = 1 filiale au 31/12/2022"
-      remarque: "EUR et nb_clients additifs entre filiales ; devise locale et % non additifs"
+      remarque: "montants EUR additifs entre filiales ; devise locale et % non additifs"
     description: >
       Chiffres de départ et paramètres de pilotage de chaque filiale (part de marché, taux de réserve
-      cible, nombre de clients, encours de dépôts et réserve initiaux). Sortis de dim_filiale (RG-MOD-01).
+      cible, encours de dépôts et réserve initiaux). Sortis de dim_filiale (RG-MOD-01).
     columns:
       - name: id_situation
         tests: [unique, not_null]
