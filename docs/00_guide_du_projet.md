@@ -106,6 +106,7 @@ Il existe deux jeux de données, avec les mêmes défauts et les mêmes totaux :
 | [07 Données sur 3 ans](07_donnees_3_ans.md) | Comment les données sont construites |
 | [08 ETL](08_etl_sources_et_nettoyage.md) | Le format des sources et les règles de nettoyage |
 | [09 Procédure](09_procedure_pas_a_pas.md) | Le lancement détaillé et le dépannage |
+| [Fiches par partie](fiches/00_repartition.md) | Le projet en 6 parties, une par membre, avec une fiche détaillée pour chacune |
 
 ## 5. Lancer le projet
 

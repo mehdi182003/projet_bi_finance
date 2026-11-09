@@ -4,6 +4,8 @@
 > Étude de cas IBI — Sujet 3 (BI prédictive Finance).
 
 > **Nouveau dans le projet ? Commencez par le [guide du projet](docs/00_guide_du_projet.md)** : ce que fait le projet, comment le lancer, les dossiers et les résultats expliqués.
+>
+> **Pour la soutenance**, le projet est découpé en 6 parties, une par membre du groupe, avec une fiche détaillée pour chacune : [docs/fiches](docs/fiches/00_repartition.md).
 
 Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout, des sources officielles jusqu'au cockpit Power BI de la Direction Financière, sur **3 ans (2023-2025) et 10 filiales**.
 
@@ -205,6 +207,7 @@ erDiagram
 ├── powerbi/                    générateur du projet, mesures DAX, thème, outil .NET TomTool
 ├── docs/                       guide du projet (00), documentation (01 à 08) et procédure de lancement (09)
 ├── docs/dictionnaire/          descriptions des colonnes + générateur du dictionnaire de données Excel
+├── docs/fiches/                une fiche détaillée par partie du projet (6 parties, une par membre)
 └── livrables/                  fiche d'expertise, webographie, réponse à l'appel d'offres, rendu POC et son dictionnaire de données, support de soutenance
 ```
 

@@ -121,6 +121,7 @@ Autres commandes utiles :
 | `powerbi/mesures_dax.dax` | **Source unique des mesures DAX** (lues par `generer_pbip.py`) |
 | `docs/dictionnaire/` | `descriptions.py` (description de chaque colonne) + `generer_dictionnaire.py` → dictionnaire Excel livré avec le MOE |
 | `docs/00_guide_du_projet.md` | **Guide pour l'équipe : projet, lancement, dossiers, résultats expliqués** |
+| `docs/fiches/` | **Le projet en 6 parties, une fiche détaillée par membre pour la soutenance** (`00_repartition.md` en tête) |
 | `docs/01` à `docs/08` | Cadrage AMOA, spécifications MOE, prédictif, Power BI, synthèse/SWOT, profil et KPI, données 3 ans, ETL |
 
 ## 6. Conventions
@@ -179,6 +180,8 @@ Autres commandes utiles :
 - [x] Webographie : `livrables/IBI_AMOA_WEBOGRAPHIE_…xlsx` (modèle Excel du cours non disponible : à reporter dessus si besoin).
 - [ ] Valider avec le groupe : le choix de Power BI, les notes de la grille de choix, le RACI, le TCO.
 - [x] Guide de l'équipe : `docs/00_guide_du_projet.md`.
+- [x] Fiches de soutenance, une par partie : `docs/fiches/` (09/11/2026).
+- [ ] Répartir les 6 parties entre les membres (tableau de `docs/fiches/00_repartition.md`).
 - [ ] Confirmer auprès du professeur que le gros volume est bien demandé (consigne absente des supports du cours).
 - [x] Revoir dimensions vs faits (retour du professeur, 05/11/2026) et livrer le dictionnaire Excel : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx`.
 - [x] Relancer le gros volume après la revue du 05/11 (09/11/2026 : 127 + 15 contrôles verts, chiffres inchangés, Power BI actualisé et 5 pages vérifiées).
