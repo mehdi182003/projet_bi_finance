@@ -182,4 +182,4 @@ Autres commandes utiles :
 - [ ] Confirmer auprès du professeur que le gros volume est bien demandé (consigne absente des supports du cours).
 - [x] Revoir dimensions vs faits (retour du professeur, 05/11/2026) et livrer le dictionnaire Excel : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx`.
 - [x] Relancer le gros volume après la revue du 05/11 (09/11/2026 : 127 + 15 contrôles verts, chiffres inchangés, Power BI actualisé et 5 pages vérifiées).
-- [ ] Fusionner la branche `moe/dimensions-faits-dictionnaire` dans `main`.
+- [x] Fusionner la branche `moe/dimensions-faits-dictionnaire` dans `main` (PR n° 1, 09/11/2026).
