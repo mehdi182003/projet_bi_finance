@@ -85,8 +85,6 @@ select
     md5(concat_ws('|', code_scenario, code_filiale))                            as id_stress,
     date_arrete,
     code_scenario,
-    libelle_scenario,
-    ordre_affichage,
     code_filiale,
     code_devise,
     choc_retraits_pct,

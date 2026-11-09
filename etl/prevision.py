@@ -254,7 +254,8 @@ def prevoir_change(engine, rng: np.random.Generator) -> pd.DataFrame:
         """
         select code_devise, date_cours, taux_eur
         from marts.fct_taux_change
-        where regime_change = 'flottant' and est_taux_publie and date_cours <= %(d)s
+        where code_devise in (select code_devise from marts.dim_devise where regime_change = 'flottant')
+          and est_taux_publie and date_cours <= %(d)s
         order by code_devise, date_cours
         """,
         engine, params={"d": date_arrete}, parse_dates=["date_cours"],

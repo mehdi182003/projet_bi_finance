@@ -19,48 +19,6 @@ table dim_scenario_stress
 		summarizeBy: none
 		sourceColumn: ordre_affichage
 
-	column choc_retraits_pct
-		dataType: double
-		lineageTag: 60315c3041f947883d41
-		summarizeBy: none
-		sourceColumn: choc_retraits_pct
-
-	column choc_change_usd_pct
-		dataType: double
-		lineageTag: 36a917ce40938bb8fb15
-		summarizeBy: none
-		sourceColumn: choc_change_usd_pct
-
-	column choc_change_cad_pct
-		dataType: double
-		lineageTag: 1b3a20defcc70cb4fdc8
-		summarizeBy: none
-		sourceColumn: choc_change_cad_pct
-
-	column choc_change_cfa_pct
-		dataType: double
-		lineageTag: 8e76b4d7f60bd8c6c33a
-		summarizeBy: none
-		sourceColumn: choc_change_cfa_pct
-
-	column choc_change_nordiques_pct
-		dataType: double
-		lineageTag: 1f27b4086dc0985d4b61
-		summarizeBy: none
-		sourceColumn: choc_change_nordiques_pct
-
-	column choc_taux_bp
-		dataType: double
-		lineageTag: f372ad024f71cbe9d0b0
-		summarizeBy: none
-		sourceColumn: choc_taux_bp
-
-	column multiplicateur_sorties
-		dataType: double
-		lineageTag: de1953cafd6747bf161d
-		summarizeBy: none
-		sourceColumn: multiplicateur_sorties
-
 	column reference_historique
 		dataType: string
 		lineageTag: 07c4740f6b18885b5a1f

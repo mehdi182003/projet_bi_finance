@@ -21,12 +21,6 @@ table mart_exposition_change
 		summarizeBy: none
 		sourceColumn: code_devise
 
-	column regime_change
-		dataType: string
-		lineageTag: d462882bb512b5c683f8
-		summarizeBy: none
-		sourceColumn: regime_change
-
 	column position_devise
 		dataType: double
 		formatString: #,0

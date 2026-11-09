@@ -44,7 +44,6 @@ select
     md5(concat_ws('|', date_cours, code_devise))                           as id_taux,
     date_cours,
     code_devise,
-    regime_change,
     taux_eur,
     case when taux_eur > 0 then 1 / taux_eur end                           as valeur_eur_par_unite,
     est_taux_publie,

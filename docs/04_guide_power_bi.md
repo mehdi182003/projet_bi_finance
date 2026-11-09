@@ -15,7 +15,7 @@ Le projet est produit par `powerbi/generer_pbip.py`, à partir de la structure r
 
 ## 2. Modèle
 
-Schéma en étoile : `dim_date`, `dim_filiale`, `dim_devise` et `dim_scenario_stress` filtrent les faits et les marts (relations 1 → *, filtrage simple).
+Schéma en étoile : `dim_date`, `dim_filiale`, `dim_devise` et `dim_scenario_stress` filtrent les tables de faits, `fct_` et `mart_` (relations 1 → *, filtrage simple). Les dimensions ne contiennent que du contexte, aucune mesure (règle RG-MOD-01) : tous les chiffres viennent des faits.
 
 | Dimension | Tables filtrées |
 |---|---|

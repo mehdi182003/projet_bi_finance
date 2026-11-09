@@ -1,3 +1,8 @@
+-- Dimension FILIALE : le contexte « qui / où » de chaque filiale (identité, pays, région, devise,
+-- système bancaire source, fuseau horaire, source des dépôts réels).
+-- RG-MOD-01 : une dimension ne porte AUCUNE mesure. Les nombres propres à chaque filiale (part de
+-- marché, taux de réserve cible, encours et réserve de départ) sont dans la table
+-- de faits fct_situation_initiale_filiale ; ils ne doivent jamais être additionnés depuis ici.
 select
     f.code_filiale,
     f.nom_filiale,
@@ -7,14 +12,10 @@ select
     f.code_devise,
     d.libelle_devise,
     d.regime_change,
-    f.part_de_marche_depots_pct,
+    f.systeme_source,
+    f.fuseau_horaire,
     f.source_depots,
     f.profil_paie,
-    f.taux_reserve_liquidite_pct,
-    f.ordre_affichage,
-    e.nb_clients,
-    e.encours_depots_initial_devise,
-    e.reserve_liquidite_initiale_devise
+    f.ordre_affichage
 from {{ ref('ref_filiales') }} f
 join {{ ref('ref_devises') }} d on d.code_devise = f.code_devise
-left join {{ ref('int_encours_initial') }} e on e.code_filiale = f.code_filiale

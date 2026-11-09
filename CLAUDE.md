@@ -24,7 +24,7 @@ PostgreSQL = data warehouse
   raw           bronze : lignes brutes + fichier, ligne, date de chargement
   staging       silver : 1 modèle dbt par système source (typage, formats, fuseaux, unités, sens)
   intermediate  silver : union, correspondances, dédoublonnage, exclusions, rejets tracés (RG-NET-xx)
-  marts         gold   : schéma en étoile (dim_* conformes, fct_* au grain documenté) + marts d'analyse
+  marts         gold   : schéma en étoile : 5 dim_* (contexte, AUCUNE mesure) + 15 faits (fct_* de base, mart_* dérivés)
   ml                   : sorties Python (prévisions, réserve optimale, contrôle a posteriori)
         ▼
 Power BI : powerbi/Cresus/Cresus.pbip (5 pages, 45 mesures DAX, 3 rôles RLS), import depuis marts
@@ -66,7 +66,7 @@ dbt ne stocke rien : il exécute le SQL **dans** PostgreSQL. Tests, documentatio
    **Mesuré sur 6 cœurs / 15 Go de RAM, en lots de 50 (31/10/2026)** :
    - génération : 16 min ;
    - chargement : 11 min (rechargement incrémental : seuls les fichiers modifiés) ;
-   - `dbt build` : 39 min ; pipeline complet depuis zéro : ~1 h 10. Contrôles après allègement (04/11/2026) : 119 réussis + 15 sur les marts de prévision ;
+   - `dbt build` : 39 min ; pipeline complet depuis zéro : ~1 h 10. Contrôles après allègement (04/11/2026) : 119 réussis + 15 sur les marts de prévision (127 + 15 depuis la revue du 05/11, mesuré sur le jeu versionné) ;
    - base PostgreSQL : **17 Go**. Prévoir **~30 Go libres** (fichiers temporaires pendant `dbt build`).
 
    Les montants totaux et les ancrages sont identiques quelle que soit la taille de lot. Les indicateurs portés par les opérations rares en dépendent : part des gros décaissements de 2,6 % (lots de 2000) à 9,6 % (500) et 13,8 % (50) ; fraude de 0,015 % à 0,034 %. Seul le gros volume fait référence pour ces deux chiffres.
@@ -119,10 +119,13 @@ Autres commandes utiles :
 | `dbt/models/marts/` | Dimensions, faits, analyses, prévision (grains dans `schema.yml`) |
 | `dbt/seeds/` | Référentiels : filiales (part de marché, système, fuseau), devises, taux directeurs réels, scénarios, correspondances |
 | `powerbi/mesures_dax.dax` | **Source unique des mesures DAX** (lues par `generer_pbip.py`) |
+| `docs/dictionnaire/` | `descriptions.py` (description de chaque colonne) + `generer_dictionnaire.py` → dictionnaire Excel livré avec le MOE |
 | `docs/00_guide_du_projet.md` | **Guide pour l'équipe : projet, lancement, dossiers, résultats expliqués** |
 | `docs/01` à `docs/08` | Cadrage AMOA, spécifications MOE, prédictif, Power BI, synthèse/SWOT, profil et KPI, données 3 ans, ETL |
 
 ## 6. Conventions
+- **RG-MOD-01 : aucune mesure dans une dimension.** Une dimension = contexte (qui, quoi, quand, où) ; un fait = mesures (combien). Test `assert_dimensions_sans_mesure`. Ne pas recopier non plus un attribut de dimension (libellé, régime de change) dans un fait.
+- Après un changement de colonnes dans `marts` : compléter `docs/dictionnaire/descriptions.py`, relancer `python docs/dictionnaire/generer_dictionnaire.py`, et aligner les fichiers `powerbi/Cresus/Cresus.SemanticModel/definition/tables/*.tmdl` (une colonne absente de la base fait échouer l'actualisation).
 - Toute règle métier ou de nettoyage porte un code (`RG-POS-06`, `RG-NET-07`, etc.) en commentaire SQL et dans la documentation.
 - Tout changement doit garder `dbt build` vert. Seule alerte attendue : la rupture du rouble.
 - Les colonnes des marts sont en `double precision` (post-hook `convertir_numeric_en_double`) : Power BI ne sait pas lire un `numeric` de plus de 28 chiffres.
@@ -145,6 +148,8 @@ Autres commandes utiles :
 12. Allègement après comparaison avec le cours (04/11/2026). Le gros volume reste. PaySim sort de l'entrepôt (table, staging, mart de profil). Rapport ramené de 6 à 5 pages, de 59 à 37 visuels et de 75 à 45 mesures : une page par objectif du sujet, plus la qualité. Le choc de taux, d'abord retiré, a été remis au simulateur : le sujet demande des scénarios de taux. Les libellés du rapport ont été simplifiés (05/11/2026) : décisions courtes, « Bas / Milieu / Haut » au lieu de P5 / P50 / P95. Sécurité par filiale (RLS) ajoutée. Le rendu POC reçoit ce que le cours attend : grille de choix (5 critères + 1 Must), format, moteur et 3 optimisations, RACI, dictionnaire de 6 KPI, recette (5 tests + 1 réconciliation, GO/NOGO).
 13. Test final interrompu par une mise en veille (04/11/2026) : les calculs n'ont pas été touchés, mais le journal a révélé un défaut sans lien avec la veille. L'API de la BCE répond parfois `504`, et une filiale disparaissait alors en silence du contrôle (6/8 au lieu de 7/9). Les dépôts de janvier 2026 sont désormais conservés dans un fichier versionné.
 14. Relecture du MOE après son rendu (05/11/2026) : le WAPE du groupe additionnait des devises différentes, ce qui donnait trop de poids aux francs CFA (17,1 % au lieu de 14,5 %). Il est désormais calculé en euros. Ne jamais additionner des montants en devise locale entre filiales.
+15. Retour du professeur sur le MOE (05/11/2026) : « quand il y a des sommes qui traînent dans les dimensions, c'est jamais bon ». `dim_filiale` portait nb_clients, encours et réserve de départ (agrégés en somme dans Power BI), part de marché et taux de réserve : sortis vers le nouveau fait `fct_situation_initiale_filiale`. Chocs chiffrés sortis de `dim_scenario_stress` (restent dans `mart_stress_test` et le seed). Inversement, libellé de scénario et régime de change retirés des faits. Figure 2 du MOE redessinée (les mart_ y ressemblaient à des dimensions). Dictionnaire Excel livré ; dans le MOE, le § 2.6 ne garde que le dictionnaire des 6 KPI et renvoie vers l'Excel (pas de doublon à maintenir), le § 2.7 (mapping source → cible) reste. Indicateurs inchangés.
+16. Relecture de la branche de Mokhmad (09/11/2026) : `nb_clients` supprimé (il comptait les clients de 2023-2025 dans un fait daté du 31/12/2022 et ne servait à aucun indicateur). Le MOE explique les nombres qui restent dans les dimensions sans être des quantités (parité 655,957, sens +1/−1, ordre d'affichage, calendrier). Dictionnaire Excel recentré sur ce que le prof demandait : les 20 tables du schéma en étoile (255 colonnes), 4 rôles (clé primaire, clé étrangère, attribut, mesure), vocabulaire Gold, nombres de lignes du gros volume. Gros volume relancé : 127 + 15 contrôles verts, chiffres de référence inchangés.
 
 ## 8. Résultats clés (gros volume en lots de 50, vérifiés le 01/11/2026 ; le jeu versionné donne des ordres de grandeur très proches, voir docs/09 § 11)
 - Prévision quotidienne : régression calendaire championne sur 20 séries sur 20. WAPE du groupe en euros : 14,5 %. Par filiale : 12-15 % sur les décaissements, 12-28 % sur les encaissements (États-Unis 27,6 %).
@@ -175,3 +180,6 @@ Autres commandes utiles :
 - [ ] Valider avec le groupe : le choix de Power BI, les notes de la grille de choix, le RACI, le TCO.
 - [x] Guide de l'équipe : `docs/00_guide_du_projet.md`.
 - [ ] Confirmer auprès du professeur que le gros volume est bien demandé (consigne absente des supports du cours).
+- [x] Revoir dimensions vs faits (retour du professeur, 05/11/2026) et livrer le dictionnaire Excel : `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx`.
+- [x] Relancer le gros volume après la revue du 05/11 (09/11/2026 : 127 + 15 contrôles verts, chiffres inchangés, Power BI actualisé et 5 pages vérifiées).
+- [ ] Fusionner la branche `moe/dimensions-faits-dictionnaire` dans `main`.

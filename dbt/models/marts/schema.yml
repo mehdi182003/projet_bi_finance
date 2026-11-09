@@ -16,8 +16,11 @@ models:
     meta:
       type_table: "dimension"
       grain: "1 ligne = 1 filiale"
-      remarque: "conforme ; clé métier stable (SCD type 1)"
-    description: Les 10 filiales de ZF Banque, leur devise et leur situation de départ.
+      remarque: "conforme ; clé métier stable (SCD type 1) ; aucune mesure (RG-MOD-01)"
+    description: >
+      Contexte « qui / où » des 10 filiales : identité, pays, région, devise, système bancaire source,
+      fuseau horaire, source des dépôts réels. Les chiffres de chaque filiale (part de marché, taux de
+      réserve, clients, encours et réserve de départ) sont dans fct_situation_initiale_filiale.
     columns:
       - name: code_filiale
         tests: [unique, not_null]
@@ -50,8 +53,10 @@ models:
     meta:
       type_table: "dimension"
       grain: "1 ligne = 1 scénario de stress"
-      remarque: "référentiel"
-    description: Scénarios de stress paramétrés (référence historique pour chacun).
+      remarque: "conforme ; aucune mesure (RG-MOD-01)"
+    description: >
+      Contexte « quoi » des 7 scénarios de stress : nom, ordre d'affichage et crise historique de
+      référence. Les chocs chiffrés appliqués à chaque filiale sont dans le fait mart_stress_test.
     columns:
       - name: code_scenario
         tests: [unique, not_null]
@@ -105,6 +110,26 @@ models:
       - name: position_cloture_eur
         tests: [not_null]
 
+  - name: fct_situation_initiale_filiale
+    meta:
+      type_table: "fait instantané (situation de départ)"
+      grain: "1 ligne = 1 filiale au 31/12/2022"
+      remarque: "montants EUR additifs entre filiales ; devise locale et % non additifs"
+    description: >
+      Chiffres de départ et paramètres de pilotage de chaque filiale (part de marché, taux de réserve
+      cible, encours de dépôts et réserve initiaux). Sortis de dim_filiale (RG-MOD-01).
+    columns:
+      - name: id_situation
+        tests: [unique, not_null]
+      - name: code_filiale
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments: {to: ref('dim_filiale'), field: code_filiale}
+      - name: encours_depots_initial_eur
+        tests: [not_null]
+
   - name: fct_taux_change
     meta:
       type_table: "fait instantané périodique"
@@ -121,6 +146,10 @@ models:
 
   # ------------------------------------------------------------------- analyses
   - name: mart_exposition_change
+    meta:
+      type_table: "fait agrégé (analyse)"
+      grain: "jour x devise"
+      remarque: "exposition et VaR semi-additives par devise ; %, taux et ratios non additifs"
     description: >
       Exposition au risque de change par devise, VaR paramétrique 95 % (1 j et 10 j),
       coût de couverture, rapport coût / risque et recommandation de couverture.
@@ -131,6 +160,10 @@ models:
         tests: [not_null]
 
   - name: mart_liquidite_placement
+    meta:
+      type_table: "fait instantané périodique (analyse)"
+      grain: "jour x filiale"
+      remarque: "montants EUR semi-additifs ; ratios et jours non additifs"
     description: >
       Ratio de liquidité Bâle III simplifié, consommation quotidienne, jours avant passage sous 100 %,
       liquidité excédentaire / besoin de refinancement (par rapport au seuil de pilotage), coûts et gains.
@@ -143,12 +176,20 @@ models:
         description: 0 si le ratio est déjà sous 100 % ; NULL si la position ne baisse pas.
 
   - name: mart_qualite_sources
+    meta:
+      type_table: "fait agrégé (qualité)"
+      grain: "système x filiale x mois"
+      remarque: "comptages additifs ; taux de rejet non additif"
     description: Défauts des exports bruts détectés et corrigés par l'ETL, par système, filiale et mois.
     columns:
       - name: id_qualite_source
         tests: [unique, not_null]
 
   - name: mart_qualite_defauts
+    meta:
+      type_table: "fait agrégé (qualité)"
+      grain: "système x filiale x mois x type de défaut"
+      remarque: "nb_lignes additif"
     description: >
       Catalogue des défauts des exports (une ligne par système, filiale, mois et type de défaut), avec le
       traitement appliqué : ligne écartée (motif de rejet) ou valeur corrigée (ligne conservée).
@@ -162,6 +203,10 @@ models:
                 values: ['Ligne écartée', 'Valeur corrigée']
 
   - name: mart_qualite_ancrage
+    meta:
+      type_table: "fait instantané (contrôle)"
+      grain: "filiale x date publiée par la banque centrale"
+      remarque: "encours semi-additifs ; écart % non additif"
     description: >
       Fiabilité : à chaque date publiée par une banque centrale, encours réel (x part de marché) vs encours
       reconstitué par cumul des flux quotidiens. Écart attendu : nul.
@@ -172,6 +217,10 @@ models:
         tests: [not_null]
 
   - name: mart_stress_test
+    meta:
+      type_table: "fait de simulation"
+      grain: "scénario x filiale à la date d'arrêté"
+      remarque: "montants EUR additifs entre filiales ; jours et % non additifs"
     description: Résultat des scénarios de stress par filiale à la date d'arrêté.
     columns:
       - name: id_stress
@@ -184,16 +233,28 @@ models:
 
   # ------------------------------------------------------------------ prévision
   - name: mart_prevision_tresorerie
+    meta:
+      type_table: "fait de prévision"
+      grain: "jour x filiale (historique + horizon)"
+      remarque: "positions semi-additives ; probabilité non additive"
     description: Position réalisée + projection (P5 / P50 / P95) issue de la simulation Monte-Carlo.
     columns:
       - name: id_prevision
         tests: [unique, not_null]
   - name: mart_prevision_change
+    meta:
+      type_table: "fait de prévision"
+      grain: "jour x devise"
+      remarque: "taux non additifs"
     description: Taux historiques + fourchette de prévision et contrôle a posteriori.
     columns:
       - name: id_prevision_change
         tests: [unique, not_null]
   - name: mart_controle_a_posteriori
+    meta:
+      type_table: "fait de contrôle"
+      grain: "filiale x date de contrôle"
+      remarque: "dépôts semi-additifs ; erreur % non additive"
     description: Prévision des dépôts au 31/01/2026 vs encours réels publiés ensuite (test hors échantillon).
     columns:
       - name: id_controle
@@ -201,11 +262,19 @@ models:
       - name: dans_la_fourchette
         description: Oui si le dépôt réel tombe dans la fourchette P5-P95 prévue, sinon Non.
   - name: mart_reserve_optimale
+    meta:
+      type_table: "fait de prévision"
+      grain: "filiale à la date d'arrêté"
+      remarque: "montants EUR additifs ; % et probabilités non additifs"
     description: Réserve requise (P99) vs réserve actuelle par filiale, liquidité libérable et gain annuel au taux réel.
     columns:
       - name: id_reserve
         tests: [unique, not_null]
   - name: mart_backtest_journalier
+    meta:
+      type_table: "fait de prévision"
+      grain: "origine x filiale x série x modèle x jour"
+      remarque: "réel et prévu additifs sur les jours ; WAPE à recalculer"
     description: Réel vs prévu, jour par jour, sur la période de backtest.
     columns:
       - name: id_backtest

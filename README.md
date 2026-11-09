@@ -12,7 +12,7 @@ Ce dépôt contient le **POC complet** : une chaîne de données de bout en bout
 | Sources | Fichiers versionnés | **Exports bruts (« sales ») des 4 systèmes bancaires des filiales** sur 2023-2025 (`data/sources_internes/`, 371 fichiers, 4,3 M de lignes) + séries réelles des banques centrales et cours BCE (`data/sources/`) |
 | Extract + Load | **Python** (pandas, psycopg) | Chargement tel quel dans la zone brute de PostgreSQL : incrémental, idempotent, tracé (fichier, ligne, MD5) |
 | Entrepôt de données | **PostgreSQL 15 ou 16** | Architecture en couches : `raw` (bronze) → `staging` / `intermediate` (silver) → `marts` (gold, schéma en étoile) + `ml` |
-| Transform + qualité | **dbt** | Nettoyage (11 règles RG-NET), dédoublonnage, rejets tracés, schéma en étoile, 97 tests (rapprochement comptable, complétude, ancrage sur les dépôts réels), lineage |
+| Transform + qualité | **dbt** | Nettoyage (11 règles RG-NET), dédoublonnage, rejets tracés, schéma en étoile (aucune mesure dans les dimensions), 104 tests (rapprochement comptable, complétude, ancrage sur les dépôts réels), lineage |
 | Analyse prédictive | **Python** (statsmodels, numpy) | Comparaison de 3 modèles au pas quotidien, simulation Monte-Carlo, réserve optimale, contrôle sur des données réelles postérieures |
 | Restitution | **Power BI** | Projet `.pbip` prêt à ouvrir : 5 pages, 45 mesures DAX, simulateur What-if, sécurité par filiale (RLS) |
 
@@ -71,7 +71,9 @@ Les défauts, les totaux et les ancrages sont les mêmes ; seul le niveau de dé
 
 **Reprise du projet** : le contexte complet (décisions, état, reste à faire) est dans [`CLAUDE.md`](CLAUDE.md), chargé automatiquement par Claude Code.
 
-Lineage et dictionnaire de données (idéal en soutenance) : `cd dbt ; dbt docs generate --profiles-dir . ; dbt docs serve --profiles-dir .`
+Lineage (idéal en soutenance) : `cd dbt ; dbt docs generate --profiles-dir . ; dbt docs serve --profiles-dir .`
+
+Dictionnaire de données (Excel, une ligne par colonne) : `python docs/dictionnaire/generer_dictionnaire.py` → `livrables/05_IBI_MOE_POC_DICTIONNAIRE_DONNEES_…xlsx`.
 
 ---
 
@@ -117,7 +119,7 @@ Les filiales n'ont pas le même système bancaire. On reçoit donc **4 formats d
 1. **Load (Python)** : chaque fichier est déposé **tel quel en texte** dans `raw` (bronze), avec fichier, ligne et date de chargement. Le chargement est incrémental et idempotent (empreinte MD5).
 2. **Staging (dbt)** : un modèle par système (typage, formats, fuseaux, unités, sens).
 3. **Intermediate (dbt)** : union des 4 systèmes, correspondances de libellés et de devises, dédoublonnage, exclusions, identifiants clients, et **table des rejets avec motif** (rien n'est supprimé en silence).
-4. **Marts (dbt)** : **schéma en étoile** (dimensions conformes, faits au grain documenté, fait principal incrémental), puis marts d'analyse.
+4. **Marts (dbt)** : **schéma en étoile**. Les 5 dimensions décrivent le contexte (qui, quoi, quand, où) et ne portent aucune mesure ; les 15 tables de faits portent les mesures (combien), au grain documenté : faits de base `fct_` (dont le fait principal incrémental) et faits dérivés `mart_` (analyse, prévision, qualité).
 5. **Contrôles** : complétude des fichiers, **rapprochement comptable jour par jour**, ancrage sur les dépôts réels. Résultat sur le gros volume : 42 669 356 lignes brutes → 40 749 329 opérations retenues (4,5 % écartées), **exactement** le nombre d'opérations réelles de chaque filiale.
 
 → [docs/08_etl_sources_et_nettoyage.md](docs/08_etl_sources_et_nettoyage.md) (dictionnaire des sources, règles RG-NET, modèle dimensionnel) · [docs/02_specifications_moe.md](docs/02_specifications_moe.md)
@@ -171,6 +173,7 @@ erDiagram
     dim_date ||--o{ fct_taux_change : date_cours
     dim_filiale ||--o{ fct_flux_tresorerie_horaire : code_filiale
     dim_filiale ||--o{ fct_position_tresorerie_quotidienne : code_filiale
+    dim_filiale ||--o{ fct_situation_initiale_filiale : code_filiale
     dim_filiale ||--o{ mart_liquidite_placement : code_filiale
     dim_filiale ||--o{ mart_stress_test : code_filiale
     dim_filiale ||--o{ mart_prevision_tresorerie : code_filiale
@@ -201,7 +204,8 @@ erDiagram
 ├── powerbi/Cresus/             projet Power BI prêt à ouvrir (Cresus.pbip)
 ├── powerbi/                    générateur du projet, mesures DAX, thème, outil .NET TomTool
 ├── docs/                       guide du projet (00), documentation (01 à 08) et procédure de lancement (09)
-└── livrables/                  fiche d'expertise, webographie, réponse à l'appel d'offres, rendu POC, support de soutenance
+├── docs/dictionnaire/          descriptions des colonnes + générateur du dictionnaire de données Excel
+└── livrables/                  fiche d'expertise, webographie, réponse à l'appel d'offres, rendu POC et son dictionnaire de données, support de soutenance
 ```
 
 ## 6. Hypothèses et limites (à assumer en soutenance)

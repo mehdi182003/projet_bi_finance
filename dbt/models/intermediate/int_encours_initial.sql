@@ -11,12 +11,6 @@ with initial as (
     where est_point_initial
 ),
 
-clients as (
-    select code_filiale, count(distinct id_client) as nb_clients
-    from {{ ref('int_operations_nettoyees') }}
-    group by code_filiale
-),
-
 taux_reference as (
     select code_devise, taux_eur as taux_reference
     from {{ ref('int_taux_change_journalier') }}
@@ -26,11 +20,9 @@ taux_reference as (
 select
     f.code_filiale,
     f.code_devise,
-    coalesce(c.nb_clients, 0)                                    as nb_clients,
     t.taux_reference,
     i.encours_zf_devise                                          as encours_depots_initial_devise,
     i.encours_zf_devise * f.taux_reserve_liquidite_pct / 100     as reserve_liquidite_initiale_devise
 from {{ ref('ref_filiales') }} f
 join initial i on i.code_filiale = f.code_filiale
-left join clients c on c.code_filiale = f.code_filiale
 left join taux_reference t on t.code_devise = f.code_devise
