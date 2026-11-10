@@ -171,7 +171,7 @@ net = net + rng.normal(0, sigma_mois, NB_SIM_FLUX)[None, :] / len(futur)
 
 1. Le champion donne la prévision centrale de chaque jour de janvier 2026.
 2. On a gardé les **erreurs relatives** du champion au backtest (par exemple : le réel a été 8 % au-dessus du prévu ce jour-là).
-3. Pour chaque trajectoire, on recopie au hasard des **blocs de 7 jours** de ces erreurs, et on les applique à la prévision. Les blocs gardent l'effet des jours de la semaine.
+3. Pour chaque trajectoire, on recopie au hasard des **blocs de 7 jours** de ces erreurs, et on les applique à la prévision. Un bloc garde l'enchaînement des erreurs sur plusieurs jours de suite : quand le modèle se trompe un jour, il se trompe souvent dans le même sens le lendemain.
 4. **Le même tirage** sert aux encaissements et aux décaissements (on remet le générateur aléatoire dans le même état) : une journée chargée l'est des deux côtés, comme dans la réalité.
 5. On ajoute un **choc mensuel** sur le flux net, d'après les écarts mensuels passés du modèle, pour ne pas sous-estimer l'incertitude sur le niveau du mois.
 6. On obtient 1 000 trajectoires de flux net, jour par jour.
@@ -331,7 +331,7 @@ C'est la référence : un modèle qui ne bat pas « la même chose que les 4 der
 Une prévision seule donne un chiffre ; la trésorerie a besoin de savoir le risque. Les 1 000 trajectoires donnent une fourchette, une probabilité de manquer de liquidité et la réserve qui suffit dans 99 % des cas.
 
 **Pourquoi des blocs de 7 jours ?**
-Pour garder le rythme de la semaine dans les erreurs : les erreurs d'un lundi ne ressemblent pas à celles d'un dimanche.
+Parce que les erreurs ne sont pas indépendantes d'un jour à l'autre : quand le modèle se trompe un jour, il se trompe souvent dans le même sens les jours suivants. Tirer des blocs d'une semaine garde cet enchaînement ; tirer les jours un par un le ferait disparaître et sous-estimerait le risque. Les blocs ne sont pas calés sur le jour de la semaine.
 
 **Le stress test de panique est-il réaliste ?**
 Il s'inspire de Silicon Valley Bank, où 25 % des dépôts ont été demandés en une journée. Le but n'est pas de prédire la crise, mais de chiffrer ce qu'il faudrait trouver, pour négocier des lignes de secours à l'avance.
@@ -343,6 +343,8 @@ Leurs vrais dépôts ont été 3,7 à 3,9 % plus hauts que prévu. C'est une err
 
 - La régression est avantagée par le générateur, qui crée lui-même le rythme du calendrier.
 - Seuls 3 mois de janvier permettent d'estimer l'effet saisonnier.
+- Le backtest porte sur octobre, novembre et décembre 2025 : il ne contient aucun mois de janvier, le mois le plus difficile. Le champion est aussi choisi et mesuré sur ces mêmes 3 mois, ce qui rend son erreur un peu optimiste.
+- La réserve à 99 % repose sur 1 000 trajectoires, donc sur les 10 pires : c'est un ordre de grandeur, pas une valeur au dixième près.
 - La prévision du groupe additionne les fourchettes des filiales : la fourchette du groupe est donc large, ce qui est prudent.
 - Les stress tests sont simplifiés : pas d'effet de contagion entre filiales, pas de vente d'actifs.
 - Le Cameroun n'entre pas dans le contrôle de janvier 2026.

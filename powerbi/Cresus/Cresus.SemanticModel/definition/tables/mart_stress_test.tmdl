@@ -15,6 +15,8 @@ table mart_stress_test
 		summarizeBy: none
 		sourceColumn: date_arrete
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column code_scenario
 		dataType: string
 		lineageTag: 14a304b1b324c9ddb4f5

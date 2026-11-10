@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "9ebd3a4119aae3bc58ed",
   "position": {
     "x": 650,
     "y": 8,
     "z": 3000,
-    "width": 295,
     "height": 68,
+    "width": 295,
     "tabOrder": 3000
   },
   "visual": {
@@ -27,35 +27,13 @@
                 }
               },
               "queryRef": "Multiplicateur sorties.Multiplicateur sorties",
-              "nativeQueryRef": "Multiplicateur sorties"
+              "nativeQueryRef": "Multiplicateur sorties",
+              "active": true
             }
           ]
         }
       }
     },
-    "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Sorties (× normal)'"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -96,6 +74,29 @@
           }
         }
       ]
-    }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Sorties (× normal)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

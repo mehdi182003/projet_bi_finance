@@ -27,6 +27,8 @@ table mart_reserve_optimale
 		summarizeBy: none
 		sourceColumn: date_arrete
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column encours_depots_devise
 		dataType: double
 		formatString: #,0

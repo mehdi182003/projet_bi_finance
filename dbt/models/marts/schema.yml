@@ -180,7 +180,10 @@ models:
       type_table: "fait agrégé (qualité)"
       grain: "système x filiale x mois"
       remarque: "comptages additifs ; taux de rejet non additif"
-    description: Défauts des exports bruts détectés et corrigés par l'ETL, par système, filiale et mois.
+    description: >
+      Défauts des exports bruts détectés par l'ETL, par système, filiale et mois. Les compteurs portent sur
+      TOUTES les lignes reçues, y compris celles qui sont ensuite écartées (un doublon peut aussi avoir un
+      libellé non standard). mart_qualite_defauts compte, lui, les corrections sur les seules lignes retenues.
     columns:
       - name: id_qualite_source
         tests: [unique, not_null]

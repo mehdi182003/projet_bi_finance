@@ -52,7 +52,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Compter 3 minutes. `(.venv)` doit apparaître au début de la ligne de commande.
+Compter 3 minutes. `(.venv)` doit apparaître au début de la ligne de commande. Si une bibliothèque trop récente pose problème, `requirements-versions-testees.txt` contient les versions exactes avec lesquelles le projet a été testé (Python 3.13).
 
 **À refaire dans chaque nouvelle fenêtre PowerShell** : se placer dans le dossier du projet, puis lancer `.\.venv\Scripts\Activate.ps1`.
 

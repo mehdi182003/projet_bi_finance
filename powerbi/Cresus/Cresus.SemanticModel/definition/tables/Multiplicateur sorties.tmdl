@@ -6,11 +6,9 @@ table 'Multiplicateur sorties'
 		lineageTag: adbf62e388e2ded0d6ce
 
 	column 'Multiplicateur sorties'
-		dataType: double
 		formatString: 0.0
 		lineageTag: 01b1aa1b068e8dd9e51d
 		summarizeBy: none
-		isDataTypeInferred
 		sourceColumn: [Value]
 
 		extendedProperty ParameterMetadata =

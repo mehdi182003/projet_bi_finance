@@ -1,0 +1,16 @@
+# Versions exactes avec lesquelles le projet a été testé (Python 3.13.5, Windows 11, 10/11/2026).
+# À utiliser si une version plus récente d'une bibliothèque pose problème :
+#     pip install -r requirements-versions-testees.txt
+dbt-core==1.12.6
+dbt-postgres==1.11.0
+holidays==0.107
+kaggle==2.2.5
+numpy==2.5.4
+openpyxl==3.1.5
+pandas==3.1.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
+python-dotenv==1.2.4
+requests==2.34.2
+SQLAlchemy==2.1.6
+statsmodels==0.15.0

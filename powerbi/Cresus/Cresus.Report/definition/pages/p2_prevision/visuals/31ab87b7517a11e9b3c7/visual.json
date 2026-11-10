@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "31ab87b7517a11e9b3c7",
   "position": {
     "x": 20,
     "y": 120,
     "z": 10000,
-    "width": 620,
     "height": 290,
+    "width": 620,
     "tabOrder": 10000
   },
   "visual": {
@@ -28,6 +28,7 @@
               },
               "queryRef": "mart_prevision_tresorerie.date_jour",
               "nativeQueryRef": "date_jour",
+              "active": true,
               "displayName": "Date"
             }
           ]

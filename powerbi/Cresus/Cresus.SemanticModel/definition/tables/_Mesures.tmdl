@@ -38,6 +38,17 @@ table _Mesures
 		displayFolder: 2. position (semi-additive)
 		lineageTag: 05ec855efbe7b482758b
 
+	measure 'Effet de change cumulé (EUR)' =
+			VAR DerniereDate = [Date d'arrêté]
+			RETURN
+			    CALCULATE (
+			        SUM ( fct_position_tresorerie_quotidienne[effet_change_eur] ),
+			        dim_date[date_jour] = DerniereDate
+			    )
+		formatString: #,0
+		displayFolder: 4. risque de change
+		lineageTag: 0b0d904b0262d5a7567e
+
 	measure 'Besoin de liquidité 30 j (EUR)' =
 			VAR DerniereDate = [Date d'arrêté]
 			RETURN
@@ -78,17 +89,6 @@ table _Mesures
 		displayFolder: 3. liquidité, placement, refinancement
 		lineageTag: 2fef17b527a2c8150947
 
-	measure 'Effet de change cumulé (EUR)' =
-			VAR DerniereDate = [Date d'arrêté]
-			RETURN
-			    CALCULATE (
-			        SUM ( fct_position_tresorerie_quotidienne[effet_change_eur] ),
-			        dim_date[date_jour] = DerniereDate
-			    )
-		formatString: #,0
-		displayFolder: 4. risque de change
-		lineageTag: 0b0d904b0262d5a7567e
-
 	measure 'Exposition au change (EUR)' =
 			VAR DerniereDate = CALCULATE ( MAX ( mart_exposition_change[date_position] ) )
 			RETURN
@@ -119,6 +119,20 @@ table _Mesures
 			RETURN CALCULATE ( SELECTEDVALUE ( mart_exposition_change[recommandation_couverture] ), dim_date[date_jour] = DerniereDate )
 		displayFolder: 4. risque de change
 		lineageTag: efd197eb5e47af1fae32
+
+	measure 'Encours réel publié (devise)' =
+			VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
+			RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reel_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 450982820203e722d3f0
+
+	measure 'Encours reconstitué (devise)' =
+			VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
+			RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reconstitue_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+		formatString: #,0
+		displayFolder: 7. qualité des données sources (etl)
+		lineageTag: 0e299c28fb605d9121e0
 
 	measure 'Position prévue P50 (EUR)' = SUM ( mart_prevision_tresorerie[position_p50_eur] )
 		formatString: #,0
@@ -258,11 +272,6 @@ table _Mesures
 		displayFolder: 6. simulateur de stress (what-if)
 		lineageTag: ba7e94321aa1ae44b0e7
 
-	measure 'Filiales critiques' = CALCULATE ( COUNTROWS ( mart_stress_test ), mart_stress_test[statut_resilience] = "3 - Critique" ) + 0
-		formatString: #,0
-		displayFolder: 6. simulateur de stress (what-if)
-		lineageTag: ce3bf2021d8fe575f2be
-
 	measure 'Lignes brutes reçues' = SUM ( mart_qualite_sources[nb_lignes_brutes] )
 		formatString: #,0
 		displayFolder: 7. qualité des données sources (etl)
@@ -298,27 +307,16 @@ table _Mesures
 		displayFolder: 7. qualité des données sources (etl)
 		lineageTag: 8d0a64d17344b7fe6972
 
-	measure 'Encours réel publié (devise)' =
-			VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
-			RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reel_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
+	measure 'Filiales critiques' = CALCULATE ( COUNTROWS ( mart_stress_test ), mart_stress_test[statut_resilience] = "3 - Critique" ) + 0
 		formatString: #,0
-		displayFolder: 7. qualité des données sources (etl)
-		lineageTag: 450982820203e722d3f0
-
-	measure 'Encours reconstitué (devise)' =
-			VAR Filiale = SELECTEDVALUE ( dim_filiale[code_filiale], "FR" )
-			RETURN CALCULATE ( SUM ( mart_qualite_ancrage[encours_reconstitue_devise] ), REMOVEFILTERS ( dim_filiale ), dim_filiale[code_filiale] = Filiale )
-		formatString: #,0
-		displayFolder: 7. qualité des données sources (etl)
-		lineageTag: 0e299c28fb605d9121e0
+		displayFolder: 6. simulateur de stress (what-if)
+		lineageTag: ce3bf2021d8fe575f2be
 
 	column Masque
-		dataType: int64
 		isHidden
 		lineageTag: 68072c10cf8ca5cfc641
 		summarizeBy: none
 		isNameInferred
-		isDataTypeInferred
 		sourceColumn: [Masque]
 
 	partition _Mesures = calculated

@@ -5,3 +5,5 @@ role 'Filiale Etats-Unis'
 
 	tablePermission dim_devise = [code_devise] = "USD"
 
+	annotation PBI_Id = 58d83504ac39481a909af105f4e83652
+

@@ -5,3 +5,5 @@ role 'Filiale France'
 
 	tablePermission dim_devise = [code_devise] = "EUR"
 
+	annotation PBI_Id = b460d9d0a5c94fd580fea887e6d7396a
+

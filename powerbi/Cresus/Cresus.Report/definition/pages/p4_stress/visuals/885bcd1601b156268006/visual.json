@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "885bcd1601b156268006",
   "position": {
     "x": 20,
     "y": 8,
     "z": 1000,
-    "width": 295,
     "height": 68,
+    "width": 295,
     "tabOrder": 1000
   },
   "visual": {
@@ -27,35 +27,13 @@
                 }
               },
               "queryRef": "Choc retraits %.Choc retraits %",
-              "nativeQueryRef": "Choc retraits %"
+              "nativeQueryRef": "Choc retraits %",
+              "active": true
             }
           ]
         }
       }
     },
-    "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Retraits (% des dépôts)'"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "data": [
         {
@@ -96,6 +74,29 @@
           }
         }
       ]
-    }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Retraits (% des dépôts)'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

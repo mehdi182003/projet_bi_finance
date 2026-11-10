@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.14.0/schema.json",
   "name": "47c91fe33123acffbc46",
   "position": {
     "x": 660,
     "y": 450,
     "z": 12000,
-    "width": 600,
     "height": 260,
+    "width": 600,
     "tabOrder": 12000
   },
   "visual": {
@@ -28,6 +28,7 @@
               },
               "queryRef": "dim_devise.code_devise",
               "nativeQueryRef": "code_devise",
+              "active": true,
               "displayName": "Devise"
             }
           ]

@@ -72,5 +72,7 @@ Avec 3 ans de données, le scénario central n'a plus de fuite structurelle (hor
 
 ## 6. Limites
 - Le profil à l'intérieur du mois (paie, prélèvements) est une hypothèse du générateur, et la régression utilise les mêmes variables. Sa précision quotidienne est donc en partie « attendue ». Le contrôle sur janvier 2026 porte, lui, sur des niveaux réels.
-- Il n'y a que 3 Januaries pour estimer l'effet « mois » : c'est un effet moyen, avec une incertitude élevée (d'où le choc mensuel).
+- Il n'y a que 3 mois de janvier pour estimer l'effet « mois » : c'est un effet moyen, avec une incertitude élevée (d'où le choc mensuel).
+- Le backtest porte sur octobre, novembre et décembre 2025 : il ne contient aucun mois de janvier, le mois le plus difficile. Le champion est aussi choisi et mesuré sur ces mêmes 3 mois, ce qui rend son erreur un peu optimiste.
+- La réserve à 99 % repose sur 1 000 trajectoires, donc sur les 10 pires : c'est un ordre de grandeur, pas une valeur au dixième près.
 - Pistes d'industrialisation : historique plus long, variables exogènes (taux, inflation), modèles hiérarchiques filiale → groupe, réentraînement mensuel avec suivi du WAPE.

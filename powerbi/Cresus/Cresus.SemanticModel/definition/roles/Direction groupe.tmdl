@@ -1,3 +1,5 @@
 role 'Direction groupe'
 	modelPermission: read
 
+	annotation PBI_Id = 5e2070c33b5d4261bc8cc3e82bd1227e
+

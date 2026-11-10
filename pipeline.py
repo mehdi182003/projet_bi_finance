@@ -6,7 +6,7 @@
               versionnés dans Git) à partir des dépôts réels et de PaySim
   load      : charge les exports bruts tels quels dans le schéma raw de PostgreSQL (incrémental, idempotent)
   dbt       : référentiels (seeds) + modèles staging/intermediate/marts + tests
-  prevision : modèles prédictifs Python (Holt-Winters + Monte-Carlo) -> schéma ml
+  prevision : 3 modèles de prévision comparés, simulation Monte-Carlo, réserve requise, change -> schéma ml
   dbt_prev  : marts de prévision (dbt) qui exploitent les sorties du schéma ml + tests
 
 Exemples :

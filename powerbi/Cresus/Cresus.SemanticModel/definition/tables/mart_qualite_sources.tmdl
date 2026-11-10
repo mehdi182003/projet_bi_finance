@@ -27,6 +27,8 @@ table mart_qualite_sources
 		summarizeBy: none
 		sourceColumn: mois
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column nb_lignes_brutes
 		dataType: int64
 		formatString: #,0

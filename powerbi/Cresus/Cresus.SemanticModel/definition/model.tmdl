@@ -33,3 +33,9 @@ ref table 'Choc change %'
 ref table 'Multiplicateur sorties'
 ref table 'Choc taux (pb)'
 
+ref role 'Direction groupe'
+ref role 'Filiale Etats-Unis'
+ref role 'Filiale France'
+
+ref cultureInfo fr-FR
+

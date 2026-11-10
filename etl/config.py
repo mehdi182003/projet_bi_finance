@@ -48,6 +48,7 @@ PG = {
     "dbname": os.getenv("POSTGRES_DB", "cresus"),
 }
 
-PREVISION_NB_SIMULATIONS = int(os.getenv("PREVISION_NB_SIMULATIONS", "500"))
+# Trajectoires simulées : etl/prevision.py en lance au moins 1 000 (flux) et 2 000 (change), même si la valeur est plus petite.
+PREVISION_NB_SIMULATIONS = int(os.getenv("PREVISION_NB_SIMULATIONS", "1000"))
 PREVISION_CHANGE_HORIZON_JOURS = int(os.getenv("PREVISION_CHANGE_HORIZON_JOURS", "30"))
 GRAINE_ALEATOIRE = 42

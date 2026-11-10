@@ -324,6 +324,8 @@ Le `case` s'arrête à la première condition vraie : **l'ordre compte**. Une li
 
 **Les valeurs corrigées** (la ligne est gardée) : 1 973 738 libellés, 1 136 325 formats (date, montant, entité, encodage), 990 287 devises, 586 197 indicateurs de fraude vides, 284 761 clients manquants ou codés nuls.
 
+**Deux façons de compter, à ne pas confondre.** Le catalogue `mart_qualite_defauts` compte les corrections sur les lignes **retenues** : 1 973 738 libellés. `mart_qualite_sources`, affiché dans Power BI, compte les défauts sur **toutes les lignes reçues**, y compris celles qui sont ensuite écartées : 2 059 616 libellés. L'écart vient des lignes qui ont deux défauts, par exemple un doublon dont le libellé est aussi non standard.
+
 NORDIC et SAB rejettent le plus : SAB à cause des fichiers mensuels qui se chevauchent, NORDIC à cause des pré-autorisations et des extournes. Le catalogue complet est dans `marts.mart_qualite_defauts`, consultable dans pgAdmin.
 
 ## 7. Les tests : comment on prouve la qualité

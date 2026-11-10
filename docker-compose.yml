@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - cresus_pgdata:/var/lib/postgresql/data
-    # Un peu plus de mémoire de travail pour les agrégations sur 6,3 M de lignes
+    # Un peu plus de mémoire de travail pour les agrégations (4,3 M de lignes, 42,7 M en gros volume)
     command: ["postgres", "-c", "work_mem=64MB", "-c", "maintenance_work_mem=256MB"]
 
 volumes:

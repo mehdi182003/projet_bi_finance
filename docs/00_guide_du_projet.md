@@ -60,6 +60,7 @@ Il existe deux jeux de données, avec les mêmes défauts et les mêmes totaux :
 ├── README.md            présentation du dépôt
 ├── pipeline.py          lance toute la chaîne
 ├── requirements.txt     bibliothèques Python à installer
+├── requirements-versions-testees.txt   versions exactes testées, en secours
 ├── .env.example         modèle de configuration (à copier en .env)
 ├── docker-compose.yml   PostgreSQL par Docker (non testé)
 ├── CLAUDE.md            notes de reprise : décisions, état, reste à faire
@@ -72,7 +73,7 @@ Il existe deux jeux de données, avec les mêmes défauts et les mêmes totaux :
 ├── dbt/
 │   ├── models/           nettoyage (staging, intermediate) et étoile (marts)
 │   ├── seeds/            référentiels : filiales, devises, taux, scénarios
-│   ├── tests/            les 10 tests métier
+│   ├── tests/            les 11 tests métier
 │   └── macros/           fonctions SQL communes
 ├── powerbi/
 │   ├── Cresus/           le rapport à ouvrir (Cresus.pbip)
@@ -294,6 +295,8 @@ Répondez franchement : Claude Code a aidé à construire le projet, comme l'ind
 - Le ratio de liquidité est simplifié, avec un taux de fuite unique de 10 %.
 - La prévision du groupe additionne celles des filiales, ce qui donne une estimation prudente.
 - Seuls 3 mois de janvier permettent d'estimer l'effet saisonnier.
+- Le backtest porte sur octobre, novembre et décembre 2025 : il ne contient aucun mois de janvier, le mois le plus difficile. Le champion est aussi choisi et mesuré sur ces mêmes 3 mois, ce qui rend son erreur un peu optimiste.
+- La réserve à 99 % repose sur 1 000 trajectoires, donc sur les 10 pires : c'est un ordre de grandeur, pas une valeur au dixième près.
 - Le Cameroun a 10 mois interpolés et n'entre pas dans le contrôle de janvier 2026.
 - Le traitement se lance à la main : l'ordonnancement et la supervision restent à construire.
 - La grille de choix, le RACI, le planning et le TCO reposent sur des hypothèses à valider en groupe.

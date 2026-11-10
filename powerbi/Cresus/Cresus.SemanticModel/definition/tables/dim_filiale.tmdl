@@ -50,18 +50,6 @@ table dim_filiale
 		summarizeBy: none
 		sourceColumn: regime_change
 
-	column systeme_source
-		dataType: string
-		lineageTag: 61c36192f738f46ee6d1
-		summarizeBy: none
-		sourceColumn: systeme_source
-
-	column fuseau_horaire
-		dataType: string
-		lineageTag: 560f5c89d28632a2eacd
-		summarizeBy: none
-		sourceColumn: fuseau_horaire
-
 	column source_depots
 		dataType: string
 		lineageTag: 76b1293091b3d1906662
@@ -79,6 +67,18 @@ table dim_filiale
 		lineageTag: 7f05edb0232e269f327b
 		summarizeBy: none
 		sourceColumn: ordre_affichage
+
+	column systeme_source
+		dataType: string
+		lineageTag: 61c36192f738f46ee6d1
+		summarizeBy: none
+		sourceColumn: systeme_source
+
+	column fuseau_horaire
+		dataType: string
+		lineageTag: 560f5c89d28632a2eacd
+		summarizeBy: none
+		sourceColumn: fuseau_horaire
 
 	partition dim_filiale = m
 		mode: import

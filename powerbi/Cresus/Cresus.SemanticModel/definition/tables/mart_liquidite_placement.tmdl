@@ -15,6 +15,8 @@ table mart_liquidite_placement
 		summarizeBy: none
 		sourceColumn: date_position
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column code_filiale
 		dataType: string
 		lineageTag: 9c7c112abd8d20a8d1e3

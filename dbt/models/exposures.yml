@@ -1,6 +1,6 @@
 version: 2
 
-# Déclare les usages en aval des marts : le cockpit Power BI apparaît dans le graphe de lignage dbt
+# Déclare les usages en aval des marts : le cockpit Power BI apparaît dans le lineage dbt
 # (dbt docs) => on sait quelles tables impactent quel tableau de bord avant toute modification.
 exposures:
   - name: cockpit_tresorerie_power_bi

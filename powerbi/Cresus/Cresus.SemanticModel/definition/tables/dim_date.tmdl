@@ -10,6 +10,8 @@ table dim_date
 		summarizeBy: none
 		sourceColumn: date_jour
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column id_date
 		dataType: int64
 		isHidden

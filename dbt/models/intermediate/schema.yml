@@ -17,7 +17,7 @@ models:
                          'Opération à montant nul', 'Montant invalide', 'Devise incohérente', 'Sens incohérent']
 
   - name: int_operations_nettoyees
-    description: Opérations retenues après nettoyage, au format unique du groupe, avec leur lignage source.
+    description: Opérations retenues après nettoyage, au format unique du groupe, avec leur lineage (système, fichier, ligne).
     columns:
       - name: ref_operation
         tests: [unique, not_null]

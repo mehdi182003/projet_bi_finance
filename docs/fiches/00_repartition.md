@@ -13,7 +13,7 @@ Chaque membre du groupe prend une partie, la maîtrise en détail et répond aux
 | 5 | Modèle en étoile et Power BI | Dimensions et faits, grain, additivité, position et liquidité, le dictionnaire Excel, les mesures DAX, les pages | [05](05_modele_power_bi.md) | 12, démo Power BI | à choisir |
 | 6 | Prévision, simulation et stress tests | Les 3 modèles de prévision, le WAPE, Monte-Carlo, la réserve, le contrôle sur janvier 2026, les stress tests et le simulateur | [06](06_prevision_risques.md) | 13, 14 (résister) | à choisir |
 
-Mokhmad a déjà retravaillé les dimensions, les faits et le dictionnaire Excel : la partie 5 lui correspond bien. Le reste est à répartir dans le groupe. Les numéros de diapos renvoient au support de soutenance (`livrables/04_IBI_SUPPORT_SOUTENANCE_…pptx`).
+Les parties 5 et 6 restent à attribuer. Mokhmad a retravaillé les dimensions, les faits et le dictionnaire Excel : il peut aider celui qui prend la partie 5. Les numéros de diapos renvoient au support de soutenance (`livrables/04_IBI_SUPPORT_SOUTENANCE_…pptx`).
 
 **L'équilibre entre les parties.** Chacun présente 2 à 4 diapos ; ceux qui en ont le moins font une démonstration. La diapo 14 se partage : la partie 2 présente « couvrir », la partie 6 « résister ».
 

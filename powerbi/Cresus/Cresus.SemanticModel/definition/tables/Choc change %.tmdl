@@ -6,11 +6,9 @@ table 'Choc change %'
 		lineageTag: 465ba0f6ee510a835c72
 
 	column 'Choc change %'
-		dataType: int64
 		formatString: 0
 		lineageTag: dbce7e8011dda07b0e22
 		summarizeBy: none
-		isDataTypeInferred
 		sourceColumn: [Value]
 
 		extendedProperty ParameterMetadata =

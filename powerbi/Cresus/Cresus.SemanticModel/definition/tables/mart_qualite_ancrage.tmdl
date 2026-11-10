@@ -21,6 +21,8 @@ table mart_qualite_ancrage
 		summarizeBy: none
 		sourceColumn: date_ancrage
 
+		annotation UnderlyingDateTimeDataType = Date
+
 	column source_depots
 		dataType: string
 		lineageTag: 455bb9826192802927e2
