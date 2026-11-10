@@ -10,7 +10,7 @@ Chaque membre du groupe prend une partie, la maîtrise en détail et répond aux
 | 2 | Les données et le change | Les séries réelles, PaySim, la génération des 3 ans, les 4 systèmes et leurs défauts, la fourchette de change, la VaR, la couverture | [02](02_donnees.md) | 6, 11, 14 (couvrir) | Robin |
 | 3 | Architecture, PostgreSQL et chargement | La grille de choix, le SWOT, l'ELT en couches, PostgreSQL, le chargement Python, l'orchestration, le branchement de Power BI et la sécurité, l'installation | [03](03_architecture_chargement.md) | 4, 7, 9 | Charles |
 | 4 | Nettoyage et qualité avec dbt | La méthodologie et les priorités, dbt, le nettoyage des 4 systèmes, les règles RG-NET, les tests, la recette | [04](04_nettoyage_qualite_dbt.md) | 5, 15, démo dbt | Mehdi |
-| 5 | Modèle en étoile et Power BI | Dimensions et faits, grain, additivité, position et liquidité, le dictionnaire Excel, les mesures DAX, les pages | [05](05_modele_power_bi.md) | 12, démo Power BI | à choisir |
+| 5 | Modèle en étoile et Power BI | Dimensions et faits, grain, additivité, position et liquidité, le dictionnaire Excel, les mesures DAX, les pages | [05](05_modele_power_bi.md) | 12, démo Power BI | Fabien |
 | 6 | Prévision, simulation et stress tests | Les 3 modèles de prévision, le WAPE, Monte-Carlo, la réserve, le contrôle sur janvier 2026, les stress tests et le simulateur | [06](06_prevision_risques.md) | 13, 14 (résister) | à choisir |
 
 Mokhmad a déjà retravaillé les dimensions, les faits et le dictionnaire Excel : la partie 5 lui correspond bien. Le reste est à répartir dans le groupe. Les numéros de diapos renvoient au support de soutenance (`livrables/04_IBI_SUPPORT_SOUTENANCE_…pptx`).
